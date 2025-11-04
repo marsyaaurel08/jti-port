@@ -60,7 +60,7 @@ class PostForm
                         SpatieMediaLibraryFileUpload::make('featured-image')
                             ->label('Featured Image')
                             ->collection('featured-image')
-                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(5120),
 
                         SpatieMediaLibraryFileUpload::make('gallery')
@@ -68,7 +68,7 @@ class PostForm
                             ->collection('gallery')
                             ->multiple()
                             ->reorderable()
-                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxFiles(10)
                             ->maxSize(5120),
 
