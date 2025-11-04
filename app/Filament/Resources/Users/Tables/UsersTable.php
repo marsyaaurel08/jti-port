@@ -7,6 +7,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use STS\FilamentImpersonate\Actions\Impersonate as ImpersonateAction;
 
@@ -22,6 +23,17 @@ class UsersTable
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('roles.name')
+                    ->label('Roles')
+                    ->badge()
+                    ->colors([
+                        'danger' => 'super_admin',
+                        'warning' => 'admin',
+                        'success' => 'editor',
+                        'gray' => 'user',
+                    ])
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable()
@@ -32,7 +44,11 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->label('Filter by Role'),
             ])
             ->recordActions([
                 EditAction::make(),
