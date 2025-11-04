@@ -23,7 +23,7 @@ class PostForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (string $operation, $state, callable $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                            ->afterStateUpdated(fn(string $operation, $state, callable $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
 
                         TextInput::make('slug')
                             ->required()
@@ -69,7 +69,7 @@ class PostForm
                             ->label('Gallery Images')
                             ->collection('gallery')
                             ->multiple()
-                            ->reorderable()
+                            ->maxFiles(1)
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxFiles(10)
                             ->maxSize(5120),
