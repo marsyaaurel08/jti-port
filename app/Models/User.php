@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Lab404\Impersonate\Models\Impersonate;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Impersonate, Notifiable;
+    use HasFactory, HasRoles, Impersonate, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -48,14 +51,21 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Determine if the user can access the Filament admin panel.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // Allow access if user has any of these roles
+        return $this->hasAnyRole(['super_admin', 'admin', 'editor', 'user']);
+    }
+
+    /**
      * Determine if the user can impersonate another user.
      */
     public function canImpersonate(): bool
     {
-        // TODO: Update this when RBAC is implemented
-        // Should check for roles: $this->hasAnyRole(['super_admin', 'support'])
-        // For now, allow all authenticated users to impersonate (can be restricted later)
-        return true;
+        // Only super admins and support roles can impersonate
+        return $this->hasAnyRole(['super_admin', 'admin']);
     }
 
     /**
@@ -63,9 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canBeImpersonated(): bool
     {
-        // TODO: Update this when RBAC is implemented
-        // Should prevent super admins from being impersonated: !$this->hasRole('super_admin')
-        // For now, allow all users to be impersonated (can be restricted later)
-        return true;
+        // Super admins cannot be impersonated for security
+        return ! $this->hasRole('super_admin');
     }
 }

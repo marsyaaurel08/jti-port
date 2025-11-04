@@ -45,7 +45,7 @@ class UsersTable
 
                         return $impersonate->impersonate($record);
                     })
-                    ->visible(fn($record) => auth()->user()->canImpersonate() && $record->canBeImpersonated()),
+                    ->visible(fn ($record) => auth()->user()->canImpersonate() && $record->canBeImpersonated()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
