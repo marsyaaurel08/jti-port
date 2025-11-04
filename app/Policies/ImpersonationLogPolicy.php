@@ -1,97 +1,70 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\ImpersonationLog;
-use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ImpersonationLogPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    use HandlesAuthorization;
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->can('viewAny:ImpersonationLog');
+        return $authUser->can('ViewAny:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, ImpersonationLog $impersonationLog): bool
+    public function view(AuthUser $authUser, ImpersonationLog $impersonationLog): bool
     {
-        return $user->can('view:ImpersonationLog');
+        return $authUser->can('View:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->can('create:ImpersonationLog');
+        return $authUser->can('Create:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, ImpersonationLog $impersonationLog): bool
+    public function update(AuthUser $authUser, ImpersonationLog $impersonationLog): bool
     {
-        return $user->can('update:ImpersonationLog');
+        return $authUser->can('Update:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, ImpersonationLog $impersonationLog): bool
+    public function delete(AuthUser $authUser, ImpersonationLog $impersonationLog): bool
     {
-        return $user->can('delete:ImpersonationLog');
+        return $authUser->can('Delete:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, ImpersonationLog $impersonationLog): bool
+    public function restore(AuthUser $authUser, ImpersonationLog $impersonationLog): bool
     {
-        return $user->can('restore:ImpersonationLog');
+        return $authUser->can('Restore:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, ImpersonationLog $impersonationLog): bool
+    public function forceDelete(AuthUser $authUser, ImpersonationLog $impersonationLog): bool
     {
-        return $user->can('forceDelete:ImpersonationLog');
+        return $authUser->can('ForceDelete:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can permanently delete any models.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->can('forceDeleteAny:ImpersonationLog');
+        return $authUser->can('ForceDeleteAny:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can restore any models.
-     */
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->can('restoreAny:ImpersonationLog');
+        return $authUser->can('RestoreAny:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can replicate the model.
-     */
-    public function replicate(User $user, ImpersonationLog $impersonationLog): bool
+    public function replicate(AuthUser $authUser, ImpersonationLog $impersonationLog): bool
     {
-        return $user->can('replicate:ImpersonationLog');
+        return $authUser->can('Replicate:ImpersonationLog');
     }
 
-    /**
-     * Determine whether the user can reorder the models.
-     */
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->can('reorder:ImpersonationLog');
+        return $authUser->can('Reorder:ImpersonationLog');
     }
+
 }
