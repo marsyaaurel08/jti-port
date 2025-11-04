@@ -18,7 +18,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -58,6 +60,24 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+                BreezyCore::make()
+                    ->myProfile(
+                        shouldRegisterUserMenu: true,
+                        shouldRegisterNavigation: false,
+                        navigationGroup: 'Settings',
+                        hasAvatars: true,
+                        slug: 'my-profile'
+                    )
+                    ->passwordUpdateRules(
+                        rules: [Password::default()->min(8)->mixedCase()->numbers()->symbols()],
+                        requiresCurrentPassword: true,
+                    )
+                    ->enableTwoFactorAuthentication(
+                        force: false,
+                    )
+                    ->enableSanctumTokens(
+                        permissions: ['create', 'view', 'update', 'delete']
+                    ),
             ])
             ->authMiddleware([
                 Authenticate::class,
