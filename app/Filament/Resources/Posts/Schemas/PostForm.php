@@ -60,6 +60,8 @@ class PostForm
                         SpatieMediaLibraryFileUpload::make('featured-image')
                             ->label('Featured Image')
                             ->collection('featured-image')
+                            ->multiple()
+                            ->maxFiles(1)
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(5120),
 

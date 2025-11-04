@@ -66,6 +66,8 @@ class UserForm
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('avatar')
                             ->collection('avatar')
+                            ->multiple()
+                            ->maxFiles(1)
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(2048)
                             ->helperText('Upload a profile picture (max 2MB)'),
