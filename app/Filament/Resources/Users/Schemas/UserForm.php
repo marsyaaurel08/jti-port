@@ -67,13 +67,8 @@ class UserForm
                         SpatieMediaLibraryFileUpload::make('avatar')
                             ->collection('avatar')
                             ->image()
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                '1:1',
-                            ])
                             ->maxSize(2048)
-                            ->rules(['image', 'mimes:jpeg,png,webp'])
-                            ->helperText('Upload a profile picture'),
+                            ->helperText('Upload a profile picture (max 2MB)'),
                     ])
                     ->columnSpan(1),
             ]);

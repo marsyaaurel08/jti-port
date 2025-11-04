@@ -61,14 +61,7 @@ class PostForm
                             ->label('Featured Image')
                             ->collection('featured-image')
                             ->image()
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                '16:9',
-                                '4:3',
-                                '1:1',
-                            ])
-                            ->maxSize(5120)
-                            ->rules(['image', 'mimes:jpeg,png,webp']),
+                            ->maxSize(5120),
 
                         SpatieMediaLibraryFileUpload::make('gallery')
                             ->label('Gallery Images')
