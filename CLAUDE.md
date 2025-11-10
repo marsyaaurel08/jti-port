@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Laravel 12 application with Filament 4 admin panel. The application uses:
 - **PHP 8.3** with Laravel 12 framework
 - **Filament v4** for admin interface (accessible at `/admin`)
-- **SQLite** as the default database
+- **MySQL** as the default database
 - **Tailwind CSS v4** for styling
 - **Livewire v3** (bundled with Filament)
 - **Pest v4** for testing
@@ -148,7 +148,7 @@ The admin panel is accessible at `/admin` and uses the default Filament authenti
 
 ### Database Configuration
 
-- **Default**: SQLite database at `database/database.sqlite`
+- **Default**: MySQL database (configured in `.env` with DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD)
 - **Testing**: In-memory SQLite (configured in `phpunit.xml`)
 - **Sessions**: Stored in database (SESSION_DRIVER=database)
 - **Cache**: Stored in database (CACHE_STORE=database)
