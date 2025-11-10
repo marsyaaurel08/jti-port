@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Activities\Schemas;
 
+use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -60,25 +61,14 @@ class ActivityInfolist
                             ->placeholder('-'),
                     ]),
                 Section::make('Changes')
+                    ->columns(2)
                     ->columnSpanFull()
                     ->schema([
-                        TextEntry::make('properties')
-                            ->label('Properties')
-                            ->columnSpanFull()
-                            ->formatStateUsing(function ($state) {
-                                if (is_null($state)) {
-                                    return '-';
-                                }
-
-                                // Convert Collection to array if needed
-                                if ($state instanceof \Illuminate\Support\Collection) {
-                                    $state = $state->toArray();
-                                }
-
-                                return self::formatValue($state);
-                            })
-                            ->html(),
-                    ]),
+                        KeyValueEntry::make('oldProperties')
+                            ->label('Old Changes'),
+                        KeyValueEntry::make('attributesProperties')
+                            ->label('New Changes'),
+                    ])
             ]);
     }
 
