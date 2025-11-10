@@ -15,9 +15,12 @@ class ActivitiesTable
         return $table
             ->columns([
                 TextColumn::make('log_name')
-                    ->searchable(),
-                TextColumn::make('subject_type')
-                    ->searchable(),
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'authentication' => 'warning',
+                        default => 'success',
+                    }),
+                TextColumn::make('subject_type'),
                 TextColumn::make('subject')
                     ->label('Subject')
                     ->getStateUsing(function ($record) {
@@ -30,14 +33,12 @@ class ActivitiesTable
                         }
                         return '-';
                     }),
-                TextColumn::make('event')
-                    ->searchable(),
-                TextColumn::make('causer_type')
-                    ->searchable(),
+                TextColumn::make('event'),
                 TextColumn::make('causer.name')
                     ->label('Causer')
                     ->default('-'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
