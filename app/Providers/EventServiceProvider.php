@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogAuthenticationFailed;
+use App\Listeners\LogAuthenticationLogin;
+use App\Listeners\LogAuthenticationLogout;
 use App\Listeners\LogImpersonationEnded;
 use App\Listeners\LogImpersonationStarted;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Lab404\Impersonate\Events\LeaveImpersonation;
 use Lab404\Impersonate\Events\TakeImpersonation;
@@ -21,6 +27,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         LeaveImpersonation::class => [
             LogImpersonationEnded::class,
+        ],
+        Login::class => [
+            LogAuthenticationLogin::class,
+        ],
+        Logout::class => [
+            LogAuthenticationLogout::class,
+        ],
+        Failed::class => [
+            LogAuthenticationFailed::class,
         ],
     ];
 
