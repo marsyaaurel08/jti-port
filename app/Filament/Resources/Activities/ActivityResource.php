@@ -4,9 +4,9 @@ namespace App\Filament\Resources\Activities;
 
 use App\Filament\Resources\Activities\Pages\ListActivities;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -82,17 +82,17 @@ class ActivityResource extends Resource
                     ]),
                 SelectFilter::make('log_name'),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('view')
                     ->label('View')
-                    ->icon('heroicon-o-eye')
-                    ->modalContent(function (Activity $record): string {
-                        return view('filament.resources.activities.view-activity', ['activity' => $record])->render();
-                    })
+                    ->icon(Heroicon::Eye)
+                    ->color('info')
                     ->modalHeading('Activity Details')
-                    ->modalSubmitActionLabel('Close')
-                    ->modalCloseButton(false)
-                    ->form([]),
+                    ->modalContent(function (Activity $record) {
+                        return view('filament.resources.activities.view-activity', ['activity' => $record]);
+                    })
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
             ])
             ->defaultSort('created_at', 'desc');
     }
