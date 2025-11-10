@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Activities;
 
 use App\Filament\Resources\Activities\Pages\ListActivities;
+use App\Filament\Resources\Activities\Pages\ViewActivity;
+use App\Filament\Resources\Activities\Schemas\ActivityForm;
+use App\Filament\Resources\Activities\Schemas\ActivityInfolist;
+use App\Filament\Resources\Activities\Tables\ActivitiesTable;
 use BackedEnum;
-use Filament\Actions\Action;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Spatie\Activitylog\Models\Activity;
 
@@ -16,91 +18,35 @@ class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
-    protected static ?string $navigationLabel = 'Activity Logs';
-
-    protected static ?string $pluralModelLabel = 'Activity Logs';
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?int $navigationSort = 100;
-
-    public static function canCreate(): bool
+    public static function form(Schema $schema): Schema
     {
-        return false;
+        return ActivityForm::configure($schema);
     }
 
-    public static function canEdit($record): bool
+    public static function infolist(Schema $schema): Schema
     {
-        return false;
-    }
-
-    public static function canDelete($record): bool
-    {
-        return false;
+        return ActivityInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable(),
-                TextColumn::make('description')
-                    ->searchable()
-                    ->limit(50),
-                TextColumn::make('event')
-                    ->label('Event')
-                    ->badge()
-                    ->sortable(),
-                TextColumn::make('log_name')
-                    ->label('Log Name')
-                    ->badge()
-                    ->sortable(),
-                TextColumn::make('subject_type')
-                    ->label('Subject Type')
-                    ->sortable(),
-                TextColumn::make('causer.name')
-                    ->label('User')
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->label('Date')
-                    ->dateTime('Y-m-d H:i:s')
-                    ->sortable(),
-            ])
-            ->filters([
-                SelectFilter::make('event')
-                    ->options([
-                        'created' => 'Created',
-                        'updated' => 'Updated',
-                        'deleted' => 'Deleted',
-                    ]),
-                SelectFilter::make('subject_type')
-                    ->options([
-                        'App\\Models\\User' => 'User',
-                        'App\\Models\\Post' => 'Post',
-                    ]),
-                SelectFilter::make('log_name'),
-            ])
-            ->recordActions([
-                Action::make('view')
-                    ->label('View')
-                    ->icon(Heroicon::Eye)
-                    ->color('info')
-                    ->modalHeading('Activity Details')
-                    ->modalContent(function (Activity $record) {
-                        return view('filament.resources.activities.view-activity', ['activity' => $record]);
-                    })
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close'),
-            ])
-            ->defaultSort('created_at', 'desc');
+        return ActivitiesTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => ListActivities::route('/'),
+            'view' => ViewActivity::route('/{record}'),
         ];
     }
 }
