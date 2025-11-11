@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ImpersonationLogResource extends Resource
 {
@@ -19,7 +20,7 @@ class ImpersonationLogResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFingerPrint;
 
     protected static ?string $navigationLabel = 'Impersonation Logs';
-
+    protected static string|UnitEnum|null $navigationGroup = 'User Management';
     protected static ?string $modelLabel = 'Impersonation Log';
 
     public static function form(Schema $schema): Schema
