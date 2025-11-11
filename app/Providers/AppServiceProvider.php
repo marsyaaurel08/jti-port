@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Filament\Pages\Page;
+use Filament\Support\Enums\Alignment;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,5 +22,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        // Page::formActionsAlignment(Alignment::Right);
     }
 }

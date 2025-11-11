@@ -259,6 +259,7 @@ This project uses Laravel Boost MCP server which provides specialized tools:
 - when generating filament resource ask user if the resource should be in a navigation group or not.
 - when generating filament resource if user define a navigation group, put the resource in that group.
 - when generating filament resource use icons from HeroIcons choose one that matches the resource purpose.
+- when generating filament resource add import and export actions to the resource table.
 
 
 ## Git Workflow

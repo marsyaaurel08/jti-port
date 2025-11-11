@@ -6,9 +6,13 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use STS\FilamentImpersonate\Actions\Impersonate as ImpersonateAction;
 
 class UsersTable
@@ -18,10 +22,8 @@ class UsersTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
-                    ->searchable()
                     ->sortable(),
                 TextColumn::make('roles.name')
                     ->label('Roles')
@@ -32,24 +34,30 @@ class UsersTable
                         'success' => 'editor',
                         'gray' => 'user',
                     ])
-                    ->searchable()
                     ->sortable(),
-                TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Filter::make('name')
+                    ->label('Name')
+                    ->schema([
+                        TextInput::make('name')
+                            ->placeholder('Search by name')
+                            ->debounce(500)
+                            ->columnSpanFull(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['name'],
+                                fn (Builder $query, $name): Builder => $query->where('name', 'like', "%{$name}%"),
+                            );
+                    }),
                 SelectFilter::make('roles')
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()
                     ->label('Filter by Role'),
-            ])
+            ], FiltersLayout::AboveContentCollapsible)
             ->recordActions([
                 EditAction::make(),
                 Action::make('impersonate')
