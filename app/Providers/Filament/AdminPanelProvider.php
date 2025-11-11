@@ -113,6 +113,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Filament Shield'),
             ])
-            ->globalSearch(false);
+            ->globalSearch(false)
+            ->databaseNotifications();
     }
 }
