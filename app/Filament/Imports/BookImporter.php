@@ -28,7 +28,7 @@ class BookImporter extends Importer
     public function resolveRecord(): ?Book
     {
         return Book::firstOrNew(
-            ['title' => $this->data['title']],
+            ['title' => $this->data['title'], 'year' => $this->data['year']],
         );
     }
 
