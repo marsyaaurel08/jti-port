@@ -248,19 +248,6 @@ This project uses Laravel Boost MCP server which provides specialized tools:
 - Components use static `make()` methods for initialization
 - Use `relationship()` method on form components when possible
 - Test Filament features with Livewire test helpers
-- when generating filament resources disable all searchable fields by default.
-- do not add created_at and updated_at fields to the resource table.
-- do not make any column toggleable in the resource table.
-- do not add filters to the resource table.
-- when generating filament forms, use sections to group fields logically.
-- when generating filament resource disable "Create & create another" actions by default.
-- when generating filament resource after creating the resource, redirect to the index table after creating a record.
-- when filter is necessary render the filters above the table content.
-- when generating filament resource ask user if the resource should be in a navigation group or not.
-- when generating filament resource if user define a navigation group, put the resource in that group.
-- when generating filament resource use icons from HeroIcons choose one that matches the resource purpose.
-- when generating filament resource add import and export actions to the resource table.
-
 
 ## Git Workflow
 
