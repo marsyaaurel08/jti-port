@@ -2,25 +2,26 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Quiz extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'lesson_id',
-        'title',
-        'description',
-        'passing_score',
-        'order',
+        'pass_score',
+        'time_limit_minutes',
     ];
 
     protected function casts(): array
     {
         return [
-            'passing_score' => 'integer',
-            'order' => 'integer',
+            'pass_score' => 'integer',
+            'time_limit_minutes' => 'integer',
         ];
     }
 

@@ -2,33 +2,36 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CourseProgress extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id',
-        'course_id',
-        'progress_percentage',
-        'last_accessed_at',
+        'enrollment_id',
+        'lesson_id',
+        'is_completed',
+        'last_watched_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'progress_percentage' => 'integer',
-            'last_accessed_at' => 'datetime',
+            'is_completed' => 'boolean',
+            'last_watched_at' => 'datetime',
         ];
     }
 
-    public function user(): BelongsTo
+    public function enrollment(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Enrollment::class);
     }
 
-    public function course(): BelongsTo
+    public function lesson(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Lesson::class);
     }
 }

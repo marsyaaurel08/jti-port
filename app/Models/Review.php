@@ -2,24 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Review extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'course_id',
         'rating',
-        'review_text',
-        'reviewed_at',
+        'comment',
     ];
 
     protected function casts(): array
     {
         return [
             'rating' => 'integer',
-            'reviewed_at' => 'datetime',
         ];
     }
 

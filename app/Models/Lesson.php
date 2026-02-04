@@ -2,33 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Lesson extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'course_id',
         'chapter_id',
         'title',
-        'content',
-        'video_url',
-        'order',
-        'is_published',
+        'type',
+        'slug',
+        'content_url',
+        'content_text',
+        'duration_seconds',
+        'is_free_preview',
+        'sort_order',
     ];
 
     protected function casts(): array
     {
         return [
-            'order' => 'integer',
-            'is_published' => 'boolean',
+            'duration_seconds' => 'integer',
+            'is_free_preview' => 'boolean',
+            'sort_order' => 'integer',
         ];
-    }
-
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo(Course::class);
     }
 
     public function chapter(): BelongsTo
@@ -39,5 +40,15 @@ class Lesson extends Model
     public function quizzes(): HasMany
     {
         return $this->hasMany(Quiz::class);
+    }
+
+    public function progress(): HasMany
+    {
+        return $this->hasMany(CourseProgress::class);
+    }
+
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class, 'last_accessed_lesson_id');
     }
 }

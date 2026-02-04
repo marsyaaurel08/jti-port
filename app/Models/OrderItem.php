@@ -2,21 +2,26 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderItem extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'order_id',
         'course_id',
-        'price',
+        'class_id',
+        'price_at_purchase',
+        'item_name',
     ];
 
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
+            'price_at_purchase' => 'decimal:2',
         ];
     }
 
@@ -28,5 +33,10 @@ class OrderItem extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function class(): BelongsTo
+    {
+        return $this->belongsTo(CourseClass::class, 'class_id');
     }
 }

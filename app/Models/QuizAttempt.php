@@ -2,25 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuizAttempt extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'quiz_id',
         'score',
-        'passed',
-        'attempted_at',
+        'started_at',
+        'finished_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'score' => 'integer',
-            'passed' => 'boolean',
-            'attempted_at' => 'datetime',
+            'score' => 'decimal:2',
+            'started_at' => 'datetime',
+            'finished_at' => 'datetime',
         ];
     }
 
@@ -32,5 +36,10 @@ class QuizAttempt extends Model
     public function quiz(): BelongsTo
     {
         return $this->belongsTo(Quiz::class);
+    }
+
+    public function answers(): HasMany
+    {
+        return $this->hasMany(QuizAnswer::class);
     }
 }

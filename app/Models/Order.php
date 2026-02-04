@@ -2,26 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
-        'total_price',
+        'invoice_number',
+        'subtotal',
+        'discount_amount',
+        'total_amount',
         'status',
         'payment_method',
-        'payment_date',
-        'notes',
+        'payment_proof',
+        'paid_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'total_price' => 'decimal:2',
-            'payment_date' => 'datetime',
+            'subtotal' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'total_amount' => 'decimal:2',
+            'paid_at' => 'datetime',
         ];
     }
 
@@ -33,5 +41,10 @@ class Order extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
     }
 }
