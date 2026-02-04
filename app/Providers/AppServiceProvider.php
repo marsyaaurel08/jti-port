@@ -28,13 +28,13 @@ class AppServiceProvider extends ServiceProvider
         // Page::formActionsAlignment(Alignment::Right);
 
         // ini dummy kalo udah pake yang bawah aja
-        View::share('categories', [
-            (object)['id' => 1, 'name' => 'Web Development', 'slug' => 'web-dev'],
-            (object)['id' => 2, 'name' => 'Mobile Development', 'slug' => 'mobile-dev'],
-            (object)['id' => 3, 'name' => 'Data Science', 'slug' => 'data-science'],
-            (object)['id' => 4, 'name' => 'Cloud Computing', 'slug' => 'cloud-computing'],
-        ]);
+        // View::share('categories', [
+        //     (object)['id' => 1, 'name' => 'Web Development', 'slug' => 'web-dev'],
+        //     (object)['id' => 2, 'name' => 'Mobile Development', 'slug' => 'mobile-dev'],
+        //     (object)['id' => 3, 'name' => 'Data Science', 'slug' => 'data-science'],
+        //     (object)['id' => 4, 'name' => 'Cloud Computing', 'slug' => 'cloud-computing'],
+        // ]);
 
-        // View::share('categories', \App\Models\Category::all());
+        View::share('categories', \App\Models\Category::all());
     }
 }

@@ -52,7 +52,7 @@
                             d="21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
-                <input type="text" placeholder="Cari materi sertifikasi..."
+                <input type="text" placeholder="Cari materi pelatihan..."
                     class="w-full bg-gray-50 border border-gray-200 rounded-full py-3 pl-12 pr-4 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-jti-orange/20 focus:border-jti-orange transition-all">
             </div>
         </div>
