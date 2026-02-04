@@ -1,11 +1,36 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
-
+html {
+    scroll-behavior: smooth;
+}
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+
+    /* Definisi Warna JTI */
+    --color-jti-primary: #14213d; /* Navy / Dark Navy Blue */
+    /* Warna biru tua gelap, hampir hitam kebiruan */
+    /* Biasa dipakai untuk: background header, sidebar, teks utama di light mode */
+
+    --color-jti-maroon: #8a3a35; /* Maroon / Dark Maroon / Merah Bata Tua */
+    /* Merah cokelat tua, elegan & hangat */
+    /* Cocok untuk: accent button, badge, link penting, elemen brand secondary */
+
+    --color-jti-orange: #f25c32; /* Orange / Bright Coral / Merah Jeruk Terang */
+    /* Orange cerah, energik, eye-catching */
+    /* Biasa dipakai untuk: CTA button utama, highlight, notifikasi, hover effect */
+
+    --color-jti-yellow: #ffc107; /* Yellow / Amber / Kuning Emas (Bootstrap warning) */
+    /* Kuning cerah klasik, sangat terang & perhatian */
+    /* Cocok untuk: warning, alert, badge peringatan, elemen yang ingin menonjol */
+
+    --color-jti-light: #f8f9fa; /* Light Gray / Off-White / Abu-abu sangat terang */
+    /* Hampir putih, netral, background utama */
+    /* Biasa dipakai untuk: background halaman, card, table row */
 }

@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Social Login Routes
 Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])
