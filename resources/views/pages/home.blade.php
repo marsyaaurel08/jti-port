@@ -2,7 +2,7 @@
     <x-home.hero />
 
     <main class="max-w-[1440px] mx-auto px-6">
-        <section id="course-list" class="py-16 bg-white">
+        <section id="course-list" class="pt-24 bg-white">
             {{-- Header Section: Menggunakan Flex untuk menyejajarkan Judul dan Tombol --}}
             <div class="flex items-end justify-between mb-8 border-b border-gray-50 pb-4">
                 <div>

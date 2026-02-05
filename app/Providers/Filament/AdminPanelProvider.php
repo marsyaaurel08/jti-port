@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->login()
             ->registration()
             ->passwordReset()
@@ -88,14 +88,14 @@ class AdminPanelProvider extends PanelProvider
                             ->label('Google')
                             ->icon('fab-google')
                             ->color('danger'),
-                        Provider::make('github')
-                            ->label('GitHub')
-                            ->icon('fab-github')
-                            ->color('gray'),
-                        Provider::make('facebook')
-                            ->label('Facebook')
-                            ->icon('fab-facebook')
-                            ->color('primary'),
+                        // Provider::make('github')
+                        //     ->label('GitHub')
+                        //     ->icon('fab-github')
+                        //     ->color('gray'),
+                        // Provider::make('facebook')
+                        //     ->label('Facebook')
+                        //     ->icon('fab-facebook')
+                        //     ->color('primary'),
                     ])
                     ->showDivider(true),
             ])
