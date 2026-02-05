@@ -1,14 +1,16 @@
 <?php
+
 namespace App\Livewire;
 
-use App\Models\Course;
-use Livewire\Component;
+use App\Models\CourseClass;
 use Livewire\Attributes\Lazy;
+use Livewire\Component;
 
 #[Lazy]
 class ClassesSlider extends Component
 {
     public $perPage = 6; // Ambil 6 data di awal (biar cepat)
+
     public $maxItems = 15; // Batas maksimal sesuai permintaan Anda
 
     public function loadMore()
@@ -25,18 +27,18 @@ class ClassesSlider extends Component
 
     public function render()
     {
-        $courses = Course::with(['category'])
-            ->where('status', 'published')
+        $classes = CourseClass::with(['instructor'])
+            ->where('is_active', '1')
             ->latest()
             ->take($this->perPage) // Ambil sesuai jumlah perPage saat ini
             ->get();
 
-        return view('livewire.course-slider', compact('courses'));
+        return view('livewire.classes-slider', compact('classes'));
     }
 
-public function placeholder()
-{
-    return <<<'HTML'
+    public function placeholder()
+    {
+        return <<<'HTML'
         <div class="flex gap-4 overflow-hidden">
             @for($i=0; $i<6; $i++)
                 <div class="shrink-0 w-[240px] bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm animate-pulse">
@@ -80,5 +82,5 @@ public function placeholder()
             @endfor
         </div>
     HTML;
-}
+    }
 }

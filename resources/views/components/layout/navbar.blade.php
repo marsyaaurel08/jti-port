@@ -1,4 +1,4 @@
-<nav x-data="{ openExplore: false, mobileMenu: false }" class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+<nav x-data="{ openExplore: false, mobileMenu: false }" class="bg-white border-b border-gray-100 sticky top-0 z-9999 shadow-sm">
     <div
         class="max-w-[1440px] mx-auto px-4 md:px-6 h-20 flex items-center justify-between md:justify-start gap-4 md:gap-6">
 
@@ -80,12 +80,17 @@
             </a>
 
             <div class="hidden md:flex items-center gap-3">
-                <a href="/login"
-                    class="px-6 py-2.5 text-sm font-bold border border-jti-yellow text-jti-yellow hover:bg-jti-yellow hover:text-gray-800 transition-all rounded-lg">Log
-                    in</a>
+                {{-- Mengarahkan ke halaman login Filament --}}
+                <a href="{{ route('filament.admin.auth.login') }}"
+                    class="px-6 py-2.5 text-sm font-bold border border-jti-yellow text-jti-yellow hover:bg-jti-yellow hover:text-gray-800 transition-all rounded-lg">
+                    Log in
+                </a>
+
+                {{-- Filament tidak memiliki halaman register default, biarkan ke rute register Anda atau sesuaikan --}}
                 <a href="/register"
-                    class="px-6 py-2.5 text-sm font-bold bg-jti-yellow text-white hover:bg-jti-maroon transition-all shadow-lg shadow-jti-yellow/20 rounded-lg">Sign
-                    up</a>
+                    class="px-6 py-2.5 text-sm font-bold bg-jti-yellow text-white hover:bg-jti-maroon transition-all shadow-lg shadow-jti-yellow/20 rounded-lg">
+                    Sign up
+                </a>
             </div>
         </div>
     </div>
@@ -125,7 +130,7 @@
             </div>
 
             <div class="space-y-4">
-                <h3 class="text-[11px] font-black text-jti-maroon uppercase tracking-[0.2em]">Kategori Materi</h3>
+                <h3 class="text-sm font-black text-jti-maroon uppercase tracking-[0.2em]">Kategori Materi</h3>
                 <nav class="flex flex-col gap-2">
                     @foreach ($categories as $category)
                         <a href="/courses?category={{ $category->slug }}"
