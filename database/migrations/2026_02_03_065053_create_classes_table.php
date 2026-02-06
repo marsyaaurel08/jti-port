@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained();
+            $table->foreignId('category_id')->constrained();
             $table->foreignId('instructor_id')->constrained('users');
             $table->string('title');
+            $table->string('thumbnail_url')->nullable();
             $table->decimal('price', 12, 2)->default(0);
             $table->dateTime('start_date');
             $table->dateTime('end_date');
