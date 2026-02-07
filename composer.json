@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "bezhansalleh/filament-shield": "^4.0",
+        "diogogpinto/filament-auth-ui-enhancer": "^2.0",
         "dutchcodingcompany/filament-socialite": "^3.0",
         "filament/filament": "^4.0",
         "filament/spatie-laravel-media-library-plugin": "^4.0",

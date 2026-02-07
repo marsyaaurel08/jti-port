@@ -21,6 +21,8 @@ class CourseClassFactory extends Factory
         return [
             'course_id' => Course::factory(),
             'instructor_id' => User::factory(),
+            'category_id' => rand(1, 5),
+            'thumbnail_url' => 'https://picsum.photos/400/200?random=' . $this->faker->numberBetween(1, 1000),
             'title' => $this->faker->words(3, true),
             'price' => $this->faker->randomFloat(2, 49999, 999999),
             'start_date' => $this->faker->dateTimeBetween('+1 week', '+1 month'),

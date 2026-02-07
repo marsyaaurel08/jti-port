@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
@@ -63,6 +64,11 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
+                // AuthUIEnhancerPlugin::make()
+                //     ->emptyPanelBackgroundImageUrl(asset('img/logo-jti.png'))
+                //     ->showEmptyPanelOnMobile(false)
+                //     ->formPanelWidth('40%')
+                //     ->formPanelPosition('left'),
                 FilamentShieldPlugin::make(),
                 BreezyCore::make()
                     ->myProfile(

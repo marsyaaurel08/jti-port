@@ -1,7 +1,7 @@
 <div class="relative" x-data="{ canLoadMore: @entangle('perPage') < @entangle('maxItems') }">
 
     {{-- Container Slider --}}
-    <div class="flex overflow-x-auto gap-5 pb-16 scrollbar-hide scroll-smooth snap-x snap-mandatory items-stretch"
+    <div class="flex overflow-x-auto gap-5 px-4 lg:px-20 py-4 scrollbar-hide scroll-smooth snap-x snap-mandatory items-stretch"
         id="course-slider">
         @foreach ($courses as $course)
             <div class="snap-start shrink-0 w-[260px] h-full">
