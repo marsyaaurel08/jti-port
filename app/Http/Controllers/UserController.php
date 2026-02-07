@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Enrollment;
 use App\Models\Order;
 use App\Models\Transaction;
+use App\Models\UserCart;
 
 class UserController extends Controller
 {
@@ -50,6 +51,23 @@ class UserController extends Controller
 
         return view('pages.user.enrolled', compact('user', 'enrolled'));
     }
+
+    /**
+     * Keranjang Saya
+     */
+    public function cart()
+    {
+        $user = Auth::user();
+
+        $userId = $user->id ?? 1;
+        $cart = UserCart::where('user_id', $userId)
+                    ->with('course')
+                    ->latest()
+                    ->get();
+
+        return view('pages.user.cart', compact('user', 'cart'));
+    }
+
 
     /**
      * Pengaturan Profil

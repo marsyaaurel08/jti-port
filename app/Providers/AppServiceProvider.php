@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Http\Responses\LogoutResponse;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
 use Filament\Pages\Page;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Support\Facades\Blade;
@@ -16,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        $this->app->bind(ContractsLogoutResponse::class, LogoutResponse::class);
     }
 
     /**
