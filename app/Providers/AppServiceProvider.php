@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contract\CourseStudentContract;
+use App\Services\CourseStudentService;
 use Filament\Pages\Page;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Support\ServiceProvider;
@@ -13,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(CourseStudentContract::class, CourseStudentService::class);
     }
 
     /**
