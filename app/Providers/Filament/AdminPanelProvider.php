@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
@@ -33,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->login()
             ->registration()
             ->passwordReset()
@@ -63,6 +64,11 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
+                // AuthUIEnhancerPlugin::make()
+                //     ->emptyPanelBackgroundImageUrl(asset('img/logo-jti.png'))
+                //     ->showEmptyPanelOnMobile(false)
+                //     ->formPanelWidth('40%')
+                //     ->formPanelPosition('left'),
                 FilamentShieldPlugin::make(),
                 BreezyCore::make()
                     ->myProfile(
@@ -88,14 +94,14 @@ class AdminPanelProvider extends PanelProvider
                             ->label('Google')
                             ->icon('fab-google')
                             ->color('danger'),
-                        Provider::make('github')
-                            ->label('GitHub')
-                            ->icon('fab-github')
-                            ->color('gray'),
-                        Provider::make('facebook')
-                            ->label('Facebook')
-                            ->icon('fab-facebook')
-                            ->color('primary'),
+                        // Provider::make('github')
+                        //     ->label('GitHub')
+                        //     ->icon('fab-github')
+                        //     ->color('gray'),
+                        // Provider::make('facebook')
+                        //     ->label('Facebook')
+                        //     ->icon('fab-facebook')
+                        //     ->color('primary'),
                     ])
                     ->showDivider(true),
             ])
