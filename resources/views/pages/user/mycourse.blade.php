@@ -46,6 +46,9 @@
                     :description="$course['description']"
                     :progress="$course['progress']"
                     :status="$course['status']"
+                    :slug="$course['slug'] ?? ''"
+                    :first_lesson_slug="$course['first_lesson_slug'] ?? null"
+                    :last_accessed_lesson_slug="$course['last_accessed_lesson_slug'] ?? null"
                 />
             @endforeach
         </div>
