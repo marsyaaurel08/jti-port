@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Http\Responses\LogoutResponse;
 use App\Models\UserCart;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
+use App\Contract\CourseStudentContract;
+use App\Services\CourseStudentService;
 use Filament\Pages\Page;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         $this->app->bind(ContractsLogoutResponse::class, LogoutResponse::class);
+        $this->app->bind(CourseStudentContract::class, CourseStudentService::class);
     }
 
     /**

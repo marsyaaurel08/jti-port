@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\{CartController, ClassesController, CourseController, DashboardController, EnrollmentController, HomeController, TransactionController, UserController};
+use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
 
 // --- Public Routes ---
@@ -58,3 +59,6 @@ Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']
 Route::delete('/auth/{provider}/unlink', [SocialiteController::class, 'unlink'])
     ->middleware('auth')
     ->name('socialite.unlink');
+// tes student course route
+Route::get('/student/my-courses', [StudentController::class, 'myCourses'])
+    ->name('student.my-courses');
