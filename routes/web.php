@@ -1,42 +1,54 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialiteController;
-use App\Http\Controllers\{ClassesController,CourseController, HomeController,UserController };
+use App\Http\Controllers\{CartController, ClassesController, CourseController, DashboardController, EnrollmentController, HomeController, TransactionController, UserController};
 use Illuminate\Support\Facades\Route;
 
+// --- Public Routes ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Grup Rute Kursus
+// Grup Rute Kursus & Kelas
 Route::prefix('courses')->name('courses.')->group(function () {
-    // Halaman Katalog (Tampilkan Semua)
     Route::get('/', [CourseController::class, 'index'])->name('index');
-
-    // Halaman Detail Kursus
     Route::get('/{slug}', [CourseController::class, 'show'])->name('show');
 });
-// Grup Rute Kelas
-Route::prefix('classes')->name('classes.')->group(function () {
-    // Halaman Katalog (Tampilkan Semua)
-    Route::get('/', [ClassesController::class, 'index'])->name('index');
 
-    // Halaman Detail Kelas
+Route::prefix('classes')->name('classes.')->group(function () {
+    Route::get('/', [ClassesController::class, 'index'])->name('index');
     Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
 });
 
-Route::middleware([])->prefix('user')->name('user.')->group(function () {
+// Keranjang Publik (Opsional)
+Route::post('/cart/add/{course}', [CartController::class, 'store'])->name('cart.add');
 
-    // Halaman Index & Dashboard (Keduanya merujuk ke method index)
-    Route::get('/', [UserController::class, 'index'])->name('index');
-    Route::get('/dashboard', [UserController::class, 'index'])->name('dashboard');
 
-    // Sub-halaman lainnya
-    Route::get('/enrolled-courses', [UserController::class, 'enrolledCourses'])->name('enrolled');
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
-    Route::get('/transactions', [UserController::class, 'transactions'])->name('transactions');
+// --- User Dashboard Routes (Authenticated) ---
+Route::middleware(['auth', 'verified'])->prefix('user')->name('user.')->group(function () {
 
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index'])->name('index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Kursus & Belajar
+    Route::get('/enrolled-courses', [EnrollmentController::class, 'index'])->name('enrolled');
+
+    // Keranjang & Checkout (Disesuaikan dengan Sidebar & Cart Page)
+    Route::get('/cart', [CartController::class, 'index'])->name('cart');
+    Route::post('/cart/add/{course}', [CartController::class, 'store'])->name('cart.add');
+    Route::delete('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+
+    // Transaksi
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions');
+
+    // Profil & Keamanan
+    Route::get('/profile', [UserController::class, 'index'])->name('profile');
+    Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::patch('/profile/avatar', [UserController::class, 'updateAvatar'])->name('profile.update.avatar');
+    Route::put('/password/update', [UserController::class, 'updatePassword'])->name('password.update');
 });
 
-// Social Login Routes
+
+// --- Social Login Routes ---
 Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])
     ->name('socialite.redirect');
 
