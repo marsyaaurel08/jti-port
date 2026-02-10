@@ -32,6 +32,23 @@ class CourseStudentService implements CourseStudentContract
     {
         $course = $enrollment->course;
 
+        // Get first lesson slug for navigation
+        $firstLessonSlug = null;
+        $firstChapter = $course->chapters()->with('lessons')->orderBy('sort_order')->first();
+        if ($firstChapter && $firstChapter->lessons->isNotEmpty()) {
+            $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
+            $firstLessonSlug = $firstLesson->slug ?? null;
+        }
+
+        // Get last accessed lesson slug or fall back to first lesson
+        $lastAccessedLessonSlug = null;
+        if ($enrollment->last_accessed_lesson_id) {
+            $lastAccessedLesson = \App\Models\Lesson::find($enrollment->last_accessed_lesson_id);
+            $lastAccessedLessonSlug = $lastAccessedLesson->slug ?? $firstLessonSlug;
+        } else {
+            $lastAccessedLessonSlug = $firstLessonSlug;
+        }
+
         return [
             'id' => $course->id,
             'title' => $course->title,
@@ -40,6 +57,9 @@ class CourseStudentService implements CourseStudentContract
             'progress' => $this->calculateProgress($enrollment),
             'status' => $this->getStatus($enrollment),
             'enrollment' => $enrollment,
+            'slug' => $course->slug,
+            'first_lesson_slug' => $firstLessonSlug,
+            'last_accessed_lesson_slug' => $lastAccessedLessonSlug,
         ];
     }
 
@@ -51,7 +71,7 @@ class CourseStudentService implements CourseStudentContract
         $totalLessons = $course->total_lessons ?? 0;
         $completedLessons = $enrollment->completed_lesson_count ?? 0;
 
-        return $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100): 0;
+        return $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
     }
 
 

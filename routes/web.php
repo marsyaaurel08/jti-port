@@ -26,6 +26,10 @@ Route::post('/cart/add/{course}', [CartController::class, 'store'])->name('cart.
 // --- User Dashboard Routes (Authenticated) ---
 Route::middleware(['auth', 'verified'])->prefix('user')->name('user.')->group(function () {
 
+    // Sub-halaman lainnya
+    Route::get('/enrolled-courses', [UserController::class, 'enrolledCourses'])->name('enrolled');
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+    Route::get('/transactions', [UserController::class, 'transactions'])->name('transactions');
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -60,5 +64,9 @@ Route::delete('/auth/{provider}/unlink', [SocialiteController::class, 'unlink'])
     ->middleware('auth')
     ->name('socialite.unlink');
 // tes student course route
-Route::get('/student/my-courses', [StudentController::class, 'myCourses'])
-    ->name('student.my-courses');
+Route::middleware(['auth'])->prefix('student')->name('student.')->group(function () {
+    Route::get('/my-courses', [StudentController::class, 'myCourses'])
+        ->name('my-courses');
+    Route::get('/courses/{courseSlug}/lessons/{lessonSlug}', [StudentController::class, 'lesson'])
+        ->name('lesson');
+});

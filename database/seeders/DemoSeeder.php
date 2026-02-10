@@ -21,21 +21,25 @@ class DemoSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create 3 users
+        // Create 3 users (or get existing)
         $users = [];
         for ($i = 1; $i <= 3; $i++) {
-            $users[$i] = User::create([
-                'name' => "User {$i}",
-                'email' => "peserta{$i}@example.com",
-                'password' => Hash::make('password'),
-            ]);
+            $users[$i] = User::firstOrCreate(
+                ['email' => "peserta{$i}@example.com"],
+                [
+                    'name' => "User {$i}",
+                    'password' => Hash::make('password'),
+                ]
+            );
         }
 
-        // Create 1 category
-        $category = Category::create([
-            'name' => 'Programming',
-            'slug' => 'programming',
-        ]);
+        // Create 1 category (or get existing)
+        $category = Category::firstOrCreate(
+            ['slug' => 'programming'],
+            [
+                'name' => 'Programming',
+            ]
+        );
 
         // Course titles for 11 courses
         $courseTitles = [
@@ -116,29 +120,18 @@ class DemoSeeder extends Seeder
         ]);
 
         // Create order items and enrollments
-        // Course 1-3: 6 completed, is_completed false -> 6 true, 4 false
-        for ($i = 0; $i < 3; $i++) {
+        // Course 1-5: Chapter 1 completed (5 lessons true), Chapter 2 not completed (5 lessons false)
+        for ($i = 0; $i < 5; $i++) {
             $this->createEnrollment(
                 $users[3],
                 $orderedCourses[$i],
                 $order,
-                6, // completed_lesson_count
+                5, // completed_lesson_count (first 5 lessons)
                 false // is_completed
             );
         }
 
-        // Course 4-5: 7 completed, is_completed false -> 7 true, 3 false
-        for ($i = 3; $i < 5; $i++) {
-            $this->createEnrollment(
-                $users[3],
-                $orderedCourses[$i],
-                $order,
-                7, // completed_lesson_count
-                false // is_completed
-            );
-        }
-
-        // Course 6: 10 completed, is_completed true -> 10 true, 0 false
+        // Course 6: 100% completed (all 10 lessons, is_completed true)
         $this->createEnrollment(
             $users[3],
             $orderedCourses[5],
@@ -153,9 +146,8 @@ class DemoSeeder extends Seeder
         $this->command->info('- Created 11 courses with 2 chapters and 10 lessons each');
         $this->command->info('- Created 1 order with 6 order items for user 3');
         $this->command->info('- Created 6 enrollments:');
-        $this->command->info('  * 3 courses: 6 lessons completed (is_completed: false)');
-        $this->command->info('  * 2 courses: 7 lessons completed (is_completed: false)');
-        $this->command->info('  * 1 course: 10 lessons completed (is_completed: true)');
+        $this->command->info('  * 5 courses: 5 lessons completed (true), 5 lessons not completed (false), is_completed: false');
+        $this->command->info('  * 1 course: All 10 lessons completed (is_completed: true, 100% complete)');
     }
 
     /**

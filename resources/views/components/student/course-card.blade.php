@@ -4,11 +4,18 @@
     'title' => '-',
     'description' => '-',
     'progress' => 0,
-    'status' => 'in-progress'
+    'status' => 'in-progress',
+    'slug' => '',
+    'first_lesson_slug' => null,
+    'last_accessed_lesson_slug' => null,
 ])
 
 @php
     $isCompleted = $status === 'completed' || $progress >= 100;
+
+    // Determine which lesson to link to
+    $lessonSlug = $last_accessed_lesson_slug ?? $first_lesson_slug;
+    $canNavigate = !empty($slug) && !empty($lessonSlug);
 @endphp
 
 <div class="border rounded-xl overflow-hidden bg-white">
@@ -47,13 +54,21 @@
                 {{ $isCompleted ? 'Completed' : 'In Progress' }}
             </span>
 
-            @if($isCompleted)
-                <button class="border px-4 py-2 text-sm rounded-md">
-                    Review
-                </button>
+            @if($canNavigate)
+                @if($isCompleted)
+                    <a href="{{ route('student.lesson', ['courseSlug' => $slug, 'lessonSlug' => $lessonSlug]) }}"
+                       class="border px-4 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors">
+                        Review
+                    </a>
+                @else
+                    <a href="{{ route('student.lesson', ['courseSlug' => $slug, 'lessonSlug' => $lessonSlug]) }}"
+                       class="bg-yellow-400 text-sm font-semibold px-4 py-2 rounded-md hover:bg-yellow-500 transition-colors">
+                        Continue
+                    </a>
+                @endif
             @else
-                <button class="bg-yellow-400 text-sm font-semibold px-4 py-2 rounded-md">
-                    Continue
+                <button class="bg-gray-300 text-sm font-semibold px-4 py-2 rounded-md cursor-not-allowed" disabled>
+                    No Lessons
                 </button>
             @endif
         </div>
