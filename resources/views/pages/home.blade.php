@@ -15,7 +15,7 @@
 
                 <a href="{{ route('courses.index') }}"
                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-jti-primary group rounded-xl transition-all duration-300">
-                    <span class="text-xs md:text-sm font-bold uppercase tracking-widest text-jti-primary group-hover:text-white">Tampilkan Semua</span>
+                    <span class="text-xs md:text-sm font-bold capitalize tracking-widest text-jti-primary group-hover:text-white">Lihat Semua</span>
                     <svg class="w-4 h-4 text-jti-primary group-hover:text-white transform group-hover:translate-x-1 transition-transform"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -42,7 +42,7 @@
 
                 <a href="{{ route('classes.index') }}"
                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-jti-primary group rounded-xl transition-all duration-300">
-                    <span class="text-xs md:text-sm font-bold uppercase tracking-widest text-jti-primary group-hover:text-white">Tampilkan Semua</span>
+                    <span class="text-xs md:text-sm font-bold capitalize tracking-widest text-jti-primary group-hover:text-white">Lihat Semua</span>
                     <svg class="w-4 h-4 text-jti-primary group-hover:text-white transform group-hover:translate-x-1 transition-transform"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />

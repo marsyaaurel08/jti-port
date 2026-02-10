@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Http\Responses\LogoutResponse;
+use App\Models\UserCart;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
 use App\Contract\CourseStudentContract;
 use App\Services\CourseStudentService;
 use Filament\Pages\Page;
 use Filament\Support\Enums\Alignment;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
@@ -17,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        //
+        $this->app->bind(ContractsLogoutResponse::class, LogoutResponse::class);
         $this->app->bind(CourseStudentContract::class, CourseStudentService::class);
     }
 
@@ -26,17 +32,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Blade::component('layouts.app', 'layouts.app');
-        //
-        // Page::formActionsAlignment(Alignment::Right);
-
-        // ini dummy kalo udah pake yang bawah aja
-        // View::share('categories', [
-        //     (object)['id' => 1, 'name' => 'Web Development', 'slug' => 'web-dev'],
-        //     (object)['id' => 2, 'name' => 'Mobile Development', 'slug' => 'mobile-dev'],
-        //     (object)['id' => 3, 'name' => 'Data Science', 'slug' => 'data-science'],
-        //     (object)['id' => 4, 'name' => 'Cloud Computing', 'slug' => 'cloud-computing'],
-        // ]);
 
         View::share('categories', \App\Models\Category::all());
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $count = UserCart::where('user_id', Auth::id())->count();
+                $view->with('cartCount', $count);
+            } else {
+                $view->with('cartCount', 0);
+            }
+        });
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $view->with('user', Auth::user());
+            }
+        });
     }
 }
