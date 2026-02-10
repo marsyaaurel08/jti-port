@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Enrollment;
 use App\Models\Order;
-use App\Models\Transaction;
 use App\Models\UserCart;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -17,81 +18,44 @@ class UserController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $userId = $user->id ?? 1;
 
-        // Data Statistik sederhana untuk Dashboard JTIport
-        $stats = [
-            'total_course' => Enrollment::where('user_id', $userId)->count(),
-            'completed'    => Enrollment::where('user_id', $userId)->where('is_completed', true)->count(),
-            'transactions' => Order::where('user_id', $userId)->where('status', 'success')->count(),
-        ];
-
-        // Ambil 3 kursus terakhir yang dipelajari
-        $recent_courses = Enrollment::where('user_id', $userId)
-                            ->with('course')
-                            ->latest()
-                            ->take(3)
-                            ->get();
-
-        return view('pages.user.index', compact('user', 'stats', 'recent_courses'));
-    }
-
-    /**
-     * Daftar Kursus Aktif
-     */
-    public function enrolledCourses()
-    {
-        $user = Auth::user();
-
-        $userId = $user->id ?? 1;
-        $enrolled = Enrollment::where('user_id', $userId)
-                        ->with('course.category')
-                        ->latest()
-                        ->paginate(6);
-
-        return view('pages.user.enrolled', compact('user', 'enrolled'));
-    }
-
-    /**
-     * Keranjang Saya
-     */
-    public function cart()
-    {
-        $user = Auth::user();
-
-        $userId = $user->id ?? 1;
-        $cart = UserCart::where('user_id', $userId)
-                    ->with('course')
-                    ->latest()
-                    ->get();
-
-        return view('pages.user.cart', compact('user', 'cart'));
-    }
-
-
-    /**
-     * Pengaturan Profil
-     */
-    public function profile()
-    {
-        $user = Auth::user();
-
-        $userId = $user->id ?? 1;
         return view('pages.user.profile', compact('user'));
     }
 
     /**
-     * Riwayat Transaksi
+     * Update Profil
      */
-    public function transactions()
+    public function updateProfile(Request $request)
     {
         $user = Auth::user();
 
-        $userId = $user->id ?? 1;
-        $transactions = Order::where('user_id', $userId)
-                            ->latest()
-                            ->paginate(10);
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+        ]);
 
-        return view('pages.user.transactions', compact('user', 'transactions'));
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        return back()->with('success', 'Profil berhasil diperbarui!');
+    }
+
+    /**
+     * Update Password
+     */
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        Auth::user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Password berhasil diubah!');
     }
 }
