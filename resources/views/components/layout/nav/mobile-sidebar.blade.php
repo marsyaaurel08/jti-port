@@ -115,11 +115,11 @@
                     <div class="space-y-1">
                         @php
                             $userMenus = [
-                                ['route' => 'user.index', 'label' => 'Dashboard Saya'],
-                                ['route' => 'user.enrolled', 'label' => 'Kursus Saya'],
-                                ['route' => 'user.cart', 'label' => 'Keranjang Belanja', 'count' => true],
-                                ['route' => 'user.transactions', 'label' => 'Riwayat Transaksi'],
-                                ['route' => 'user.profile', 'label' => 'Pengaturan Profil'],
+                                ['route' => 'student.my-courses', 'label' => 'Kursus Saya'],
+                                ['route' => 'student.my-classes', 'label' => 'Kelas Saya'],
+                                ['route' => 'student.cart', 'label' => 'Keranjang Belanja', 'count' => true],
+                                ['route' => 'student.transactions', 'label' => 'Riwayat Transaksi'],
+                                ['route' => 'student.profile', 'label' => 'Pengaturan Profil'],
                             ];
                         @endphp
 

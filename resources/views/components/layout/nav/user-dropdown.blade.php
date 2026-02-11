@@ -19,8 +19,7 @@
         </div>
         {{-- Links --}}
         <div class="py-2">
-            <a href="{{ route('user.index') }}" class="block px-6 py-2 text-sm font-semibold hover:bg-jti-light/30">Dashboard Saya</a>
-            <a href="{{ route('user.enrolled') }}" class="block px-6 py-2 text-sm font-semibold hover:bg-jti-light/30">Kursus Saya</a>
+            <a href="{{ route('student.enrolled') }}" class="block px-6 py-2 text-sm font-semibold hover:bg-jti-light/30">Kursus Saya</a>
             <hr class="my-1 border-gray-50">
             <form method="POST" action="{{ route('filament.admin.auth.logout') }}">
                 @csrf
