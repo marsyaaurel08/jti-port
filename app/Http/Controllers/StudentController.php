@@ -2,20 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Contract\ClassStudentContract;
 use App\Contract\CourseStudentContract;
-use App\Models\{Course, Lesson, Chapter, Enrollment, CourseProgress};
+use App\Models\Chapter;
+use App\Models\Course;
+use App\Models\CourseProgress;
+use App\Models\Enrollment;
+use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
-
     protected CourseStudentContract $courseStudentService;
 
-    public function __construct(CourseStudentContract $courseStudentService)
+    protected ClassStudentContract $classStudentService;
+
+    public function __construct(CourseStudentContract $courseStudentService, ClassStudentContract $classStudentService)
     {
         $this->courseStudentService = $courseStudentService;
+        $this->classStudentService = $classStudentService;
     }
 
     public function myCourses(Request $request)
@@ -25,10 +32,28 @@ class StudentController extends Controller
             $filter = $request->get('filter', 'all');
             // For demonstration, using a fixed user ID of 3
             $courses = $this->courseStudentService->getStudentCourses(3, $filter);
+
             return view('pages.user.mycourse', compact('courses'));
         } catch (\Exception $e) {
-            Log::error('Failed to load student courses: ' . $e->getMessage());
+            Log::error('Failed to load student courses: '.$e->getMessage());
+
             return back()->with('error', 'Gagal memuat kursus. Silakan coba lagi.');
+        }
+    }
+
+    public function myClasses(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $filter = $request->get('filter', 'all');
+            // For demonstration, using a fixed user ID of 3
+            $classes = $this->classStudentService->getStudentClasses(3, $filter);
+
+            return view('pages.user.myclass', compact('classes'));
+        } catch (\Exception $e) {
+            Log::error('Failed to load student classes: '.$e->getMessage());
+
+            return back()->with('error', 'Gagal memuat kelas. Silakan coba lagi.');
         }
     }
 
@@ -47,7 +72,7 @@ class StudentController extends Controller
                 ->where('course_id', $course->id)
                 ->first();
 
-            if (!$enrollment) {
+            if (! $enrollment) {
                 return redirect()->route('courses.show', $courseSlug)
                     ->with('error', 'Anda harus mendaftar kursus terlebih dahulu.');
             }
@@ -61,7 +86,7 @@ class StudentController extends Controller
                 ->firstOrFail();
 
             // Get all chapters with lessons for the sidebar
-            $chapters = Chapter::with(['lessons' => function ($query) use ($enrollment) {
+            $chapters = Chapter::with(['lessons' => function ($query) {
                 $query->orderBy('sort_order');
             }])
                 ->where('course_id', $course->id)
@@ -94,7 +119,7 @@ class StudentController extends Controller
 
             // Update last accessed lesson
             $enrollment->update([
-                'last_accessed_lesson_id' => $lesson->id
+                'last_accessed_lesson_id' => $lesson->id,
             ]);
 
             return view('pages.user.lesson', compact(
@@ -108,7 +133,8 @@ class StudentController extends Controller
                 'user'
             ));
         } catch (\Exception $e) {
-            Log::error('Failed to load lesson: ' . $e->getMessage());
+            Log::error('Failed to load lesson: '.$e->getMessage());
+
             return back()->with('error', 'Gagal memuat materi. Silakan coba lagi.');
         }
     }

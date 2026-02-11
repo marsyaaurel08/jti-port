@@ -7,10 +7,9 @@ use App\Models\Enrollment;
 
 class CourseStudentService implements CourseStudentContract
 {
-
     public function getStudentCourses(int $userId, ?string $filter = null): \Illuminate\Support\Collection
     {
-        // Get user's enrollments with course, class, and progress data
+        // Get user's enrollments with course, and progress data
         $enrollments = Enrollment::with(['course', 'progress'])
             ->where('user_id', $userId)
             ->get();
@@ -73,7 +72,6 @@ class CourseStudentService implements CourseStudentContract
 
         return $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
     }
-
 
     public function getStatus(Enrollment $enrollment): string
     {

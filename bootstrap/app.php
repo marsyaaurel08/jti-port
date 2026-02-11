@@ -19,5 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('activitylog:clean')->daily();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (Throwable $e) {
+            if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+                return redirect()->route('login');
+            }
+        });
     })->create();

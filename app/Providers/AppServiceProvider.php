@@ -2,17 +2,17 @@
 
 namespace App\Providers;
 
+use App\Contract\ClassStudentContract;
+use App\Contract\CourseStudentContract;
 use App\Http\Responses\LogoutResponse;
 use App\Models\UserCart;
-use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
-use App\Contract\CourseStudentContract;
+use App\Services\ClassStudentService;
 use App\Services\CourseStudentService;
-use Filament\Pages\Page;
-use Filament\Support\Enums\Alignment;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
         //
         $this->app->bind(ContractsLogoutResponse::class, LogoutResponse::class);
         $this->app->bind(CourseStudentContract::class, CourseStudentService::class);
+        $this->app->bind(ClassStudentContract::class, ClassStudentService::class);
     }
 
     /**
