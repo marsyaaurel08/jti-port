@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Enrollment;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class EnrollmentController extends Controller
@@ -15,7 +14,6 @@ class EnrollmentController extends Controller
             ->latest()
             ->paginate(6);
 
-
-        return view('pages.user.enrolled', compact('enrolled', 'cartCount'));
+        return view('pages.user.enrolled', compact('enrolled'));
     }
 }

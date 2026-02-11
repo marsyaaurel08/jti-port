@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\UserCart;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
@@ -41,11 +40,11 @@ class CartController extends Controller
 
         // Simpan ke Database
         UserCart::create([
-            'user_id'   => $userId,
+            'user_id' => $userId,
             'course_id' => $course->id,
         ]);
 
-        return redirect()->route('user.cart')->with('success', 'Berhasil ditambahkan ke keranjang!');
+        return redirect()->route('student.cart')->with('success', 'Berhasil ditambahkan ke keranjang!');
     }
 
     public function removeFromCart($id)
