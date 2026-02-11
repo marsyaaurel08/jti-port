@@ -1,7 +1,7 @@
 {{-- Global State untuk Navbar --}}
 <nav x-data="{ openExplore: false, mobileMenu: false, subProfile: false }" class="bg-white border-b border-gray-100 sticky top-0 z-[9999] shadow-sm">
 
-    <div class=" mx-auto px-4 md:px-6 h-20 flex items-center justify-between md:justify-center gap-4 md:gap-6">
+    <div class="mx-auto px-4 md:px-6 h-20 flex items-center justify-between md:justify-center gap-4 md:gap-6">
 
         {{-- Brand & Toggle --}}
         <div class="flex items-center gap-4">
@@ -26,7 +26,20 @@
         {{-- Right Side Actions --}}
         <div class="flex items-center gap-2 md:gap-5">
             <x-layout.nav.cart-icon />
-            <x-layout.nav.user-auth />
+
+            {{-- Logika Pembeda Auth --}}
+            @auth
+                @if ($isStaff)
+                    {{-- Tampilkan untuk Admin/Pengajar --}}
+                    <x-layout.nav.admin-auth />
+                @else
+                    {{-- Tampilkan untuk Student --}}
+                    <x-layout.nav.user-auth />
+                @endif
+            @else
+                {{-- Tampilkan jika belum login --}}
+                <x-layout.nav.user-auth />
+            @endauth
         </div>
     </div>
 
