@@ -21,7 +21,7 @@
         {{-- Isi Dropdown (Sesuai kode Anda sebelumnya) --}}
         <div x-show="openProfile" x-transition
             class="absolute right-0 mt-2 w-72 bg-white border border-gray-100 shadow-2xl z-50 rounded-xl overflow-hidden">
-            <a href="{{ route('user.index') }}"
+            <a href="{{ route('student.index') }}"
                 class="px-5 py-4 flex items-center gap-3 border-b border-gray-50 hover:bg-gray-50/50 group transition-colors">
                 <div
                     class="w-12 h-12 rounded-full bg-jti-primary flex items-center justify-center text-white text-xl group-hover:bg-jti-orange transition-colors">
@@ -33,22 +33,22 @@
                 </div>
             </a>
             <div class="py-2">
-                <a href="{{ route('user.index') }}"
-                    class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Dashboard
-                    Saya</a>
-                <a href="{{ route('user.enrolled') }}"
+                <a href="{{ route('student.my-courses') }}"
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Kursus
                     Saya</a>
-                <a href="/cart"
+                <a href="{{ route('student.my-classes') }}"
+                    class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Kelas
+                    Saya</a>
+                <a href="{{ route('student.cart') }}"
                     class="flex items-center justify-between px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">
                     <span>Keranjang Belanja</span>
                     <span
                         class="bg-jti-orange text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">9</span>
                 </a>
-                <a href="{{ route('user.transactions') }}"
+                <a href="{{ route('student.transactions') }}"
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Riwayat
                     Transaksi</a>
-                <a href="{{ route('user.profile') }}"
+                <a href="{{ route('student.profile') }}"
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Edit
                     Profil</a>
                 <form method="POST" action="{{ route('filament.admin.auth.logout') }}">

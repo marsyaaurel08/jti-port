@@ -47,7 +47,17 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" />
                     </svg>
-                    22.5 total jam
+                    {{-- Durasi menit to jam ($course->total_duration format nya menit)--}}
+                    @php
+                        $hours = floor($course->total_duration / 60);
+                        $minutes = $course->total_duration % 60;
+                    @endphp
+                    @if ($hours > 0)
+                        {{ $hours }} jam
+                    @endif
+                    @if ($minutes > 0)
+                        {{ $minutes }} menit
+                    @endif
                 </span>
                 @php
                     $levelColor = match ($course->level) {
