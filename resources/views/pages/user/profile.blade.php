@@ -1,122 +1,126 @@
-{{-- resources/views/pages/user/profile.blade.php --}}
-<x-user.layout.index :user="$user">
-    <div class="space-y-10">
+<x-layouts.app>
+    <div class="min-h-screen bg-gray-50">
+        <!-- Sidebar + Content Container -->
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Sidebar -->
+                <div class="lg:col-span-1">
+                    <x-user.sidebar :user="$user" />
+                </div>
 
-        {{-- Section 1: Header & Photo Profile --}}
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-8 md:p-12 bg-gradient-to-r from-jti-primary/5 to-transparent flex flex-col md:flex-row items-center gap-8">
-                {{-- Avatar Upload with Preview --}}
-                <form action="{{ route('user.profile.update.avatar') }}" method="POST" enctype="multipart/form-data" id="avatarForm" class="relative group">
-                    @csrf @method('PATCH')
-                    <div class="w-32 h-32 rounded-[2.5rem] bg-jti-primary overflow-hidden shadow-2xl shadow-jti-primary/20 border-4 border-white relative">
-                        <img id="avatarPreview"
-                             src="{{ $user->getFilamentAvatarUrl() ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=14213d&color=fff' }}"
-                             class="w-full h-full object-cover">
+                <!-- Main Content -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white rounded-lg shadow-md p-8">
+                        <!-- Header -->
+                        <div class="mb-8 border-b pb-6">
+                            <h1 class="text-3xl font-bold text-gray-900">Profil Saya</h1>
+                            <p class="text-gray-600 mt-2">Kelola informasi profil dan keamanan akun Anda</p>
+                        </div>
 
-                        {{-- Overlay Upload --}}
-                        <label for="avatarInput" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </label>
-                    </div>
-                    <input type="file" name="avatar" id="avatarInput" class="hidden" onchange="previewImage(event)">
-                </form>
+                        <!-- Success/Error Messages -->
+                        @if (session('success'))
+                            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                                ✓ {{ session('success') }}
+                            </div>
+                        @endif
 
-                <div class="text-center md:text-left space-y-2">
-                    <h2 class="text-3xl font-black text-jti-primary tracking-tight">{{ $user->name }}</h2>
-                    <p class="text-gray-400 font-bold uppercase tracking-widest text-xs italic">{{ $user->email }}</p>
-                    <div class="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
-                        @foreach($user->roles as $role)
-                            <span class="px-3 py-1 bg-jti-orange/10 text-jti-orange text-[10px] font-black uppercase rounded-full ring-1 ring-jti-orange/20">
-                                {{ $role->name }}
-                            </span>
-                        @endforeach
+                        @if ($errors->any())
+                            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                                <ul class="list-disc list-inside">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <!-- Profile Form -->
+                        <form method="POST" action="{{ route('student.profile.update') }}" class="mb-8">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="space-y-6">
+                                <!-- Nama -->
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nama
+                                        Lengkap</label>
+                                    <input type="text" id="name" name="name"
+                                        value="{{ old('name', $user->name) }}"
+                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent"
+                                        required>
+                                </div>
+
+                                <!-- Email -->
+                                <div>
+                                    <label for="email"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" id="email" name="email"
+                                        value="{{ old('email', $user->email) }}"
+                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent"
+                                        required>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div>
+                                    <button type="submit"
+                                        class="px-6 py-2.5 bg-jti-yellow hover:bg-jti-maroon text-white font-medium rounded-lg transition-colors">
+                                        Simpan Perubahan
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Password Section -->
+                        <div class="border-t pt-8">
+                            <h2 class="text-xl font-bold text-gray-900 mb-6">Ubah Password</h2>
+
+                            <form method="POST" action="{{ route('student.password.update') }}">
+                                @csrf
+                                @method('PUT')
+
+                                <div class="space-y-6">
+                                    <!-- Current Password -->
+                                    <div>
+                                        <label for="current_password"
+                                            class="block text-sm font-medium text-gray-700 mb-2">Password Saat
+                                            Ini</label>
+                                        <input type="password" id="current_password" name="current_password"
+                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent"
+                                            required>
+                                    </div>
+
+                                    <!-- New Password -->
+                                    <div>
+                                        <label for="password"
+                                            class="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
+                                        <input type="password" id="password" name="password"
+                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent"
+                                            required>
+                                    </div>
+
+                                    <!-- Confirm Password -->
+                                    <div>
+                                        <label for="password_confirmation"
+                                            class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi
+                                            Password</label>
+                                        <input type="password" id="password_confirmation" name="password_confirmation"
+                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent"
+                                            required>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div>
+                                        <button type="submit"
+                                            class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+                                            Ubah Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            {{-- Form Informasi Dasar --}}
-            <form action="{{ route('user.profile.update') }}" method="POST" class="p-8 md:p-12 space-y-8">
-                @csrf @method('PUT')
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {{-- Input Nama --}}
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-jti-primary uppercase tracking-[0.2em] ml-1">Nama Lengkap</label>
-                        <div class="relative">
-                            <input type="text" name="name" value="{{ old('name', $user->name) }}"
-                                class="w-full bg-gray-50 border-none ring-1 ring-gray-200 rounded-2xl px-5 py-4 text-sm font-bold text-jti-primary focus:ring-2 focus:ring-jti-orange transition-all outline-none">
-                        </div>
-                        @error('name') <p class="text-[10px] text-rose-500 font-bold ml-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    {{-- Input Email --}}
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-jti-primary uppercase tracking-[0.2em] ml-1">Alamat Email</label>
-                        <div class="relative">
-                            <input type="email" name="email" value="{{ old('email', $user->email) }}"
-                                class="w-full bg-gray-100 border-none ring-1 ring-gray-200 rounded-2xl px-5 py-4 text-sm font-bold text-gray-400 cursor-not-allowed outline-none" readonly>
-                        </div>
-                        <p class="text-[9px] text-gray-400 italic ml-1">* Email tidak dapat diubah untuk keamanan akun.</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="group flex items-center gap-3 px-10 py-4 bg-jti-primary text-white font-black rounded-2xl hover:bg-jti-maroon transition-all shadow-xl shadow-jti-primary/20 active:scale-95 text-xs uppercase tracking-widest">
-                        <span>Simpan Perubahan</span>
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        {{-- Section 2: Keamanan --}}
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-8 border-b border-gray-50 bg-gray-50/50">
-                <h3 class="text-xl font-black text-jti-primary tracking-tight">Keamanan Akun</h3>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Gunakan kombinasi password yang kuat</p>
-            </div>
-
-            <form action="{{ route('user.password.update') }}" method="POST" class="p-8 md:p-12 space-y-8">
-                @csrf @method('PUT')
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-jti-primary uppercase tracking-[0.2em] ml-1">Password Saat Ini</label>
-                        <input type="password" name="current_password" class="w-full bg-gray-50 border-none ring-1 ring-gray-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-rose-500 transition-all outline-none">
-                    </div>
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-jti-primary uppercase tracking-[0.2em] ml-1">Password Baru</label>
-                        <input type="password" name="password" class="w-full bg-gray-50 border-none ring-1 ring-gray-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-jti-orange transition-all outline-none">
-                    </div>
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black text-jti-primary uppercase tracking-[0.2em] ml-1">Konfirmasi Password</label>
-                        <input type="password" name="password_confirmation" class="w-full bg-gray-50 border-none ring-1 ring-gray-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-jti-orange transition-all outline-none">
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="px-8 py-4 border-2 border-jti-primary text-jti-primary font-black rounded-2xl hover:bg-jti-primary hover:text-white transition-all active:scale-95 text-xs uppercase tracking-widest">
-                        Perbarui Password
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
-
-    {{-- Script untuk Preview Image --}}
-    <script>
-        function previewImage(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const output = document.getElementById('avatarPreview');
-                output.src = reader.result;
-                // Opsional: Langsung submit form saat file dipilih
-                document.getElementById('avatarForm').submit();
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    </script>
-</x-user.layout.index>
+</x-layouts.app>
