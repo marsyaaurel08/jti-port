@@ -28,7 +28,11 @@ class AppServiceProvider extends ServiceProvider
         Blade::component('layouts.app', 'layouts.app');
 
         // Share categories untuk navbar
-        View::share('categories', \App\Models\Category::all());
+        try {
+            View::share('categories', \App\Models\Category::all());
+        } catch (\Exception $e) {
+            View::share('categories', collect());
+        }
 
         View::composer('*', function ($view) {
             if (Auth::check()) {
