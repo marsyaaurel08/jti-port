@@ -16,8 +16,9 @@ use Illuminate\Support\Facades\Route;
 // --- Public Routes ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::redirect('/user', '/student')->name('dashboard');
-
+Route::get('/user', function () {
+    return redirect('/');
+});
 /**
  * Penting: Mendefinisikan rute 'login' agar Middleware Auth tidak error.
  * Diarahkan ke halaman login Filament User Panel.
@@ -36,6 +37,7 @@ Route::get('/register', function () {
 // Logout Route - Menggunakan logout bawaan filament atau manual
 Route::post('/logout', function () {
     auth()->logout();
+
     return redirect('/');
 })->name('logout');
 
@@ -46,11 +48,13 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
+
     return redirect('/');
 })->middleware(['auth', 'signed', 'throttle:6,1'])->name('verification.verify');
 
 Route::post('/email/resend', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
+
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
@@ -62,7 +66,7 @@ Route::prefix('courses')->name('courses.')->group(function () {
 
 Route::prefix('classes')->name('classes.')->group(function () {
     Route::get('/', [ClassesController::class, 'index'])->name('index');
-    Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
+    Route::get('/{courseClass}', [ClassesController::class, 'show'])->name('show');
 });
 
 // Keranjang Publik
