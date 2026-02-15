@@ -90,22 +90,22 @@ class UserPanelProvider extends PanelProvider
                     ->enableSanctumTokens(
                         permissions: ['create', 'view', 'update', 'delete']
                     ),
-                FilamentSocialitePlugin::make()
-                    ->providers([
-                        Provider::make('google')
-                            ->label('Google')
-                            ->icon('fab-google')
-                            ->color('danger'),
-                        // Provider::make('github')
-                        //     ->label('GitHub')
-                        //     ->icon('fab-github')
-                        //     ->color('gray'),
-                        // Provider::make('facebook')
-                        //     ->label('Facebook')
-                        //     ->icon('fab-facebook')
-                        //     ->color('primary'),
-                    ])
-                    ->showDivider(true),
+                // FilamentSocialitePlugin::make()
+                //     ->providers([
+                //         Provider::make('google')
+                //             ->label('Google')
+                //             ->icon('fab-google')
+                //             ->color('danger'),
+                //         // Provider::make('github')
+                //         //     ->label('GitHub')
+                //         //     ->icon('fab-github')
+                //         //     ->color('gray'),
+                //         // Provider::make('facebook')
+                //         //     ->label('Facebook')
+                //         //     ->icon('fab-facebook')
+                //         //     ->color('primary'),
+                //     ])
+                //     ->showDivider(true),
             ])
             ->authMiddleware([
                 Authenticate::class,
