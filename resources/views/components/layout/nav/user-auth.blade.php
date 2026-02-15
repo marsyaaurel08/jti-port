@@ -1,6 +1,6 @@
 @guest
     <div class="hidden md:flex items-center gap-3">
-        <a href="{{ route('filament.admin.auth.login') }}"
+        <a href="{{ route('filament.user.auth.login') }}"
             class="px-6 py-2.5 text-sm font-semibold border border-jti-yellow text-jti-yellow hover:bg-jti-yellow hover:text-gray-800 transition-all rounded-lg">Log
             in</a>
         <a href="/register"
