@@ -65,7 +65,7 @@ class DemoSeeder extends Seeder
                 'title' => $title,
                 'slug' => strtolower(str_replace(' ', '-', $title)),
                 'description' => "Learn the basics of {$title}",
-                'price' => 99.99,
+                'price' => 99.99 + ($index * 10), // Increment price for variety
                 'level' => 'beginner',
                 'thumbnail_url' => "https://picsum.photos/400/200?random={$randomId}",
                 'status' => 'published',
@@ -89,7 +89,7 @@ class DemoSeeder extends Seeder
                         'chapter_id' => $chapter->id,
                         'title' => "Lesson {$lessonCounter}: Introduction",
                         'type' => 'video',
-                        'slug' => strtolower(str_replace(' ', '-', $title)) . "-lesson-{$lessonCounter}",
+                        'slug' => strtolower(str_replace(' ', '-', $title))."-lesson-{$lessonCounter}",
                         'content_url' => 'https://example.com/video.mp4',
                         'content_text' => 'Lesson content goes here...',
                         'duration_seconds' => 600, // 10 minutes
@@ -109,7 +109,7 @@ class DemoSeeder extends Seeder
         // Create 1 order for user ID 3
         $order = Order::create([
             'user_id' => $users[3]->id,
-            'invoice_number' => 'INV-' . time(),
+            'invoice_number' => 'INV-'.time(),
             'subtotal' => $totalAmount,
             'discount_amount' => 0.00,
             'total_amount' => $totalAmount,
@@ -179,7 +179,7 @@ class DemoSeeder extends Seeder
             'expires_at' => now()->addYear(),
             'is_completed' => $isCompleted,
             'completed_at' => $isCompleted ? now() : null,
-            'certificate_code' => $isCompleted ? 'CERT-' . strtoupper(uniqid()) : null,
+            'certificate_code' => $isCompleted ? 'CERT-'.strtoupper(uniqid()) : null,
             'certificate_url' => $isCompleted ? 'https://example.com/certificate.pdf' : null,
             'completed_lesson_count' => $completedLessonCount,
             'last_accessed_lesson_id' => $lessons[$completedLessonCount - 1]->id ?? $lessons[0]->id,
