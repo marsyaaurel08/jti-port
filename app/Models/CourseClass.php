@@ -16,6 +16,10 @@ class CourseClass extends Model
     protected $fillable = [
         'course_id',
         'instructor_id',
+        'category_id',
+        'level',
+        'thumbnail_url',
+        'description',
         'title',
         'price',
         'start_date',
