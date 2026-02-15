@@ -36,7 +36,6 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('staff')
             ->login()
-            ->registration()
             ->brandname('jti-port')
             ->passwordReset()
             ->emailVerification()
