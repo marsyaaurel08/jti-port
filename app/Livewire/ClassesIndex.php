@@ -41,6 +41,11 @@ class ClassesIndex extends Component
         $this->resetPage();
     }
 
+    public function updatedSelectedRatings(): void
+    {
+        $this->resetPage();
+    }
+
     public function updatedIsFree(): void
     {
         $this->resetPage();
@@ -103,6 +108,12 @@ class ClassesIndex extends Component
         return view('livewire.classes-index', [
             'classes' => $query->paginate(10),
             'categories' => Category::orderBy('name')->get(),
+            'selectedCategories' => $this->selectedCategories,
+            'selectedRatings' => $this->selectedRatings,
+            'selectedLevels' => $this->selectedLevels,
+            'isFree' => $this->isFree,
+            'isPaid' => $this->isPaid,
+            'sort' => $this->sort,
         ]);
     }
 }
