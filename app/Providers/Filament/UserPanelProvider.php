@@ -37,6 +37,7 @@ class UserPanelProvider extends PanelProvider
             ->path('user')
             ->login()
             ->registration()
+            ->homeUrl('/')
             ->brandname('jti-port')
             ->passwordReset()
             ->emailVerification()
