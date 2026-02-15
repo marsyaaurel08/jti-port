@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('instructor_id')->constrained('users');
             $table->string('title');
             $table->string('thumbnail_url')->nullable();
+            $table->text('description')->nullable();
+            $table->enum('level', ['beginner', 'intermediate', 'advanced']);
             $table->decimal('price', 12, 2)->default(0);
             $table->dateTime('start_date');
             $table->dateTime('end_date');
