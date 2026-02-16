@@ -3,9 +3,6 @@
 namespace App\Providers\Filament;
 
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
-use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
-use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -35,14 +32,19 @@ class UserPanelProvider extends PanelProvider
             ->default()
             ->id('user')
             ->path('user')
-            ->login()
+            ->emailVerification()
+            ->passwordReset()
             ->registration()
+            ->login()
             ->homeUrl('/')
             ->brandname('jti-port')
-            ->passwordReset()
-            ->emailVerification()
             ->colors([
                 'primary' => Color::Amber,
+            ])
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->pages([
+                Dashboard::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

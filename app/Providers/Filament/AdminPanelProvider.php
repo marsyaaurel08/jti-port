@@ -37,8 +37,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('staff')
             ->login()
             ->brandname('jti-port')
+            ->brandLogo(asset('img/logo-jti.png'))
+            ->brandLogoHeight('3rem')
             ->passwordReset()
-            ->emailVerification()
             ->colors([
                 'primary' => Color::Amber,
             ])
