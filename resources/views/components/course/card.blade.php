@@ -1,6 +1,6 @@
 @props(['course'])
 
-<div class="h-full">
+<div class="h-full" x-data="{ isLoading: false }">
     <div class="relative h-full">
         <div
             class="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-[0_20px_50px_rgba(20,33,61,0.12)] transition-all duration-500 flex flex-col h-full relative z-30 font-sans">
@@ -67,17 +67,35 @@
                     </div>
 
                     <div class="grid grid-cols-5 gap-2">
-                        <button
-                            class="col-span-1 flex items-center justify-center p-2 rounded-lg bg-gray-50 text-gray-400 hover:bg-jti-light hover:text-jti-primary transition-all border border-gray-100 active:scale-90"
-                            title="Tambah ke Keranjang">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </button>
+                        @if (
+                            !auth()->check() ||
+                                !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
+                            <button type="button"
+                                @click="addToCart({{ $course->id }}, () => { isLoading = false; }); isLoading = true;"
+                                :disabled="isLoading"
+                                class="col-span-1 flex items-center justify-center p-2 rounded-lg bg-gray-50 text-gray-400 hover:bg-jti-light hover:text-jti-primary transition-all border border-gray-100 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-50 disabled:hover:text-gray-400"
+                                title="Tambah ke Keranjang">
+                                <!-- Cart Icon -->
+                                <svg x-show="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+
+                                <!-- Loading Spinner -->
+                                <svg x-show="isLoading" x-cloak class="w-5 h-5 animate-spin" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                        stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </button>
+                        @endif
 
                         <a href="{{ route('courses.show', $course->slug) }}"
-                            class="relative col-span-4 group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary py-2.5 rounded-lg transition-all duration-500 hover:shadow-lg active:scale-95 text-sm font-bold tracking-wider">
+                            class="relative {{ auth()->check() &&auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar'])? 'col-span-5': 'col-span-4' }} group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary py-2.5 rounded-lg transition-all duration-500 hover:shadow-lg active:scale-95 text-sm font-bold tracking-wider">
                             <div
                                 class="absolute inset-0 w-full h-full bg-jti-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500">
                             </div>

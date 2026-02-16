@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\CourseClass;
 use App\Models\UserCart;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +13,7 @@ class CartController extends Controller
     {
         $user = Auth::user();
         $cartItems = UserCart::where('user_id', $user->id)
-            ->with(['course.category', 'course.instructor'])
+            ->with(['course.category'])
             ->get();
 
         $totalPrice = $cartItems->sum(function ($item) {
@@ -35,7 +36,15 @@ class CartController extends Controller
             ->exists();
 
         if ($exists) {
-            return redirect()->back()->with('info', 'Kursus sudah ada di keranjang.');
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kursus sudah ada di keranjang. Silakan periksa keranjang Anda.',
+                    'type' => 'info',
+                ], 200);
+            }
+
+            return redirect()->back()->with('info', 'Kursus sudah ada di keranjang. Silakan periksa keranjang Anda.');
         }
 
         // Simpan ke Database
@@ -44,7 +53,53 @@ class CartController extends Controller
             'course_id' => $course->id,
         ]);
 
-        return redirect()->route('student.cart')->with('success', 'Berhasil ditambahkan ke keranjang!');
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kursus berhasil ditambahkan ke keranjang!',
+                'type' => 'success',
+            ], 200);
+        }
+
+        return redirect()->back()->with('success', 'Kursus berhasil ditambahkan ke keranjang!');
+    }
+
+    public function storeClass(CourseClass $courseClass)
+    {
+        $userId = Auth::id();
+
+        // Cek jika kelas sudah ada di keranjang database
+        $exists = UserCart::where('user_id', $userId)
+            ->where('class_id', $courseClass->id)
+            ->exists();
+
+        if ($exists) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kelas sudah ada di keranjang. Silakan periksa keranjang Anda.',
+                    'type' => 'info',
+                ], 200);
+            }
+
+            return redirect()->back()->with('info', 'Kelas sudah ada di keranjang. Silakan periksa keranjang Anda.');
+        }
+
+        // Simpan ke Database
+        UserCart::create([
+            'user_id' => $userId,
+            'class_id' => $courseClass->id,
+        ]);
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kelas berhasil ditambahkan ke keranjang!',
+                'type' => 'success',
+            ], 200);
+        }
+
+        return redirect()->back()->with('success', 'Kelas berhasil ditambahkan ke keranjang!');
     }
 
     public function removeFromCart($id)

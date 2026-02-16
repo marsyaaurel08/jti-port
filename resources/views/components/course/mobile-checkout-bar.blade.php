@@ -26,7 +26,7 @@
         </div>
 
         {{-- Buy Now Button --}}
-        <form action="{{ route('cart.add', $course->id) }}" method="POST" class="flex-shrink-0 w-32">
+        <form action="{{ route('student.cart.add', $course->id) }}" method="POST" class="flex-shrink-0 w-32">
             @csrf
             <button
                 class="w-full py-3 bg-jti-primary text-white font-semibold rounded-lg hover:bg-jti-maroon transition-all active:scale-95 text-sm">
