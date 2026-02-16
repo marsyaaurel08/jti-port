@@ -22,9 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class EnrollmentCourseResource extends Resource
 {
     protected static ?string $model = Enrollment::class;
-
-    protected static ?string $navigationLabel = 'Course Enrollments'; 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $navigationLabel = 'Course Enrollments';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
     public static function form(Schema $schema): Schema
     {
