@@ -54,7 +54,8 @@ class CourseClass extends Model
 
     public function enrollments(): HasMany
     {
-        return $this->hasMany(Enrollment::class);
+        // Tambahkan parameter kedua untuk menentukan kolom 'class_id' secara eksplisit
+        return $this->hasMany(Enrollment::class, 'class_id');
     }
 
     public function orderItems(): HasMany
