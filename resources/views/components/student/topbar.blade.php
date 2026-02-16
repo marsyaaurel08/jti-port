@@ -15,27 +15,27 @@
 
         {{-- Right --}}
         <div class="flex items-center gap-4">
-            <input
-                type="text"
-                placeholder="Search Courses..."
-                class="border rounded-md px-3 py-1 text-sm focus:outline-none"
-            >
+            <input type="text" placeholder="Search Courses..."
+                class="border rounded-md px-3 py-1 text-sm focus:outline-none">
 
-            @auth
+            @if (Auth::check() && Auth::user()->hasVerifiedEmail())
                 <div class="flex items-center gap-2 text-sm">
-                    @if(auth()->user()->avatar_url)
-                        <img src="{{ auth()->user()->avatar_url }}" class="w-8 h-8 rounded-full object-cover" alt="{{ auth()->user()->name }}">
+                    @if (auth()->user()->avatar_url)
+                        <img src="{{ auth()->user()->avatar_url }}" class="w-8 h-8 rounded-full object-cover"
+                            alt="{{ auth()->user()->name }}">
                     @else
-                        <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
+                        <div
+                            class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                     @endif
                     <div class="leading-tight">
                         <p class="font-semibold">{{ auth()->user()->name }}</p>
-                        <p class="text-xs text-gray-400">{{ ucfirst(auth()->user()->roles->first()?->name ?? 'Student') }}</p>
+                        <p class="text-xs text-gray-400">
+                            {{ ucfirst(auth()->user()->roles->first()?->name ?? 'Student') }}</p>
                     </div>
                 </div>
-            @endauth
+            @endif
         </div>
 
     </div>
