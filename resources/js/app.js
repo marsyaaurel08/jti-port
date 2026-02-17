@@ -7,4 +7,10 @@ Alpine.plugin(collapse)
 Alpine.plugin(intersect)
 
 window.Alpine = Alpine;
-Alpine.start();
+
+// Only start Alpine if it hasn't been started yet
+// This prevents the "multiple instances of Alpine running" warning during HMR
+if (!window.Alpine.started) {
+    Alpine.start();
+    window.Alpine.started = true;
+}
