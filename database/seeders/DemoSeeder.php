@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Chapter;
 use App\Models\Course;
+use App\Models\CourseClass;
 use App\Models\CourseProgress;
 use App\Models\Enrollment;
 use App\Models\Lesson;
@@ -140,6 +141,83 @@ class DemoSeeder extends Seeder
             true // is_completed
         );
 
+        // =============================================
+        // Create Class with 3 Students with Different Progress
+        // =============================================
+        $instructor = User::firstOrCreate(
+            ['email' => 'instructor@example.com'],
+            [
+                'name' => 'Instructor User',
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        $classCode = CourseClass::create([
+            'course_id' => $allCourses[0]->id, // Use first course (Laravel Fundamentals)
+            'instructor_id' => $instructor->id,
+            'category_id' => $category->id,
+            'title' => 'Laravel Fundamentals - Advanced Batch',
+            'slug' => 'laravel-fundamentals-advanced-batch',
+            'description' => 'Advanced batch for Laravel fundamentals',
+            'level' => 'intermediate',
+            'price' => 149.99,
+            'thumbnail_url' => 'https://picsum.photos/400/200?random=100',
+            'start_date' => now(),
+            'end_date' => now()->addMonths(3),
+            'max_capacity' => 30,
+            'current_enrolled' => 3,
+            'meeting_link' => 'https://meet.example.com/laravel-class',
+            'is_active' => true,
+        ]);
+
+        // Create order for class (shared order for all 3 students)
+        $classOrder = Order::create([
+            'user_id' => $users[1]->id,
+            'invoice_number' => 'INV-CLASS-'.time(),
+            'subtotal' => 149.99 * 3,
+            'discount_amount' => 0.00,
+            'total_amount' => 149.99 * 3,
+            'status' => 'paid',
+            'payment_method' => 'credit_card',
+            'payment_proof' => null,
+            'paid_at' => now(),
+        ]);
+
+        // Get lessons from the first course (10 lessons total)
+        $classLessons = Lesson::whereHas('chapter', function ($query) use ($allCourses) {
+            $query->where('course_id', $allCourses[0]->id);
+        })->orderBy('sort_order')->get();
+
+        // Student 1: 30% complete (3 lessons out of 10)
+        $this->createClassEnrollment(
+            $users[1],
+            $allCourses[0],
+            $classCode,
+            $classOrder,
+            3, // completed_lesson_count
+            false // is_completed
+        );
+
+        // Student 2: 60% complete (6 lessons out of 10)
+        $this->createClassEnrollment(
+            $users[2],
+            $allCourses[0],
+            $classCode,
+            $classOrder,
+            6, // completed_lesson_count
+            false // is_completed
+        );
+
+        // Student 3: 100% complete (all 10 lessons)
+        $this->createClassEnrollment(
+            $users[3],
+            $allCourses[0],
+            $classCode,
+            $classOrder,
+            10, // completed_lesson_count
+            true // is_completed
+        );
+
         $this->command->info('Demo data seeded successfully!');
         $this->command->info('- Created 3 users');
         $this->command->info('- Created 1 category');
@@ -148,6 +226,12 @@ class DemoSeeder extends Seeder
         $this->command->info('- Created 6 enrollments:');
         $this->command->info('  * 5 courses: 5 lessons completed (true), 5 lessons not completed (false), is_completed: false');
         $this->command->info('  * 1 course: All 10 lessons completed (is_completed: true, 100% complete)');
+        $this->command->info('');
+        $this->command->info('- Created 1 class: "Laravel Fundamentals - Advanced Batch"');
+        $this->command->info('- Enrolled 3 students in the class:');
+        $this->command->info('  * Student 1 (peserta1@example.com): 30% progress (3/10 lessons)');
+        $this->command->info('  * Student 2 (peserta2@example.com): 60% progress (6/10 lessons)');
+        $this->command->info('  * Student 3 (peserta3@example.com): 100% progress (10/10 lessons, COMPLETED)');
     }
 
     /**
@@ -193,6 +277,53 @@ class DemoSeeder extends Seeder
                 'lesson_id' => $lesson->id,
                 'is_completed' => $isLessonCompleted,
                 'last_watched_at' => $isLessonCompleted ? now()->subHours($completedLessonCount - $index) : null,
+            ]);
+        }
+    }
+
+    /**
+     * Create class enrollment with course progress
+     */
+    private function createClassEnrollment($user, $course, $courseClass, $order, $completedLessonCount, $isCompleted)
+    {
+        // Create order item for class enrollment
+        OrderItem::create([
+            'order_id' => $order->id,
+            'course_id' => $course->id,
+            'class_id' => $courseClass->id,
+            'price_at_purchase' => 149.99,
+            'item_name' => $courseClass->title,
+        ]);
+
+        // Get all lessons for this course
+        $lessons = Lesson::whereHas('chapter', function ($query) use ($course) {
+            $query->where('course_id', $course->id);
+        })->orderByRaw('CAST(sort_order AS SIGNED)')->get();
+
+        // Create enrollment for class
+        $enrollment = Enrollment::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'class_id' => $courseClass->id,
+            'order_id' => $order->id,
+            'enrolled_at' => now(),
+            'expires_at' => now()->addMonths(6),
+            'is_completed' => $isCompleted,
+            'completed_at' => $isCompleted ? now() : null,
+            'certificate_code' => $isCompleted ? 'CERT-CLASS-'.strtoupper(uniqid()) : null,
+            'certificate_url' => $isCompleted ? 'https://example.com/certificate.pdf' : null,
+            'completed_lesson_count' => $completedLessonCount,
+            'last_accessed_lesson_id' => $lessons[$completedLessonCount - 1]->id ?? $lessons[0]->id,
+        ]);
+
+        // Create course progress entries for each lesson
+        foreach ($lessons as $index => $lesson) {
+            $isLessonCompleted = $index < $completedLessonCount;
+            CourseProgress::create([
+                'enrollment_id' => $enrollment->id,
+                'lesson_id' => $lesson->id,
+                'is_completed' => $isLessonCompleted,
+                'last_watched_at' => $isLessonCompleted ? now()->subDays($completedLessonCount - $index) : null,
             ]);
         }
     }

@@ -50,6 +50,7 @@ class CourseClassSeeder extends Seeder
                 'thumbnail_url' => "https://picsum.photos/400/200?random={$randomId}",
                 'description' => "Class description for {$course->title}",
                 'level' => $course->level,
+                'slug' => strtolower(str_replace(' ', '-', $course->title)),
                 'title' => $course->title,
                 'price' => $course->price,
                 'start_date' => $startDate,

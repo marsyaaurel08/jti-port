@@ -59,48 +59,57 @@
                     </div>
 
                     <div class="grid grid-cols-5 gap-2">
-                        {{-- Add to Cart --}}
-                        @if (
-                            !auth()->check() ||
-                                !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
-                            <button type="button"
-                                @click="addToCartClass({{ $class->id }}, () => { isLoading = false; }); isLoading = true;"
-                                :disabled="isLoading" title="Tambah ke Keranjang"
-                                class="col-span-1 flex items-center justify-center p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-jti-light hover:text-jti-primary transition-all border border-gray-100 shadow-sm active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-50 disabled:hover:text-gray-400">
-                                <!-- Cart Icon -->
-                                <svg x-show="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
 
-                                <!-- Loading Spinner -->
-                                <svg x-show="isLoading" x-cloak class="w-5 h-5 animate-spin" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                    </path>
-                                </svg>
-                            </button>
-                        @endif
+                        <!-- Tombol Tambah ke Keranjang: hanya muncul jika sudah login & bukan admin/pengajar -->
+                        @auth
+                            @if (!auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
+                                <button type="button" x-data="{ isLoading: false }"
+                                    @click="addToCartClass({{ $class->id }}, () => { isLoading = false }); isLoading = true;"
+                                    :disabled="isLoading" title="Tambah ke Keranjang"
+                                    class="col-span-1 flex items-center justify-center p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-jti-light hover:text-jti-primary transition-all border border-gray-100 shadow-sm active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-50 disabled:hover:text-gray-400">
+                                    <!-- Cart Icon -->
+                                    <svg x-show="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
 
-                        {{-- Main Action --}}
+                                    <!-- Loading Spinner -->
+                                    <svg x-show="isLoading" class="w-5 h-5 animate-spin" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            @endif
+                        @endauth
+
+                        <!-- Tombol Lihat Detail: full width jika cart tidak muncul -->
                         <a href="/classes/{{ $class->slug }}"
-                            class="relative {{ auth()->check() &&auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar'])? 'col-span-5': 'col-span-4' }} group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary font-bold py-2.5 rounded-xl transition-all duration-500 shadow-sm hover:shadow-lg active:scale-95 text-sm tracking-wider">
+                            class="relative
+                  {{ (auth()->check() &&
+                      auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar'])) ||
+                  !auth()->check()
+                      ? 'col-span-5'
+                      : 'col-span-4' }}
+                  group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary font-bold py-2.5 rounded-xl transition-all duration-500 shadow-sm hover:shadow-lg active:scale-95 text-sm tracking-wider">
                             <div
                                 class="absolute inset-0 w-full h-full bg-jti-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500">
                             </div>
                             <span
                                 class="relative z-10 flex items-center gap-1 group-hover/btn:text-white transition-colors duration-300">
-                                Lihat Detail <svg class="w-3 h-3 transition-transform group-hover/btn:translate-x-1"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                Lihat Detail
+                                <svg class="w-3 h-3 transition-transform group-hover/btn:translate-x-1" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
                             </span>
                         </a>
+
                     </div>
                 </div>
             </div>

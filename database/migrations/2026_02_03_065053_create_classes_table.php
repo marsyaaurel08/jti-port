@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained();
             $table->foreignId('instructor_id')->constrained('users');
             $table->string('title');
+            $table->string('slug')->unique();
             $table->string('thumbnail_url')->nullable();
             $table->text('description')->nullable();
             $table->enum('level', ['beginner', 'intermediate', 'advanced']);

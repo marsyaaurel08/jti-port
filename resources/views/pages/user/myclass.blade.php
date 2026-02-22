@@ -36,10 +36,11 @@
         @if ($classes->count() > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 @foreach ($classes as $class)
+                {{-- @dd($class) --}}
                     <x-student.course-card
-                        :image="$class['image']"
+                        :image="$class['thumbnail_url']"
                         :title="$class['title']"
-                        :description="$class['description']"
+                        :description="$class['title']"
                         :progress="$class['progress']"
                         :status="$class['status']"
                         :slug="$class['slug'] ?? ''"
