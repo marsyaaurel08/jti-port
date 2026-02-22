@@ -3,9 +3,6 @@
 namespace App\Providers\Filament;
 
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
-use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
-use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -35,13 +32,19 @@ class UserPanelProvider extends PanelProvider
             ->default()
             ->id('user')
             ->path('user')
-            ->login()
-            ->registration()
-            ->brandname('jti-port')
-            ->passwordReset()
             ->emailVerification()
+            ->passwordReset()
+            ->registration()
+            ->login()
+            ->homeUrl('/')
+            ->brandname('jti-port')
             ->colors([
                 'primary' => Color::Amber,
+            ])
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->pages([
+                Dashboard::class,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -89,22 +92,22 @@ class UserPanelProvider extends PanelProvider
                     ->enableSanctumTokens(
                         permissions: ['create', 'view', 'update', 'delete']
                     ),
-                FilamentSocialitePlugin::make()
-                    ->providers([
-                        Provider::make('google')
-                            ->label('Google')
-                            ->icon('fab-google')
-                            ->color('danger'),
-                        // Provider::make('github')
-                        //     ->label('GitHub')
-                        //     ->icon('fab-github')
-                        //     ->color('gray'),
-                        // Provider::make('facebook')
-                        //     ->label('Facebook')
-                        //     ->icon('fab-facebook')
-                        //     ->color('primary'),
-                    ])
-                    ->showDivider(true),
+                // FilamentSocialitePlugin::make()
+                //     ->providers([
+                //         Provider::make('google')
+                //             ->label('Google')
+                //             ->icon('fab-google')
+                //             ->color('danger'),
+                //         // Provider::make('github')
+                //         //     ->label('GitHub')
+                //         //     ->icon('fab-github')
+                //         //     ->color('gray'),
+                //         // Provider::make('facebook')
+                //         //     ->label('Facebook')
+                //         //     ->icon('fab-facebook')
+                //         //     ->color('primary'),
+                //     ])
+                //     ->showDivider(true),
             ])
             ->authMiddleware([
                 Authenticate::class,

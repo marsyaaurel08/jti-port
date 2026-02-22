@@ -25,10 +25,9 @@
 
         {{-- Right Side Actions --}}
         <div class="flex items-center gap-2 md:gap-5">
-            <x-layout.nav.cart-icon />
-
             {{-- Logika Pembeda Auth --}}
-            @auth
+            @if (Auth::check() && Auth::user()->hasVerifiedEmail())
+                <x-layout.nav.cart-icon />
                 @if ($isStaff)
                     {{-- Tampilkan untuk Admin/Pengajar --}}
                     <x-layout.nav.admin-auth />
@@ -37,9 +36,9 @@
                     <x-layout.nav.user-auth />
                 @endif
             @else
-                {{-- Tampilkan jika belum login --}}
+                {{-- Tampilkan jika belum login atau belum verified --}}
                 <x-layout.nav.user-auth />
-            @endauth
+            @endif
         </div>
     </div>
 
