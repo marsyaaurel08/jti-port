@@ -16,7 +16,9 @@
         {{ $slot }}
     </main>
 
-    <x-layout.footer />
+    @if (!isset($showFooter) || $showFooter)
+        <x-layout.footer />
+    @endif
 
 </body>
 

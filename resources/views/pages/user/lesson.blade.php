@@ -1,41 +1,39 @@
-<x-layouts.app>
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-10 max-w-7xl mx-auto mb-32">
+<x-layouts.app :showFooter="false">
+    <div class="px-6 py-10 ml-72 mb-32">
         <!-- Sidebar Chapters -->
-        <div class="lg:col-span-1">
-            <div class="sticky top-24 bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $course->title }}</h2>
-                <div class="space-y-2 max-h-96 overflow-y-auto">
-                    @foreach ($chapters as $chapter)
-                        <div class="mb-4">
-                            <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-tight">
-                                {{ $chapter->title }}</h3>
-                            <div class="space-y-1">
-                                @foreach ($chapter->lessons as $chapterLesson)
-                                    @php
-                                        $isCompleted = in_array($chapterLesson->id, $completedLessonIds);
-                                        $isActive = $chapterLesson->id === $lesson->id;
-                                    @endphp
-                                    <a href="{{ route('student.lesson', [$course->slug, $chapterLesson->slug]) }}"
-                                        class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
-                                        <span class="inline-block mr-2">
-                                            @if ($isCompleted)
-                                                ✓
-                                            @else
-                                                •
-                                            @endif
-                                        </span>
-                                        {{ $chapterLesson->title }}
-                                    </a>
-                                @endforeach
-                            </div>
+        <div class="fixed left-4 top-24 bottom-4 w-64 bg-white shadow-xl rounded-2xl p-6 overflow-y-auto z-40">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $course->title }}</h2>
+            <div class="space-y-2">
+                @foreach ($chapters as $chapter)
+                    <div class="mb-4">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-tight">
+                            {{ $chapter->title }}</h3>
+                        <div class="space-y-1">
+                            @foreach ($chapter->lessons as $chapterLesson)
+                                @php
+                                    $isCompleted = in_array($chapterLesson->id, $completedLessonIds);
+                                    $isActive = $chapterLesson->id === $lesson->id;
+                                @endphp
+                                <a href="{{ route('student.lesson', [$course->slug, $chapterLesson->slug]) }}"
+                                    class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                    <span class="inline-block mr-2">
+                                        @if ($isCompleted)
+                                            ✓
+                                        @else
+                                            •
+                                        @endif
+                                    </span>
+                                    {{ $chapterLesson->title }}
+                                </a>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endforeach
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="lg:col-span-3">
+        <div>
             <!-- Lesson Header -->
             <div class="bg-white rounded-lg shadow-md p-8 mb-6">
                 <div class="flex items-center justify-between mb-4">
