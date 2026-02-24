@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasAvatar;
+use Filament\Models\Contracts\{FilamentUser, HasAvatar};
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,15 +15,14 @@ use Lab404\Impersonate\Models\Impersonate;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\{HasMedia, InteractsWithMedia};
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles, Impersonate, InteractsWithMedia, LogsActivity, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, Impersonate, InteractsWithMedia, LogsActivity, Notifiable, TwoFactorAuthenticatable, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -66,9 +64,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // Allow access if user has any of these roles
-        return true;
-        // return $this->hasAnyRole(['super_admin', 'admin', 'editor', 'user']);
+        $isAdminRole = $this->hasAnyRole(['admin', 'super_admin', 'pengajar']);
+
+        return match ($panel->getId()) {
+            'admin' => $isAdminRole,
+
+            'user' => ! $isAdminRole,
+
+            default => false,
+        };
     }
 
     /**
@@ -161,6 +165,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
         return LogOptions::defaults()
             ->logAll()
             ->logExcept(['password', 'remember_token'])
-            ->setDescriptionForEvent(fn (string $eventName) => "User {$eventName}");
+            ->setDescriptionForEvent(fn(string $eventName) => "User {$eventName}");
     }
 }

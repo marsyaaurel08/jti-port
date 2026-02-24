@@ -1,5 +1,16 @@
-<x-layouts.app :showFooter="false">
-    <div class="px-6 py-10 ml-72 mb-32">
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jtiport - Learning Management System</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="bg-white text-gray-900">
+    <x-layout.navbar />
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-10 max-w-7xl mx-auto mb-32">
         <!-- Sidebar Chapters -->
         <div class="fixed left-4 top-24 bottom-4 w-64 bg-white shadow-xl rounded-2xl p-6 overflow-y-auto z-40">
             <h2 class="text-lg font-bold text-gray-900 mb-4">{{ $course->title }}</h2>
@@ -31,7 +42,6 @@
                 @endforeach
             </div>
         </div>
-
         <!-- Main Content -->
         <div>
             <!-- Lesson Header -->
@@ -45,7 +55,6 @@
                     {{ $lesson->duration_seconds ? floor($lesson->duration_seconds / 60) . ' menit' : 'Durasi tidak ditentukan' }}
                 </p>
             </div>
-
             <!-- Video/Content Section -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 @if ($lesson->type === 'video')
@@ -83,7 +92,6 @@
                     </div>
                 @endif
             </div>
-
             <!-- Progress -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <p class="text-sm text-gray-600 mb-2">Progress Kursus</p>
@@ -94,7 +102,8 @@
             </div>
         </div>
     </div>
-
     <!-- Navigation -->
     <x-student.lesson-navigation :prev="$previousLesson ? route('student.lesson', [$course->slug, $previousLesson->slug]) : null" :next="$nextLesson ? route('student.lesson', [$course->slug, $nextLesson->slug]) : null" />
-</x-layouts.app>
+</body>
+
+</html>

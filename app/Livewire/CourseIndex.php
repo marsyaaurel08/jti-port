@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Category;
 use App\Models\Course;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -29,29 +30,32 @@ class CourseIndex extends Component
     #[Url(history: true)]
     public $sort = 'latest';
 
-    public function updating($name, $value)
-    {
-        if (str_contains($name, 'selected') || str_contains($name, 'is') || $name === 'sort') {
-            $this->resetPage();
-        }
-    }
-
-    public function updatedSelectedRatings()
+    public function updatedSelectedCategories(): void
     {
         $this->resetPage();
     }
 
-    public function updatedSelectedLevels()
+    public function updatedSelectedRatings(): void
     {
         $this->resetPage();
     }
 
-    public function updatedIsFree()
+    public function updatedSelectedLevels(): void
     {
         $this->resetPage();
     }
 
-    public function updatedIsPaid()
+    public function updatedIsFree(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedIsPaid(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSort(): void
     {
         $this->resetPage();
     }
@@ -80,7 +84,7 @@ class CourseIndex extends Component
             });
         }
 
-        if (!empty($this->selectedCategories)) {
+        if (! empty($this->selectedCategories)) {
             $query->whereIn('category_id', $this->selectedCategories);
         }
 
@@ -108,6 +112,13 @@ class CourseIndex extends Component
 
         return view('livewire.course-index', [
             'courses' => $query->paginate(10),
+            'categories' => Category::all(),
+            'selectedCategories' => $this->selectedCategories,
+            'selectedRatings' => $this->selectedRatings,
+            'selectedLevels' => $this->selectedLevels,
+            'isFree' => $this->isFree,
+            'isPaid' => $this->isPaid,
+            'sort' => $this->sort,
         ]);
     }
 }

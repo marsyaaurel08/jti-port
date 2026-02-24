@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
+use App\Models\CourseClass;
 
 class ClassesController extends Controller
 {
@@ -11,10 +11,10 @@ class ClassesController extends Controller
         return view('pages.classes.index');
     }
 
-    public function show($slug)
+    public function show(CourseClass $courseClass)
     {
-        $course = Course::where('slug', $slug)->firstOrFail();
+        $courseClass->load(['course', 'instructor']);
 
-        return view('pages.classes.show', compact('course'));
+        return view('pages.classes.show', ['class' => $courseClass]);
     }
 }

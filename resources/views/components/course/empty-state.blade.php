@@ -1,4 +1,4 @@
-{{-- Empty State --}}
+{{-- Empty State when no courses found --}}
 <div class="py-32 text-center border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm mb-4">
         <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

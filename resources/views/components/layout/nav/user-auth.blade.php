@@ -1,14 +1,13 @@
-@guest
+@if (!Auth::check() || !Auth::user()->hasVerifiedEmail())
     <div class="hidden md:flex items-center gap-3">
-        <a href="{{ route('filament.admin.auth.login') }}"
+        <a href="{{ route('filament.user.auth.login') }}"
             class="px-6 py-2.5 text-sm font-semibold border border-jti-yellow text-jti-yellow hover:bg-jti-yellow hover:text-gray-800 transition-all rounded-lg">Log
             in</a>
-        <a href="/register"
+        <a href="{{ route('filament.user.auth.register') }}"
             class="px-6 py-2.5 text-sm font-semibold bg-jti-yellow text-white hover:bg-jti-maroon transition-all shadow-lg rounded-lg">Sign
             up</a>
     </div>
-@endguest
-@auth
+@else
     {{-- Profile Dropdown Desktop --}}
     <div class="relative hidden md:block" x-data="{ openProfile: false }" @mouseenter="openProfile = true"
         @mouseleave="openProfile = false">
@@ -51,13 +50,14 @@
                 <a href="{{ route('student.profile') }}"
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Edit
                     Profil</a>
-                <form method="POST" action="{{ route('filament.admin.auth.logout') }}">
+                <form method="POST" action="{{ route('filament.user.auth.logout') }}">
                     @csrf
-                    <button type="submit" class="block px-6 py-3 text-sm font-semibold text-red-500 hover:bg-jti-light/30 hover:text-red-600 transition-colors w-full text-left cursor-pointer">
+                    <button type="submit"
+                        class="block px-6 py-3 text-sm font-semibold text-red-500 hover:bg-jti-light/30 hover:text-red-600 transition-colors w-full text-left cursor-pointer">
                         Logout
                     </button>
                 </form>
             </div>
         </div>
     </div>
-@endauth
+@endif

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Jtiport - Learning Management System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -11,6 +12,9 @@
 <body class="bg-white text-gray-900">
 
     <x-layout.navbar />
+
+    {{-- Flash Message Toast --}}
+    <x-alert.toast />
 
     <main class="min-h-screen">
         {{ $slot }}

@@ -63,7 +63,7 @@
         "setup-dev": [
             "@php artisan migrate:fresh --seed",
             "@php artisan shield:generate --all --panel=admin",
-            "@php artisan shield:super-admin --user=4 --panel=admin"
+            "@php artisan shield:super-admin --user=10 --panel=admin"
         ],
         "dev": [
             "@php artisan optimize",

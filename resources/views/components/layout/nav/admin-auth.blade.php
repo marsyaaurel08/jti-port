@@ -1,4 +1,4 @@
-@guest
+@if (!Auth::check() || !Auth::user()->hasVerifiedEmail())
     <div class="hidden md:flex items-center gap-3">
         {{-- Login diarahkan ke login Filament --}}
         <a href="{{ route('filament.admin.auth.login') }}"
@@ -10,9 +10,7 @@
             class="px-6 py-2.5 text-sm font-semibold bg-jti-yellow text-white hover:bg-jti-maroon transition-all shadow-lg rounded-lg">Sign
             up</a>
     </div>
-@endguest
-
-@auth
+@else
     {{-- Profile Dropdown Desktop --}}
     <div class="relative hidden md:block" x-data="{ openProfile: false }" @mouseenter="openProfile = true"
         @mouseleave="openProfile = false">
@@ -61,4 +59,4 @@
             </div>
         </div>
     </div>
-@endauth
+@endif

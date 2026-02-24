@@ -50,12 +50,6 @@ class EnrollmentCoursesTable
                     ->label('Tgl Terdaftar')
                     ->dateTime('d M Y')
                     ->sortable(),
-
-                TextColumn::make('expires_at')
-                    ->label('Kedaluwarsa')
-                    ->dateTime('d M Y')
-                    ->placeholder('Lifetime')
-                    ->color(fn($state) => $state && $state->isPast() ? 'danger' : 'gray'),
             ])
             ->filters([
                 // TrashedFilter::make(),
