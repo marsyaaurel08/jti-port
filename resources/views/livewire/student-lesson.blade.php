@@ -71,9 +71,9 @@
 
                 <!-- Video/Content Section -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                    @if ($lesson->type === 'video' && $lesson->content_url)
+                    @if ($lesson->type === 'video' && $this->videoEmbedUrl)
                         <div class="relative w-full" style="padding-bottom: 56.25%;">
-                            <iframe src="{{ $lesson->content_url }}"
+                            <iframe src="{{ $this->videoEmbedUrl }}"
                                 class="absolute top-0 left-0 w-full h-full border-0" allowfullscreen=""
                                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
                         </div>
@@ -182,3 +182,4 @@
         </div>
     </div>
 </div>
+

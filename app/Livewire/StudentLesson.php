@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Contract\CourseStudentContract;
 use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\CourseProgress;
@@ -14,7 +13,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.app', ['showFooter' => false])]
 
 class StudentLesson extends Component
 {
@@ -40,17 +39,27 @@ class StudentLesson extends Component
 
     public $isLessonCompleted = false;
 
-    protected CourseStudentContract $courseStudentService;
-
-    public function __construct(CourseStudentContract $courseStudentService)
-    {
-        $this->courseStudentService = $courseStudentService;
-    }
-
     #[Computed]
     public function user()
     {
         return Auth::user();
+    }
+
+    #[Computed]
+    public function videoEmbedUrl(): ?string
+    {
+        if (!$this->lesson || !$this->lesson->content_url) {
+            return null;
+        }
+
+        $url = $this->lesson->content_url;
+
+        // Convert YouTube URL to embed format
+        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return 'https://www.youtube.com/embed/' . $matches[1];
+        }
+
+        return $url;
     }
 
     public function mount($courseSlug, $lessonSlug): void
@@ -100,7 +109,7 @@ class StudentLesson extends Component
                 ->orderBy('sort_order')
                 ->get();
 
-            $this->chapters = $chapters->map(fn ($chapter) => [
+            $this->chapters = $chapters->map(fn($chapter) => [
                 'id' => $chapter->id,
                 'title' => $chapter->title,
                 'sort_order' => $chapter->sort_order,
@@ -139,7 +148,7 @@ class StudentLesson extends Component
                 'last_accessed_lesson_id' => $this->lesson->id,
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to load lesson: '.$e->getMessage());
+            Log::error('Failed to load lesson: ' . $e->getMessage());
             session()->flash('error', 'Gagal memuat materi. Silakan coba lagi.');
         }
     }
@@ -168,7 +177,7 @@ class StudentLesson extends Component
 
             session()->flash('success', 'Pelajaran berhasil ditandai sebagai selesai!');
         } catch (\Exception $e) {
-            Log::error('Failed to mark lesson as completed: '.$e->getMessage());
+            Log::error('Failed to mark lesson as completed: ' . $e->getMessage());
             session()->flash('error', 'Gagal menandai pelajaran. Silakan coba lagi.');
         }
     }
@@ -185,7 +194,7 @@ class StudentLesson extends Component
 
             session()->flash('success', 'Pelajaran ditandai sebagai belum selesai.');
         } catch (\Exception $e) {
-            Log::error('Failed to mark lesson as incomplete: '.$e->getMessage());
+            Log::error('Failed to mark lesson as incomplete: ' . $e->getMessage());
             session()->flash('error', 'Gagal mengubah status pelajaran. Silakan coba lagi.');
         }
     }
