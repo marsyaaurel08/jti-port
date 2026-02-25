@@ -9,6 +9,7 @@ use App\Models\CourseClass;
 use App\Models\CourseProgress;
 use App\Models\Enrollment;
 use App\Models\Lesson;
+use App\Models\LogSelfHealing;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
@@ -217,6 +218,42 @@ class DemoSeeder extends Seeder
             10, // completed_lesson_count
             true // is_completed
         );
+
+        // Data 1: Kasus Self Healing Course (Status macet di pending)
+        LogSelfHealing::create([
+            'user_id' => $users[3]->id,
+            'order_id' => $order->id,
+            'order_type' => 'course',
+            'invoice_number' => $order->invoice_number,
+            'status_before' => 'pending',
+            'status_after' => 'paid',
+            'message' => 'Sistem mendeteksi transaksi sudah sukses di payment gateway namun status di lokal masih pending. Melakukan sinkronisasi otomatis.',
+            'payload' => [
+                'gateway' => 'midtrans',
+                'transaction_id' => 'TRX-'.uniqid(),
+                'verification_status' => 'settlement',
+                'retry_attempt' => 1,
+            ],
+        ]);
+
+        // Data 2: Kasus Self Healing Class (Integritas data enrollment)
+        LogSelfHealing::create([
+            'user_id' => $users[1]->id,
+            'order_id' => $classOrder->id,
+            'order_type' => 'class',
+            'invoice_number' => $classOrder->invoice_number,
+            'status_before' => 'error_missing_enrollment',
+            'status_after' => 'success_restored',
+            'message' => 'Ditemukan ketidaksesuaian data enrollment untuk user pada kelas ini. Melakukan pemulihan akses (enrollment restore).',
+            'payload' => [
+                'action' => 'force_enroll',
+                'class_id' => $classCode->id,
+                'detected_at' => now()->toDateTimeString(),
+                'repair_code' => 'SH-002',
+            ],
+        ]);
+
+        $this->command->info('- Created 2 self-healing logs (1 course, 1 class)');
 
         $this->command->info('Demo data seeded successfully!');
         $this->command->info('- Created 3 users');
