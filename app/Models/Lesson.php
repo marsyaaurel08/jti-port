@@ -51,33 +51,4 @@ class Lesson extends Model
     {
         return $this->hasMany(Enrollment::class, 'last_accessed_lesson_id');
     }
-
-    /**
-     * Get the YouTube embed URL from the content_url
-     */
-    public function getYoutubeEmbedUrlAttribute(): ?string
-    {
-        if (!$this->content_url) {
-            return null;
-        }
-
-        // Extract video ID from various YouTube URL formats
-        $patterns = [
-            '/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/',
-            '/^([a-zA-Z0-9_-]{11})$/',
-        ];
-
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $this->content_url, $matches)) {
-                return 'https://www.youtube.com/embed/' . $matches[1];
-            }
-        }
-
-        // If it's already an embed URL, return it as is
-        if (str_contains($this->content_url, 'youtube.com/embed/')) {
-            return $this->content_url;
-        }
-
-        return null;
-    }
 }
