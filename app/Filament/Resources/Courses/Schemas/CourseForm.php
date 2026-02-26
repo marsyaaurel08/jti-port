@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Courses\Schemas;
 
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -75,6 +76,7 @@ class CourseForm
                                         ->label('Judul Bab')
                                         ->required(),
                                     Repeater::make('lessons')
+                                        ->relationship('lessons')
                                         ->label('Pelajaran')
                                         ->schema([
                                             TextInput::make('title')
@@ -82,16 +84,19 @@ class CourseForm
                                                 ->required(),
                                             Select::make('type')
                                                 ->label('Tipe Pelajaran')
-                                                ->options(['video' => 'Video', 'article' => 'Article', 'quiz' => 'Quiz'])
-                                                ->required(),
+                                                ->options(['video' => 'Video', 'text' => 'Text', 'quiz' => 'Quiz'])
+                                                ->required()
+                                                ->live(),
                                             TextInput::make('slug')
                                                 ->label('Slug')
                                                 ->required(),
                                             TextInput::make('content_url')
                                                 ->label('Content URL')
+                                                ->visible(fn($get) => $get('type') === 'video')
                                                 ->url(),
-                                            Textarea::make('content_text')
-                                                ->label('Content Text'),
+                                            RichEditor::make('content_text')
+                                                ->label('Content Text')
+                                                ->visible(fn($get) => $get('type') === 'text'),
                                             TextInput::make('duration_seconds')
                                                 ->label('Durasi (menit)')
                                                 ->numeric()
@@ -100,10 +105,6 @@ class CourseForm
                                                 ->label('Preview Gratis')
                                                 ->options([0 => 'Tidak', 1 => 'Ya'])
                                                 ->required(),
-                                            TextInput::make('sort_order')
-                                                ->label('Urutan')
-                                                ->numeric()
-                                                ->required(),
                                         ])->columnSpanFull(),
                                 ]), // closes chapters repeater schema and chapters repeater
                         ]), // closes second Tab's schema and second Tab
@@ -111,3 +112,4 @@ class CourseForm
             ]);
     }
 }
+
