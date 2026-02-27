@@ -11,9 +11,11 @@ class ClassesController extends Controller
         return view('pages.classes.index');
     }
 
-    public function show(CourseClass $courseClass)
+    public function show($slug)
     {
-        $courseClass->load(['course', 'instructor']);
+        $courseClass = CourseClass::where('slug', $slug)
+            ->with(['course.chapters.lessons', 'category', 'instructor'])
+            ->firstOrFail();
 
         return view('pages.classes.show', ['class' => $courseClass]);
     }

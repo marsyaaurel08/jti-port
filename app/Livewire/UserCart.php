@@ -6,6 +6,7 @@ use App\Models\UserCart as UserCartModel;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
@@ -36,13 +37,13 @@ class UserCart extends Component
 
         $cartItems = UserCartModel::where('user_id', $userId)
             ->with([
-                'course' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
-                'class' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
+                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
+                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
                 'course.category:id,name',
             ])
             ->get();
 
-        $this->cartItems = $cartItems->map(fn ($item) => [
+        $this->cartItems = $cartItems->map(fn($item) => [
             'id' => $item->id,
             'course_id' => $item->course_id,
             'class_id' => $item->class_id,
@@ -84,12 +85,22 @@ class UserCart extends Component
         }
     }
 
+    /**
+     * Handle refresh cart dari cross-tab communication atau page visibility
+     * Listener ini di-trigger oleh event 'refreshCart' dari JavaScript
+     */
+    #[On('refreshCart')]
+    public function refreshCart(): void
+    {
+        $this->loadCart();
+    }
+
     private function syncCartToSession(int $userId): void
     {
         $items = UserCartModel::where('user_id', $userId)
             ->with([
-                'course' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
-                'class' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
+                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
+                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
             ])
             ->get()
             ->map(function ($item) {
