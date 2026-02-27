@@ -21,6 +21,7 @@ class CourseClass extends Model
         'thumbnail_url',
         'description',
         'title',
+        'slug',
         'price',
         'start_date',
         'end_date',
@@ -45,6 +46,11 @@ class CourseClass extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function instructor(): BelongsTo

@@ -4,7 +4,7 @@
     {{-- Decorative Background (Optional: Memberikan kesan modern) --}}
     <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[500px] h-[500px] bg-jti-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-    <div class="max-w-[1440px] mx-auto px-6 relative z-10">
+    <div class="max-w-[1440px] mx-auto px-6 lg:px-48 relative z-10">
         <div class="lg:w-2/3">
             {{-- Breadcrumbs - Lebih slim & minimalis --}}
             <nav class="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500 mb-8">

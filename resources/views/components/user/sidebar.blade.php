@@ -73,7 +73,7 @@
 
     {{-- Footer: Logout yang Menutup --}}
     <div class="p-4 mt-auto border-t border-slate-50">
-        <form method="POST" action="{{ route('filament.admin.auth.logout') }}">
+        <form method="POST" action="{{ route('filament.user.auth.logout') }}">
             @csrf
             <button type="submit"
                     class="w-full flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors duration-200">

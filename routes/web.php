@@ -24,7 +24,7 @@ Route::prefix('courses')->name('courses.')->group(function () {
 
 Route::prefix('classes')->name('classes.')->group(function () {
     Route::get('/', [ClassesController::class, 'index'])->name('index');
-    Route::get('/{courseClass}', [ClassesController::class, 'show'])->name('show');
+    Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
 });
 
 // --- User Dashboard Routes (Authenticated) ---

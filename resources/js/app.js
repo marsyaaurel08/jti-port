@@ -3,129 +3,99 @@ import intersect from "@alpinejs/intersect";
 import collapse from "@alpinejs/collapse";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { createIcons, icons } from "lucide";
+import Splide from "@splidejs/splide";
+import "@splidejs/splide/css";
+import "./cart.js"; // ← Import cart functionality
 
+// ── Icons ────────────────────────────────────────────────────────────────────
+createIcons({ icons });
+
+// ── Alpine ───────────────────────────────────────────────────────────────────
 Alpine.plugin(collapse);
 Alpine.plugin(intersect);
-
 window.Alpine = Alpine;
 Alpine.start();
 
-// Initialize AOS for animations
+// ── AOS ──────────────────────────────────────────────────────────────────────
 AOS.init({
     duration: 600,
     easing: "ease-in-out",
     delay: 100,
-    once: false,
+    once: true,
 });
+
+// ── Splide ───────────────────────────────────────────────────────────────────
 /**
- * Global flag untuk mencegah spam request add to cart
+ * Inisialisasi semua carousel Splide di halaman.
+ * Cukup tambahkan atribut data-splide="..." pada elemen HTML,
+ * dan fungsi ini akan otomatis menginisialisasinya.
+ *
+ * Contoh penggunaan di Blade:
+ *   <div id="instructor-carousel" class="splide" data-splide-config>
+ *
+ * Untuk konfigurasi custom per-carousel, gunakan data attribute:
+ *   <div class="splide"
+ *        data-splide-per-page="3"
+ *        data-splide-type="loop"
+ *        data-splide-autoplay="true">
  */
-window.isAddingToCart = false;
+function initSplideCarousels() {
+    document
+        .querySelectorAll(".splide:not([data-splide-initialized])")
+        .forEach((el) => {
+            // Baca konfigurasi dari data attributes (opsional, override default)
+            const perPage = parseInt(el.dataset.splidePerPage) || 1;
+            const type = el.dataset.splideType || "loop";
+            const autoplay = el.dataset.splideAutoplay !== "false";
+            const interval = parseInt(el.dataset.splideInterval) || 3500;
+            const gap = el.dataset.splideGap || "1.5rem";
 
-/**
- * Handler umum response fetch
- */
-async function handleFetchResponse(response) {
-    if (response.status === 401) {
-        window.showToast(
-            "Silahkan login terlebih dahulu untuk menambah ke keranjang",
-            "info",
-        );
-        return null;
-    }
+            const splide = new Splide(el, {
+                type: type,
+                perPage: perPage,
+                gap: gap,
+                autoplay: autoplay,
+                interval: interval,
+                pauseOnHover: true,
+                arrows: false,
+                pagination: false,
+                breakpoints: {
+                    1280: { perPage: Math.min(perPage, 3) },
+                    1024: { perPage: Math.min(perPage, 2) },
+                    640: { perPage: 1, padding: { right: "12%" } },
+                },
+            });
 
-    if (response.redirected) {
-        window.showToast("Akses ditolak. Silahkan login kembali.", "info");
-        return null;
-    }
+            splide.mount();
 
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        window.showToast(
-            errorData.message || "Terjadi kesalahan pada sistem",
-            "error",
-        );
-        return null;
-    }
+            // Tandai sudah di-init agar tidak double-init
+            el.dataset.splideInitialized = "true";
 
-    return response.json();
-}
-
-/**
- * Fungsi generic untuk add to cart (kursus atau kelas)
- */
-async function addToCartGeneric(endpoint, callback = null) {
-    if (window.isAddingToCart) return;
-    window.isAddingToCart = true;
-
-    try {
-        // Optimistic toast loading
-        window.showToast("Menambahkan ke keranjang...", "info", 2500);
-
-        const csrfToken = document.querySelector(
-            'meta[name="csrf-token"]',
-        )?.content;
-
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                "X-CSRF-Token": csrfToken || "",
-                "X-Requested-With": "XMLHttpRequest",
-            },
-            credentials: "include",
+            // Re-render Lucide icons karena Splide mengklon slide
+            createIcons({ icons });
         });
-
-        const data = await handleFetchResponse(response);
-
-        if (data) {
-            window.showToast(data.message, data.success ? "success" : "info");
-
-            if (data.success) {
-                // Dispatch event custom untuk Alpine navbar
-                window.dispatchEvent(
-                    new CustomEvent("cart-updated", {
-                        detail: { count: data.cart_count },
-                    }),
-                );
-
-                // Optional: tetap dispatch ke Livewire jika ada komponen lain yang butuh
-                if (window.Livewire) {
-                    window.Livewire.dispatch("cartUpdated", {
-                        count: data.cart_count,
-                    });
-                }
-            }
-        }
-    } catch (error) {
-        window.showToast("Koneksi bermasalah atau Anda belum login", "error");
-        console.error("Add to cart error:", error);
-    } finally {
-        if (callback) callback();
-        window.isAddingToCart = false;
-    }
 }
 
-/**
- * Tambah Kursus ke Keranjang
- */
-window.addToCart = async function (courseId, callback) {
-    const endpoint = `/student/cart/add/${courseId}`;
-    await addToCartGeneric(endpoint, callback);
-};
+// Jalankan saat DOM siap
+document.addEventListener("DOMContentLoaded", initSplideCarousels);
 
-/**
- * Tambah Kelas ke Keranjang
- */
-window.addToCartClass = async function (classId, callback) {
-    const endpoint = `/student/cart/add-class/${classId}`;
-    await addToCartGeneric(endpoint, callback);
-};
+// Support navigasi Livewire v3 (SPA-like navigation)
+document.addEventListener("livewire:navigated", () => {
+    // Reset flag agar carousel di halaman baru bisa di-init ulang
+    document
+        .querySelectorAll(".splide[data-splide-initialized]")
+        .forEach((el) => {
+            delete el.dataset.splideInitialized;
+        });
+    initSplideCarousels();
+    AOS.refreshHard();
+});
 
-/**
- * Toast notification dengan animasi fade-out
- */
+// Expose ke window jika perlu dipanggil manual dari komponen lain
+window.initSplideCarousels = initSplideCarousels;
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
 window.showToast = function (message, type = "success", duration = 4000) {
     const container = document.getElementById("toast-container");
     if (!container) return;

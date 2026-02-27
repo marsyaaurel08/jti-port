@@ -1,129 +1,112 @@
 @props(['course'])
 
-{{-- Video Preview Section --}}
-<div class="relative group cursor-pointer overflow-hidden rounded-t-xl">
-    <img src="{{ $course->thumbnail_url }}"
-        class="w-full aspect-video object-cover transition-transform duration-700 group-hover:scale-105" alt="Thumbnail">
-    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-        <div
-            class="w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-            <svg class="w-5 h-5 text-jti-primary fill-current" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-            </svg>
+{{-- Container Card: Menggunakan gaya panel gelap yang solid --}}
+<div class="overflow-hidden rounded-sm border bg-[#0a0f1d] shadow-2xl backdrop-blur-md">
+
+    {{-- Video Preview Section --}}
+    <div class="relative group cursor-pointer overflow-hidden aspect-video">
+        <img src="{{ $course->thumbnail_url }}"
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Thumbnail">
+
+        {{-- Glass Overlay --}}
+        <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+            <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-jti-yellow group-hover:text-jti-primary transition-all duration-300">
+                <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="p-5 bg-white rounded-b-xl border-x border-b border-gray-100 shadow-sm">
-
-    {{-- Price & Share Section --}}
-    <div class="flex items-center justify-between mb-5">
-        <div class="flex flex-col">
-            <div class="flex items-baseline gap-2">
-                <span class="text-2xl font-bold tracking-tight text-gray-900">
-                    Rp{{ number_format($course->price, 0, ',', '.') }}
-                </span>
+    <div class="p-6">
+        {{-- Price Section --}}
+        <div class="flex items-end justify-between mb-8">
+            <div class="flex flex-col gap-1">
                 @if ($course->old_price)
-                    <span class="text-gray-400 line-through text-xs font-medium">
+                    <span class="text-xs font-medium text-gray-500 line-through leading-none">
                         Rp{{ number_format($course->old_price, 0, ',', '.') }}
                     </span>
                 @endif
+                <div class="flex items-center gap-2">
+                    <span class="text-3xl font-bold tracking-tighter text-white">
+                        Rp{{ number_format($course->price, 0, ',', '.') }}
+                    </span>
+                    @if ($course->old_price)
+                        <span class="px-2 py-0.5 bg-jti-yellow/10 border border-jti-yellow/20 text-jti-yellow text-[10px] font-bold rounded">
+                            85% OFF
+                        </span>
+                    @endif
+                </div>
             </div>
-            @if ($course->old_price)
-                <span class="text-[9px] font-bold text-jti-orange uppercase tracking-wider">Hemat 85%</span>
+
+            <button title="Bagikan"
+                class="p-2.5 text-gray-500 hover:text-jti-yellow bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all">
+                <i data-lucide="share-2" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        {{-- Action Buttons --}}
+        <div class="flex flex-col gap-3 mb-8" x-data="{ isLoading: false }">
+            <form action="{{ route('student.cart.add', $course->id) }}" method="POST">
+                @csrf
+                <button class="w-full py-4 bg-jti-yellow text-jti-primary font-bold rounded-xl hover:shadow-[0_0_20px_rgba(252,211,77,0.3)] hover:-translate-y-0.5 transition-all text-sm">
+                    Checkout Sekarang
+                </button>
+            </form>
+
+            @if (!auth()->check() || !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
+                <button type="button"
+                    @click="addToCart({{ $course->id }}, () => { isLoading = false; }); isLoading = true;"
+                    :disabled="isLoading"
+                    class="w-full py-4 bg-white/5 border border-white/10 text-gray-300 font-semibold rounded-xl hover:bg-white/10 transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-2 group">
+
+                    <i data-lucide="shopping-cart" x-show="!isLoading" class="w-4 h-4 group-hover:text-jti-yellow transition-colors"></i>
+
+                    <svg x-show="isLoading" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+
+                    <span>Tambah ke Keranjang</span>
+                </button>
             @endif
         </div>
 
-        <button title="Bagikan"
-            class="p-2.5 text-gray-400 hover:text-jti-primary hover:bg-gray-50 rounded-lg border border-gray-100 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path
-                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-2.684 3 3 0 000 2.684zm0 9.316a3 3 0 100-2.684 3 3 0 000 2.684z" />
-            </svg>
-        </button>
-    </div>
-
-    {{-- Action Buttons --}}
-    <div class="flex flex-col gap-2 mb-6" x-data="{ isLoading: false }">
-        <form action="{{ route('student.cart.add', $course->id) }}" method="POST">
-            @csrf
-            <button
-                class="w-full py-3 bg-jti-primary text-white font-bold rounded-lg hover:bg-jti-primary/90 transition-all text-sm tracking-wide">
-                Beli Sekarang
+        {{-- Coupon Section: Minimalis --}}
+        <div x-data="{ openCoupon: false }" class="mb-8 group">
+            <button @click="openCoupon = !openCoupon"
+                class="w-full text-center text-[11px] font-medium text-gray-500 hover:text-jti-yellow transition-colors">
+                Punya kode kupon?
             </button>
-        </form>
 
-        @if (
-            !auth()->check() ||
-                !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
-            <button type="button"
-                @click="addToCart({{ $course->id }}, () => { isLoading = false; }); isLoading = true;"
-                :disabled="isLoading"
-                class="w-full py-3 border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white flex items-center justify-center gap-2">
-                <!-- Cart Icon -->
-                <svg x-show="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-
-                <!-- Loading Spinner -->
-                <svg x-show="isLoading" x-cloak class="w-5 h-5 animate-spin" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                        stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                </svg>
-
-                <span>Tambah Keranjang</span>
-            </button>
-        @endif
-    </div>
-
-    {{-- Coupon Section --}}
-    <div x-data="{ openCoupon: false }" class="mb-6 pt-4 border-t border-gray-50">
-        <button @click="openCoupon = !openCoupon"
-            class="w-full text-center text-[10px] font-bold text-gray-400 hover:text-jti-primary uppercase tracking-widest transition-colors">
-            Punya Kode Kupon?
-        </button>
-
-        <div x-show="openCoupon" x-transition class="mt-3 flex gap-2">
-            <input type="text" placeholder="KODE"
-                class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-md focus:border-jti-primary outline-none uppercase font-semibold">
-            <button
-                class="px-4 py-2 bg-gray-900 text-white text-[10px] font-bold rounded-md hover:bg-black transition-colors uppercase">
-                Apply
-            </button>
+            <div x-show="openCoupon" x-transition class="mt-4 flex gap-2">
+                <input type="text" placeholder="Masukkan kode"
+                    class="flex-1 px-4 py-2 text-xs bg-white/5 border border-white/10 rounded-lg text-white focus:border-jti-yellow outline-none transition-all placeholder:text-gray-700">
+                <button class="px-4 py-2 bg-gray-100 text-black text-[11px] font-bold rounded-lg hover:bg-white transition-colors">
+                    Terapkan
+                </button>
+            </div>
         </div>
-    </div>
 
-    {{-- Features List --}}
-    <div class="bg-gray-50/80 p-4 rounded-xl">
-        <ul class="space-y-2.5">
-            <li class="flex items-center gap-2.5 text-xs text-gray-600 font-medium">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path
-                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {{ $course->total_duration }} Durasi Video
-            </li>
-            <li class="flex items-center gap-2.5 text-xs text-gray-600 font-medium">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
-                </svg>
-                {{ $course->chapters_count }} Bab Materi
-            </li>
-            <li class="flex items-center gap-2.5 text-xs text-jti-primary font-bold">
-                <svg class="w-4 h-4 text-jti-primary" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Akses Selamanya
-            </li>
-        </ul>
+        {{-- Features List --}}
+        <div class="border-t border-white/5 pt-6">
+            <h5 class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-4">Termasuk di dalamnya:</h5>
+            <ul class="space-y-4">
+                <li class="flex items-center gap-3 text-sm text-gray-400 group">
+                    <i data-lucide="play-circle" class="w-4 h-4 text-gray-600 group-hover:text-jti-yellow transition-colors"></i>
+                    <span>{{ $course->total_duration }} Durasi Video</span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-gray-400 group">
+                    <i data-lucide="book-open" class="w-4 h-4 text-gray-600 group-hover:text-jti-yellow transition-colors"></i>
+                    <span>{{ $course->chapters_count }} Bab Pembelajaran</span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-gray-300 group">
+                    <div class="w-4 h-4 flex items-center justify-center">
+                        <div class="w-1.5 h-1.5 rounded-full bg-jti-yellow shadow-[0_0_8px_rgba(252,211,77,0.6)] animate-pulse"></div>
+                    </div>
+                    <span class="font-medium">Akses seumur hidup</span>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
