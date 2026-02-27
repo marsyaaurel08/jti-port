@@ -13,10 +13,7 @@
     <div class="min-h-screen font-sans bg-white">
         <div class="mx-auto py-14 md:px-6 -mt-20">
             <div class="flex flex-col lg:flex-row gap-8">
-                {{-- <aside class="w-full lg:w-80 ">
-                    <x-user.sidebar :user="$user" />
-                </aside> --}}
-                <main class="flex-1 min-w-0 pt-6">
+                <main class="flex-1 min-w-0 pt-32">
                     {{ $slot }}
                 </main>
             </div>

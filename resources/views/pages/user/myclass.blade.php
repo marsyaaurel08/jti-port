@@ -1,5 +1,5 @@
 <x-student.layout.index :user="$user">
-    <div class="max-w-7xl mx-auto px-6 py-10">
+    <div class="max-w-7xl mx-auto px-6">
 
         {{-- Header: Perbaikan kontras dan spacing --}}
         <div class="mb-10">

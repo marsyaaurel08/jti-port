@@ -9,14 +9,14 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-white text-gray-900">
+<body class="bg-white text-gray-900 -tracking-[0.02em]">
 
     <x-layout.navbar />
 
     {{-- Flash Message Toast --}}
     <x-alert.toast />
 
-    <main class="min-h-screen">
+    <main class="min-h-screen pt-20">
         {{ $slot }}
     </main>
 

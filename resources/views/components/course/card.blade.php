@@ -3,7 +3,7 @@
 <div class="h-full" x-data="{ isLoading: false }">
     <div class="relative h-full">
         <div
-            class="group bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-[0_20px_50px_rgba(20,33,61,0.12)] transition-all duration-500 flex flex-col h-full relative z-30 font-sans">
+            class="group bg-white border border-gray-100 rounded-sm overflow-hidden hover:shadow-[0_20px_50px_rgba(20,33,61,0.12)] transition-all duration-500 flex flex-col h-full relative z-30 font-sans">
 
             {{-- Image Section --}}
             <div class="relative h-40 shrink-0 overflow-hidden">
@@ -48,7 +48,7 @@
                         };
                     @endphp
                     <span
-                        class="px-3 py-1 {{ $levelColor }} rounded-lg border text-xs capitalize tracking-widest shadow-sm">
+                        class="px-3 py-1 {{ $levelColor }} rounded-sm border text-xs capitalize tracking-widest shadow-sm">
                         {{ $course->level }}
                     </span>
                 </div>
@@ -69,7 +69,7 @@
                                 <button type="button" x-data="{ isLoading: false }"
                                     @click="addToCart({{ $course->id }}, () => { isLoading = false }); isLoading = true;"
                                     :disabled="isLoading"
-                                    class="col-span-1 flex items-center justify-center p-2 rounded-lg bg-gray-50 text-gray-400 hover:bg-jti-light hover:text-jti-primary transition-all border border-gray-100 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-50 disabled:hover:text-gray-400"
+                                    class="col-span-1 flex items-center justify-center p-2 rounded-sm bg-gray-50 text-gray-400 hover:bg-jti-light hover:text-jti-primary transition-all border border-gray-100 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-50 disabled:hover:text-gray-400"
                                     title="Tambah ke Keranjang">
                                     <!-- Cart Icon -->
                                     <svg x-show="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor"
@@ -99,7 +99,7 @@
                   !auth()->check()
                       ? 'col-span-5'
                       : 'col-span-4' }}
-                  group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary py-2.5 rounded-lg transition-all duration-500 hover:shadow-lg active:scale-95 text-sm font-bold tracking-wider">
+                  group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary py-2.5 rounded-sm transition-all duration-500 hover:shadow-lg active:scale-95 text-sm font-bold tracking-wider">
                             <div
                                 class="absolute inset-0 w-full h-full bg-jti-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500">
                             </div>

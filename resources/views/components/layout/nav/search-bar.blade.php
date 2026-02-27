@@ -1,4 +1,4 @@
-<div class="hidden md:block grow max-w-7xl">
+<div class="hidden md:block grow max-w-xl">
     <div class="relative group">
         {{-- Ikon Kaca Pembesar --}}
         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-jti-orange transition-colors">

@@ -1,68 +1,66 @@
 @props(['course'])
 
-<div class="relative bg-slate-950 text-white py-12 lg:py-20 overflow-hidden border-b border-white/5">
-    {{-- Decorative Background (Optional: Memberikan kesan modern) --}}
-    <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[500px] h-[500px] bg-jti-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="relative bg-[#020617] text-white py-16 lg:py-24 overflow-hidden border-b border-white/[0.03]">
+    {{-- Ambient Light (Khas Academix: Menggunakan gradasi lembut untuk kedalaman) --}}
+    <div class="absolute top-0 left-0 -translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-jti-primary/20 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute bottom-0 right-0 translate-y-1/2 translate-x-1/4 w-[400px] h-[400px] bg-jti-yellow/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-    <div class="max-w-[1440px] mx-auto px-6 relative z-10">
-        <div class="lg:w-2/3">
-            {{-- Breadcrumbs - Lebih slim & minimalis --}}
-            <nav class="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-gray-500 mb-8">
-                <a href="/" class="hover:text-jti-orange transition-colors">Home</a>
-                <span class="text-gray-700">/</span>
-                <a href="/courses" class="hover:text-jti-orange transition-colors">Courses</a>
-                <span class="text-gray-700">/</span>
-                <a href="/courses/?selectedCategories[0]={{ $course->category->id }}" class="text-jti-orange/80 hover:text-jti-orange transition-colors">
-                    {{ $course->category->name }}
-                </a>
+    <div class="max-w-[1440px] mx-auto px-6 lg:px-48 relative z-10">
+        <div class="lg:w-3/4">
+
+            {{-- Breadcrumbs - Dibuat lebih tipis & spaced-out --}}
+            <nav class="flex items-center gap-3 text-[10px] font-semibold tracking-[0.3em] uppercase text-gray-500 mb-10" data-aos="fade-down">
+                <a href="/" class="hover:text-jti-yellow transition-colors duration-300">Home</a>
+                <span class="text-white/10">/</span>
+                <a href="/courses" class="hover:text-jti-yellow transition-colors duration-300">Courses</a>
+                <span class="text-white/10">/</span>
+                <span class="text-jti-yellow/80">{{ $course->category->name }}</span>
             </nav>
 
-            {{-- Title - Menggunakan font-bold (bukan black) & tracking tight --}}
-            <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 leading-[1.15] tracking-tight text-white drop-shadow-sm">
+            {{-- Title - Menggunakan tracking-tighter dan font-bold (bukan black) --}}
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-bold mb-10 leading-[1.1] tracking-tighter text-white" data-aos="fade-up">
                 {{ $course->title }}
             </h1>
 
-            {{-- Stats & Level --}}
-            <div class="flex flex-wrap items-center gap-6">
-                {{-- Rating Section --}}
+            {{-- Badge Group --}}
+            <div class="flex flex-wrap items-center gap-5 md:gap-8" data-aos="fade-up" data-aos-delay="200">
+
+                {{-- Rating - Glassmorphism style --}}
                 <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm">
-                        <span class="text-lg font-bold text-yellow-400">{{ number_format($course->avg_rating, 1) }}</span>
-                        <div class="flex text-yellow-400">
-                            {{-- Icon Star --}}
-                            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                        </div>
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-full backdrop-blur-md">
+                        <svg class="w-3.5 h-3.5 text-jti-yellow fill-current" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                        </svg>
+                        <span class="text-sm font-bold text-gray-100">{{ number_format($course->avg_rating, 1) }}</span>
                     </div>
-                    <span class="text-xs font-medium text-gray-400">
-                        <span class="text-gray-200">2.1M+</span> Pelajar
+                    <span class="text-[11px] font-medium text-gray-500 uppercase tracking-widest">
+                        <span class="text-gray-300">2.1M+</span> Enrolled
                     </span>
                 </div>
 
-                {{-- Vertical Separator --}}
-                <div class="hidden md:block w-px h-6 bg-white/10"></div>
+                {{-- Separator --}}
+                <div class="hidden md:block w-px h-4 bg-white/10"></div>
 
                 {{-- Level Badge --}}
                 <div class="flex items-center gap-3">
                     @php
                         $levelStyles = match(strtolower($course->level)) {
-                            'beginner', 'pemula' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                            'intermediate', 'menengah' => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                            'advanced', 'mahir' => 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-                            default => 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+                            'beginner', 'pemula' => 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5',
+                            'intermediate', 'menengah' => 'border-jti-yellow/30 text-jti-yellow bg-jti-yellow/5',
+                            'advanced', 'mahir' => 'border-rose-500/30 text-rose-400 bg-rose-500/5',
+                            default => 'border-white/20 text-white/60 bg-white/5',
                         };
                     @endphp
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Level</span>
-                        <span class="{{ $levelStyles }} px-3 py-1 rounded-md border text-[10px] font-bold uppercase tracking-tighter">
-                            {{ $course->level }}
-                        </span>
-                    </div>
+                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Difficulty</span>
+                    <span class="{{ $levelStyles }} px-4 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider">
+                        {{ $course->level }}
+                    </span>
                 </div>
 
-                {{-- Last Updated (Opsional but recommended for modern UI) --}}
-                <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 font-medium">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Update Terakhir: {{ $course->updated_at->format('M Y') }}
+                {{-- Last Updated --}}
+                <div class="flex items-center gap-2.5 text-[11px] text-gray-500 font-medium uppercase tracking-wider">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-jti-yellow/50"></i>
+                    Updated: <span class="text-gray-300">{{ $course->updated_at->format('M Y') }}</span>
                 </div>
             </div>
         </div>

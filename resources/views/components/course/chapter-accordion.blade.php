@@ -1,66 +1,65 @@
 @props(['chapter'])
 
-<div x-data="{ open: false }" class="border-b border-gray-100 last:border-0 shadow-sm mb-2 rounded-lg overflow-hidden">
+<div x-data="{ open: false }" class="mb-3 overflow-hidden transition-all duration-300 border border-gray-100 rounded-xl bg-white shadow-sm">
     {{-- Header Chapter --}}
-    <button @click="open = !open" class="w-full flex items-center justify-between p-5 bg-gray-50/80 hover:bg-gray-100 transition-all text-left">
-        <div class="flex items-center gap-4">
-            <svg :class="open ? 'rotate-180' : ''" class="w-5 h-5 transition-transform duration-200 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-            <span class="font-bold text-gray-800 text-lg">{{ $chapter->title }}</span>
+    <button @click="open = !open"
+        class="flex items-center justify-between w-full p-5 transition-all text-left group hover:bg-gray-50/50">
+        <div class="flex items-center gap-5">
+            {{-- Status Indicator: Kuning hanya saat open --}}
+            <div :class="open ? 'bg-jti-yellow shadow-[0_0_12px_rgba(252,211,77,0.6)]' : 'bg-gray-200'"
+                 class="w-1.5 h-1.5 rounded-full transition-all duration-500"></div>
+
+            <div class="flex flex-col">
+                {{-- Judul: Default abu-abu tua (gelap), Kuning saat hover atau active --}}
+                <span :class="open ? 'text-jti-yellow' : 'text-gray-500 group-hover:text-jti-yellow'"
+                      class="text-lg font-semibold tracking-tight transition-colors duration-300">
+                    {{ $chapter->title }}
+                </span>
+                <span class="text-[11px] text-gray-400 font-medium">
+                    {{ $chapter->lessons->count() }} materi · {{ floor($chapter->lessons->sum('duration_seconds') / 60) }} menit
+                </span>
+            </div>
         </div>
-        <div class="text-right">
-            <span class="block text-xs font-bold text-gray-400 uppercase tracking-widest">{{ $chapter->lessons->count() }} Materi</span>
-            {{-- Menghitung total durasi satu chapter (Opsional) --}}
-            <span class="text-[10px] text-gray-400">{{ floor($chapter->lessons->sum('duration_seconds') / 60) }} Menit</span>
+
+        {{-- Icon Arrow --}}
+        <div :class="open ? 'text-jti-yellow bg-jti-yellow/10 border-jti-yellow/20' : 'text-gray-300 bg-gray-50 border-gray-100 group-hover:text-jti-yellow'"
+             class="w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-300 border">
+            <svg :class="open ? 'rotate-180' : ''" class="w-3.5 h-3.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+            </svg>
         </div>
     </button>
 
     {{-- List Lesson --}}
-    <div x-show="open" x-transition class="bg-white px-5 py-2">
-        @foreach($chapter->lessons as $lesson)
-            <div class="flex items-center justify-between py-4 border-b border-gray-50 last:border-0 group">
-                <div class="flex items-center gap-4">
-                    {{-- Icon Berdasarkan Type --}}
-                    <div class="flex-shrink-0">
-                        @switch($lesson->type)
-                            @case('video')
-                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                @break
-                            @case('text')
-                                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                @break
-                            @case('quiz')
-                                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                @break
-                            @default
-                                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                        @endswitch
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="px-4 pb-4">
+
+        <div class="space-y-1 pt-2 border-t border-gray-50">
+            @foreach($chapter->lessons as $lesson)
+                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 group transition-all duration-200 cursor-pointer">
+                    <div class="flex items-center gap-4">
+                        <div class="text-gray-300 group-hover:text-jti-yellow transition-colors">
+                            @switch($lesson->type)
+                                @case('video') <i data-lucide="play" class="w-4 h-4"></i> @break
+                                @case('text') <i data-lucide="book-open" class="w-4 h-4"></i> @break
+                                @case('quiz') <i data-lucide="help-circle" class="w-4 h-4"></i> @break
+                                @default <i data-lucide="hash" class="w-4 h-4"></i>
+                            @endswitch
+                        </div>
+
+                        <span class="text-sm font-medium text-gray-500 group-hover:text-gray-900 transition-colors">
+                            {{ $lesson->title }}
+                        </span>
                     </div>
 
-                    <div class="flex flex-col leading-tight">
-                        <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">{{ $lesson->title }}</span>
-                    </div>
-                </div>
-
-                {{-- Tampilan Durasi --}}
-                <div class="flex items-center gap-1.5 text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span class="text-[11px] font-mono font-bold">
-                        @php
-                            $minutes = floor($lesson->duration_seconds / 60);
-                            $seconds = $lesson->duration_seconds % 60;
-                        @endphp
-
-                        @if($minutes > 0)
-                            {{ $minutes }}m
-                        @endif
-                        {{ $seconds }}s
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-gray-500 transition-colors tabular-nums">
+                        {{ floor($lesson->duration_seconds / 60) }}m {{ $lesson->duration_seconds % 60 }}s
                     </span>
                 </div>
-            </div>
-        @endforeach
+            @endforeach
+        </div>
     </div>
 </div>
