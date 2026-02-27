@@ -7,6 +7,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -17,30 +19,55 @@ class CoursesTable
     {
         return $table
             ->columns([
-                TextColumn::make('category.name')
-                    ->searchable(),
+                ImageColumn::make('thumbnail_url')
+                    ->label('Thumbnail')
+                    ->size('4:3')
+                    ->defaultImageUrl(url('/images/default-course-thumbnail.png')),
                 TextColumn::make('title')
-                    ->searchable(),
-                TextColumn::make('slug')
-                    ->searchable(),
+                    ->label('Judul Kursus')
+                    ->searchable()
+                    ->weight('bold')
+                    ->limit(50),
+                // TextColumn::make('description')
+                //     ->label('Deskripsi')
+                //     ->limit(100)
+                //     ->wrap(),
+                TextColumn::make('category.name')
+                    ->label('Kategori')
+                    ->badge()
+                    ->color('primary'),
                 TextColumn::make('price')
+                    ->label('Harga')
                     ->money()
                     ->sortable(),
-                TextColumn::make('level')
-                    ->badge(),
-                TextColumn::make('thumbnail_url')
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->badge(),
-                TextColumn::make('total_duration')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total_lessons')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('avg_rating')
-                    ->numeric()
-                    ->sortable(),
+                // TextColumn::make('level')
+                //     ->label('Level')
+                //     ->badge()
+                //     ->color(fn(string $state): string => match ($state) {
+                //         'beginner' => 'success',
+                //         'intermediate' => 'warning',
+                //         'advanced' => 'danger',
+                //     }),
+                // TextColumn::make('status')
+                //     ->label('Status')
+                //     ->badge()
+                //     ->color(fn(string $state): string => match ($state) {
+                //         'draft' => 'gray',
+                //         'published' => 'success',
+                //         'archived' => 'warning',
+                //     }),
+                // TextColumn::make('total_duration')
+                //     ->label('Durasi')
+                //     ->formatStateUsing(fn(int $state): string => $state . 'm')
+                //     ->sortable(),
+                // TextColumn::make('total_lessons')
+                //     ->label('Pelajaran')
+                //     ->numeric()
+                //     ->sortable(),
+                // TextColumn::make('avg_rating')
+                //     ->label('Rating')
+                //     ->formatStateUsing(fn(float $state): string => number_format($state, 1))
+                //     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -58,6 +85,9 @@ class CoursesTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('Detail')
+                    ->icon('heroicon-o-eye'),
                 EditAction::make(),
             ])
             ->toolbarActions([

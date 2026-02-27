@@ -10,6 +10,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class CourseForm
 {
@@ -43,9 +44,8 @@ class CourseForm
                                 ->label('Level')
                                 ->options(['beginner' => 'Beginner', 'intermediate' => 'Intermediate', 'advanced' => 'Advanced'])
                                 ->required(),
-                            TextInput::make('thumbnail_url')
-                                ->label('Thumbnail URL')
-                                ->url(),
+                            SpatieMediaLibraryFileUpload::make('thumbnail_url')
+                                ->label('Thumbnail URL'),
                             Select::make('status')
                                 ->label('Status')
                                 ->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])
