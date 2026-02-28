@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Courses\Schemas;
 
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -21,11 +22,11 @@ class CourseInfolist
                     ->schema([
                         Grid::make(1)
                             ->schema([
-                                ImageEntry::make('thumbnail_url')
+                                SpatieMediaLibraryImageEntry::make('thumbnail')
                                     ->label('Thumbnail')
-                                    ->size('lg')
-                                    ->defaultImageUrl(url('/images/default-course-thumbnail.png')),
-                            ]),
+                                    ->collection('thumbnail')
+                                    
+                                    ]),
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('title')

@@ -44,8 +44,14 @@ class CourseForm
                                 ->label('Level')
                                 ->options(['beginner' => 'Beginner', 'intermediate' => 'Intermediate', 'advanced' => 'Advanced'])
                                 ->required(),
-                            SpatieMediaLibraryFileUpload::make('thumbnail_url')
-                                ->label('Thumbnail URL'),
+                            SpatieMediaLibraryFileUpload::make('thumbnail')
+                                ->label('Thumbnail')
+                                ->collection('thumbnail')
+                                ->image()
+                                ->imageEditor()
+                                ->preserveFilenames()
+                                ->responsiveImages()
+                                ->visibility('public'),
                             Select::make('status')
                                 ->label('Status')
                                 ->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])
@@ -112,4 +118,3 @@ class CourseForm
             ]);
     }
 }
-

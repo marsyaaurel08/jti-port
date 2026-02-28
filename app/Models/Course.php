@@ -42,43 +42,7 @@ class Course extends Model implements HasMedia
     /**
      * Get the thumbnail URL from media library or fall back to thumbnail_url field.
      */
-    protected function getThumbnailUrlAttribute(): ?string
-    {
-        // Try to get thumbnail from media library first
-        $thumbnailMedia = $this->getFirstMediaUrl('thumbnail');
-        if ($thumbnailMedia) {
-            return $thumbnailMedia;
-        }
-
-        // Fallback to thumbnail_url field
-        return $this->attributes['thumbnail_url'] ?? null;
-    }
-
-    /**
-     * Register media collections for the course.
-     */
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('thumbnail')
-            ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
-    }
-
-    /**
-     * Register media conversions for the course.
-     */
-    public function registerMediaConversions(?Media $media = null): void
-    {
-        $this->addMediaConversion('thumb')
-            ->width(400)
-            ->height(225)
-            ->sharpen(10);
-
-        $this->addMediaConversion('preview')
-            ->width(800)
-            ->height(450);
-    }
-
+    
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
