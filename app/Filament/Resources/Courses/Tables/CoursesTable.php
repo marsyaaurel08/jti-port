@@ -9,6 +9,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -19,10 +20,11 @@ class CoursesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('thumbnail_url')
+                SpatieMediaLibraryImageColumn::make('thumbnail')
                     ->label('Thumbnail')
-                    ->size('4:3')
-                    ->defaultImageUrl(url('/images/default-course-thumbnail.png')),
+                    ->collection('thumbnail')
+                    ->extraImgAttributes(['class' => 'w-full h-64 object-cover rounded-lg mb-3']),
+
                 TextColumn::make('title')
                     ->label('Judul Kursus')
                     ->searchable()
