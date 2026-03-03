@@ -21,6 +21,7 @@ class QuizAnswer extends Model
     protected function casts(): array
     {
         return [
+            'user_answer' => 'array',
             'is_correct' => 'boolean',
             'score_obtained' => 'decimal:2',
         ];
