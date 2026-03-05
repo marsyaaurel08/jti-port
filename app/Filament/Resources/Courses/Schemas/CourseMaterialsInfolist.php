@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Courses\Schemas;
 
+use App\Filament\Resources\Quizzes\QuizResource;
+use App\Models\Quiz;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
@@ -40,7 +43,7 @@ class CourseMaterialsInfolist
                                             ->color('gray'),
                                     ]),
                                 RepeatableEntry::make('lessons')
-                                    ->label('Lessons')
+                                    ->label('Materi')
                                     ->schema([
                                         Grid::make(1)
                                             ->schema([
@@ -80,15 +83,28 @@ class CourseMaterialsInfolist
                                                     ->badge()
                                                     ->color(fn(bool $state): string => $state ? 'success' : 'gray')
                                                     ->formatStateUsing(fn(bool $state): string => $state ? 'Ya' : 'Tidak'),
+                                                Action::make('manage_quiz')
+                                                    ->label('Manage Quiz')
+                                                    ->icon('heroicon-o-academic-cap')
+                                                    ->color('warning')
+                                                    ->visible(fn($record): bool => $record->type === 'quiz')
+                                                    ->url(function ($record) {
+                                                        // Get or create quiz for this lesson
+                                                        $quiz = $record->quiz ?? Quiz::create([
+                                                            'lesson_id' => $record->id,
+                                                            'pass_score' => 70,
+                                                            'time_limit_minutes' => null,
+                                                        ]);
+
+                                                        return QuizResource::getUrl('edit', ['record' => $quiz->id]);
+                                                    }),
                                             ])
-                                            ->columnSpanFull()
                                             ->extraAttributes(['class' => 'bg-gray-50 rounded-lg p-3']),
-                                    ])
-                                    ->columnSpanFull(),
+                                    ]),
                             ])
-                            ->columnSpanFull()
                             ->extraAttributes(['class' => 'border rounded-lg p-4 mb-4']),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 }

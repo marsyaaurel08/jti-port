@@ -14,7 +14,11 @@ class Question extends Model
     protected $fillable = [
         'quiz_id',
         'type',
+        'question_text',
         'question_config',
+        'answer_key',
+        'explanation',
+        'hint',
         'score_weight',
     ];
 
@@ -22,6 +26,7 @@ class Question extends Model
     {
         return [
             'question_config' => 'array',
+            'answer_key' => 'array',
             'score_weight' => 'integer',
         ];
     }
