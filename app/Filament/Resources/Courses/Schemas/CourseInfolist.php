@@ -70,7 +70,7 @@ class CourseInfolist
                                     ->label('Rating Rata-rata')
                                     ->formatStateUsing(fn(float $state): string => number_format($state, 1) . ' / 5.0'),
                             ]),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 }
