@@ -10,7 +10,6 @@ use App\Filament\Resources\EnrollmentClasses\Schemas\EnrollmentClassForm;
 use App\Filament\Resources\EnrollmentClasses\Schemas\EnrollmentClassInfolist;
 use App\Filament\Resources\EnrollmentClasses\Tables\EnrollmentClassesTable;
 use App\Models\Enrollment;
-use App\Models\EnrollmentClass;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -24,6 +23,9 @@ class EnrollmentClassResource extends Resource
     protected static ?string $model = Enrollment::class;
 
     protected static ?string $navigationLabel = 'Class Enrollments';
+    protected static ?string $pluralLabel = 'Class Enrollments';
+    protected static ?string $modelLabel = 'Class Enrollments';
+
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
@@ -65,5 +67,11 @@ class EnrollmentClassResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereNotNull('class_id');
     }
 }
