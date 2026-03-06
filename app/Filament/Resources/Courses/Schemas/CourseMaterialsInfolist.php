@@ -88,7 +88,8 @@ class CourseMaterialsInfolist
                             ])
                             ->columnSpanFull()
                             ->extraAttributes(['class' => 'border rounded-lg p-4 mb-4']),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 }
