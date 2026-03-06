@@ -7,12 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Course extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes,InteractsWithMedia;
+    use HasFactory, SoftDeletes, InteractsWithMedia, LogsActivity;
 
     protected $fillable = [
         'category_id',
@@ -36,6 +39,10 @@ class Course extends Model implements HasMedia
         ];
     }
 
+    /**
+     * Get the thumbnail URL from media library or fall back to thumbnail_url field.
+     */
+    
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -74,5 +81,13 @@ class Course extends Model implements HasMedia
     public function progress(): HasMany
     {
         return $this->hasMany(CourseProgress::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logExcept(['updated_at', 'deleted_at'])
+            ->setDescriptionForEvent(fn(string $eventName) => "Course {$eventName}");
     }
 }

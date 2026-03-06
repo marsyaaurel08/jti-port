@@ -7,7 +7,11 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -44,8 +48,14 @@ class CourseForm
                                 ->label('Level')
                                 ->options(['beginner' => 'Beginner', 'intermediate' => 'Intermediate', 'advanced' => 'Advanced'])
                                 ->required(),
-                            SpatieMediaLibraryFileUpload::make('thumbnail_url')
-                                ->label('Thumbnail URL'),
+                            SpatieMediaLibraryFileUpload::make('thumbnail')
+                                ->label('Thumbnail')
+                                ->collection('thumbnail')
+                                ->image()
+                                ->imageEditor()
+                                ->preserveFilenames()
+                                ->responsiveImages()
+                                ->visibility('public'),
                             Select::make('status')
                                 ->label('Status')
                                 ->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])
@@ -105,6 +115,23 @@ class CourseForm
                                                 ->label('Preview Gratis')
                                                 ->options([0 => 'Tidak', 1 => 'Ya'])
                                                 ->required(),
+                                            // Quiz Configuration
+                                            Section::make('Konfigurasi Quiz')
+                                                ->relationship('quiz')
+                                                ->visible(fn($get) => $get('type') === 'quiz')
+                                                ->schema([
+                                                    TextInput::make('pass_score')
+                                                        ->label('Nilai Lulus Minimum')
+                                                        ->numeric()
+                                                        ->default(70)
+                                                        ->minValue(0)
+                                                        ->maxValue(100)
+                                                        ->required(),
+                                                    TextInput::make('time_limit_minutes')
+                                                        ->label('Batas Waktu (menit)')
+                                                        ->numeric()
+                                                        ->nullable(),
+                                                ]),
                                         ])->columnSpanFull(),
                                 ]), // closes chapters repeater schema and chapters repeater
                         ]), // closes second Tab's schema and second Tab
@@ -112,4 +139,3 @@ class CourseForm
             ]);
     }
 }
-
