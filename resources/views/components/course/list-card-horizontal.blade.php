@@ -1,78 +1,99 @@
 @props(['course'])
 
-<a href="/courses/{{ $course->slug }}"
-    class="group flex flex-col sm:flex-row bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-jti-primary/5 transition-all duration-500">
-    {{-- Thumbnail --}}
-    <div class="sm:w-64 h-44 shrink-0 overflow-hidden relative">
-        <img src="{{ $course->thumbnail_url }}"
-            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+<div class="group flex flex-col md:flex-row bg-white border border-slate-200 rounded-md overflow-hidden hover:border-jti-primary/30 hover:shadow-xl transition-all duration-500 relative">
+
+    {{-- Thumbnail Section --}}
+    <div class="md:w-72 h-52 shrink-0 overflow-hidden relative">
+        <a href="/courses/{{ $course->slug }}" class="block h-full">
+            <img src="{{ $course->thumbnail_url }}" alt="{{ $course->title }}"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+
+            <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
+        </a>
+
+        {{-- Badge Level di Thumbnail sudah dihapus agar lebih bersih --}}
     </div>
 
-    {{-- Info Konten --}}
-    <div class="p-5 flex flex-col grow">
-        <div class="flex justify-between items-start gap-4">
+    {{-- Content Section --}}
+    <div class="p-6 flex flex-col grow relative">
+        <div class="flex justify-between items-start gap-4 mb-3">
             <div class="grow">
-                <h3
-                    class="text-lg font-semibold text-jti-primary leading-tight mb-1 group-hover:text-jti-orange transition-colors">
+                <a href="/courses/{{ $course->slug }}"
+                    class="text-lg md:text-xl font-bold text-slate-800 leading-snug group-hover:text-jti-primary transition-colors duration-300">
                     {{ $course->title }}
-                </h3>
-                <p class="text-xs text-gray-500 line-clamp-2 mb-3 max-w-2xl">
-                    {{ $course->description }}
-                </p>
+                </a>
             </div>
 
-            {{-- Harga di Pojok Kanan --}}
-            <div class="text-right shrink-0">
-                <div class="text-lg font-semibold text-jti-primary">
+            {{-- Price --}}
+            <div class="shrink-0 text-right">
+                <span class="text-lg font-extrabold text-jti-primary tracking-tight">
                     {{ $course->price > 0 ? 'Rp' . number_format($course->price, 0, ',', '.') : 'Gratis' }}
+                </span>
+            </div>
+        </div>
+
+        <p class="text-sm text-slate-500 line-clamp-2 mb-6 leading-relaxed">
+            {{ $course->description }}
+        </p>
+
+        {{-- Footer Meta & Stats --}}
+        <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+            <div class="flex items-center gap-5">
+                {{-- Rating Stat --}}
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Rating</span>
+                    <div class="flex items-center gap-1.5">
+                        <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
+                        <span class="text-xs font-bold text-slate-700">{{ number_format($course->avg_rating, 1) }}</span>
+                    </div>
+                </div>
+
+                {{-- Level Stat (Pindahan dari Thumbnail) --}}
+                <div class="flex flex-col border-l border-slate-100 pl-4">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Level</span>
+                    <span class="text-xs font-bold {{ match (strtolower($course->level)) {
+                        'beginner' => 'text-emerald-600',
+                        'intermediate' => 'text-amber-600',
+                        'advanced' => 'text-rose-600',
+                        default => 'text-slate-600',
+                    } }}">
+                        {{ ucfirst($course->level) }}
+                    </span>
+                </div>
+
+                {{-- Duration Stat --}}
+                <div class="flex flex-col border-l border-slate-100 pl-4">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Durasi</span>
+                    <div class="flex items-center gap-1">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400" style="stroke-width: 2px;"></i>
+                        <span class="text-xs font-bold text-slate-700">
+                            {{ floor($course->total_duration / 60) }}j {{ $course->total_duration % 60 }}m
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Meta Data --}}
-        <div class="mt-auto flex flex-wrap items-center gap-y-2 gap-x-4">
-            {{-- Rating --}}
-            <div class="flex items-center gap-1">
-                <span class="text-sm font-semibold text-jti-orange">{{ number_format($course->avg_rating, 1) }}</span>
+            {{-- Minimalist Cart Button --}}
+            @auth
+                @if (!auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
+                    <div x-data="{ isLoading: false }">
+                        <button
+                            @click="addToCart({{ $course->id }}, () => { isLoading = false }); isLoading = true;"
+                            :disabled="isLoading"
+                            class="group/cart relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-jti-primary hover:text-white transition-all duration-300 active:scale-90 border border-slate-100 shadow-sm"
+                            title="Tambah ke Keranjang">
 
-                {{-- Memanggil komponen bintang yang baru dibuat --}}
-                <x-course.stars :rating="$course->avg_rating" />
+                            <div x-show="!isLoading" class="relative flex items-center justify-center">
+                                <i data-lucide="shopping-cart" class="w-5 h-5 transition-transform duration-300 group-hover/cart:-rotate-12" style="stroke-width: 1.8px;"></i>
+                            </div>
 
-                <span class="text-[10px] text-gray-400">({{ $course->reviews_count }})</span>
-            </div>
-
-            <div class="flex items-center gap-4 text-sm text-gray-500 font-medium">
-                <span class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" />
-                    </svg>
-                    {{-- Durasi menit to jam ($course->total_duration format nya menit)--}}
-                    @php
-                        $hours = floor($course->total_duration / 60);
-                        $minutes = $course->total_duration % 60;
-                    @endphp
-                    @if ($hours > 0)
-                        {{ $hours }} jam
-                    @endif
-                    @if ($minutes > 0)
-                        {{ $minutes }} menit
-                    @endif
-                </span>
-                @php
-                    $levelColor = match ($course->level) {
-                        'beginner' => 'bg-green-100 text-green-700 border-green-200',
-                        'intermediate' => 'bg-blue-100 text-blue-700 border-blue-200',
-                        'advanced' => 'bg-red-100 text-red-700 border-red-200',
-                        default => 'bg-gray-100 text-gray-700 border-gray-200',
-                    };
-                @endphp
-
-                <span
-                    class="px-3 py-1 {{ $levelColor }} rounded-lg border text-xs capitalize tracking-widest shadow-sm">
-                    {{ $course->level }}
-                </span>
-            </div>
+                            <div x-show="isLoading" class="animate-spin flex items-center justify-center">
+                                <i data-lucide="loader-2" class="w-5 h-5" style="stroke-width: 2px;"></i>
+                            </div>
+                        </button>
+                    </div>
+                @endif
+            @endauth
         </div>
     </div>
-</a>
+</div>

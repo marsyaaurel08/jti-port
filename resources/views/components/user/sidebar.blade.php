@@ -1,7 +1,7 @@
 {{-- resources/views/components/user/layout/sidebar.blade.php --}}
 @props(['user', 'cartCount' => 0])
 
-<div class="bg-white min-h-[400px] flex flex-col">
+<div class="bg-white min-h-[400px] flex flex-col border border-slate-200 rounded-xl shadow-sm">
     {{-- Header: Profil Ringkas --}}
     <div class="px-6 py-8">
         <div class="flex items-center gap-4">
@@ -30,18 +30,18 @@
                 [
                     'route' => 'student.cart',
                     'label' => 'Keranjang Saya',
-                    'icon' => 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
+                    'icon' => 'shopping-cart',
                     'count' => $cartCount
                 ],
                 [
                     'route' => 'student.transactions',
                     'label' => 'Transaksi',
-                    'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+                    'icon' => 'receipt',           // alternatif: 'receipt-text' kalau mau lebih detail
                 ],
                 [
                     'route' => 'student.profile',
                     'label' => 'Profil',
-                    'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+                    'icon' => 'user',
                 ],
             ];
         @endphp
@@ -55,10 +55,8 @@
                   : 'text-slate-500 hover:bg-slate-50/80 hover:text-slate-900' }}">
 
                 <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 transition-colors {{ $isActive ? 'text-jti-primary' : 'text-slate-400 group-hover:text-slate-600' }}"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $menu['icon'] }}" />
-                    </svg>
+                    <i data-lucide="{{ $menu['icon'] }}"
+                       class="w-5 h-5 transition-colors {{ $isActive ? 'text-jti-primary' : 'text-slate-400 group-hover:text-slate-600' }}"></i>
                     <span class="text-[13.5px] font-medium tracking-tight">{{ $menu['label'] }}</span>
                 </div>
 
@@ -77,9 +75,7 @@
             @csrf
             <button type="submit"
                     class="w-full flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                </svg>
+                <i data-lucide="log-out" class="w-5 h-5"></i>
                 <span class="text-[13.5px] font-medium">Log out</span>
             </button>
         </form>

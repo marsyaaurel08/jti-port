@@ -1,14 +1,49 @@
-<div class="max-w-[1440px] mx-auto px-10 lg:px-72 py-12">
-    {{-- Header Section --}}
-    <x-course.header-section :total="$courses->total()" :selectedRatings="$selectedRatings" :selectedLevels="$selectedLevels" :isFree="$isFree" :isPaid="$isPaid"
-        :selectedCategories="$selectedCategories" :sort="$sort" />
+{{-- Container Utama dengan Background subtle agar card putih lebih menonjol --}}
+<div class="min-h-screen bg-[#F8FAFC]">
+    <div class="max-w-[1440px] mx-auto px-10 lg:px-72 py-8">
 
-    <div class="flex flex-col md:flex-row gap-10">
-        {{-- Sidebar Filter --}}
-        <x-course.filters :categories="$categories" :selectedCategories="$selectedCategories" :selectedRatings="$selectedRatings" :selectedLevels="$selectedLevels" :isFree="$isFree"
-            :isPaid="$isPaid" />
+        {{-- Header Section: Diberi margin bottom yang lebih besar agar layout bernapas --}}
+        <div class="mb-4">
+            <x-course.header-section
+                :total="$courses->total()"
+                :selectedRatings="$selectedRatings"
+                :selectedLevels="$selectedLevels"
+                :isFree="$isFree"
+                :isPaid="$isPaid"
+                :selectedCategories="$selectedCategories"
+                :sort="$sort"
+            />
+        </div>
 
-        {{-- Results List --}}
-        <x-course.results-list :courses="$courses" />
+        <div class="flex flex-col lg:flex-row gap-12 items-start">
+
+            {{-- Sidebar Filter: Sticky agar tetap terlihat saat scroll --}}
+            <aside class="w-full lg:w-[280px] shrink-0 lg:sticky lg:top-26">
+                <x-course.filters
+                    :categories="$categories"
+                    :selectedCategories="$selectedCategories"
+                    :selectedRatings="$selectedRatings"
+                    :selectedLevels="$selectedLevels"
+                    :isFree="$isFree"
+                    :isPaid="$isPaid"
+                />
+
+                {{-- Info Tambahan di bawah filter (Khas Academix) --}}
+                <div class="mt-8 p-6 bg-jti-primary rounded-3xl text-white overflow-hidden relative group">
+                    <div class="relative z-10">
+                        <p class="text-xs font-bold opacity-80 uppercase tracking-widest mb-1">Butuh Bantuan?</p>
+                        <p class="text-sm font-medium leading-relaxed">Konsultasikan jalur sertifikasi yang tepat untuk karier Anda.</p>
+                    </div>
+                    {{-- Dekorasi Abstract --}}
+                    <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+                </div>
+            </aside>
+
+            {{-- Results List: Mengambil sisa space yang ada --}}
+            <main class="grow min-w-0">
+                <x-course.results-list :courses="$courses" />
+            </main>
+
+        </div>
     </div>
 </div>

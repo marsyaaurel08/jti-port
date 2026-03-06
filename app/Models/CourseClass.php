@@ -73,4 +73,8 @@ class CourseClass extends Model
     {
         return $this->hasMany(UserCart::class);
     }
+    public function available_slots(): int
+    {
+        return $this->max_capacity - $this->current_enrolled;
+    }
 }

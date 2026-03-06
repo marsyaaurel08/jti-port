@@ -10,7 +10,6 @@ use App\Filament\Resources\EnrollmentCourses\Schemas\EnrollmentCourseForm;
 use App\Filament\Resources\EnrollmentCourses\Schemas\EnrollmentCourseInfolist;
 use App\Filament\Resources\EnrollmentCourses\Tables\EnrollmentCoursesTable;
 use App\Models\Enrollment;
-use App\Models\EnrollmentCourse;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -22,7 +21,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class EnrollmentCourseResource extends Resource
 {
     protected static ?string $model = Enrollment::class;
+
     protected static ?string $navigationLabel = 'Course Enrollments';
+    protected static ?string $pluralLabel = 'Course Enrollments';
+    protected static ?string $modelLabel = 'Course Enrollments';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
     public static function form(Schema $schema): Schema
@@ -63,5 +66,11 @@ class EnrollmentCourseResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereNull('class_id');
     }
 }

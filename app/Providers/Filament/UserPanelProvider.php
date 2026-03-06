@@ -38,6 +38,8 @@ class UserPanelProvider extends PanelProvider
             ->login()
             ->homeUrl('/')
             ->brandname('jti-port')
+            ->brandLogo(asset('img/logo-jti.png'))
+            ->brandLogoHeight('3rem')
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -2,19 +2,12 @@
     <div x-data="{ open: true }" x-show="open" x-transition class="fixed top-20 right-4 z-50 max-w-sm">
         <div class="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg">
             <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <i data-lucide="circle-check" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"></i>
                 <div class="flex-1">
                     <p class="font-semibold text-green-800">{{ $message }}</p>
                 </div>
                 <button @click="open = false" class="text-green-600 hover:text-green-800">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
@@ -25,19 +18,12 @@
     <div x-data="{ open: true }" x-show="open" x-transition class="fixed top-20 right-4 z-50 max-w-sm">
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg">
             <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
                 <div class="flex-1">
                     <p class="font-semibold text-blue-800">{{ $message }}</p>
                 </div>
                 <button @click="open = false" class="text-blue-600 hover:text-blue-800">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
@@ -48,19 +34,12 @@
     <div x-data="{ open: true }" x-show="open" x-transition class="fixed top-20 right-4 z-50 max-w-sm">
         <div class="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
             <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <i data-lucide="circle-alert" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
                 <div class="flex-1">
                     <p class="font-semibold text-red-800">{{ $message }}</p>
                 </div>
                 <button @click="open = false" class="text-red-600 hover:text-red-800">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
@@ -84,11 +63,10 @@
         const buttonColor = type === 'success' ? 'text-green-600 hover:text-green-800' : type === 'info' ?
             'text-blue-600 hover:text-blue-800' : 'text-red-600 hover:text-red-800';
 
-        const iconSvg = type === 'success' ?
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />' :
-            type === 'info' ?
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />' :
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+        // Icon Lucide berdasarkan type
+        const iconName = type === 'success' ? 'circle-check' :
+                         type === 'info'    ? 'info' :
+                         'circle-alert';  // default error
 
         const toast = document.createElement('div');
         toast.id = toastId;
@@ -98,38 +76,39 @@
         toast.setAttribute('data-aos-easing', 'ease-out');
         toast.innerHTML = `
             <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 ${iconColor} flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    ${iconSvg}
-                </svg>
+                <i data-lucide="${iconName}" class="w-5 h-5 ${iconColor} flex-shrink-0 mt-0.5"></i>
                 <div class="flex-1">
                     <p class="font-semibold ${textColor}">${message}</p>
                 </div>
                 <button onclick="document.getElementById('${toastId}').remove()" class="${buttonColor}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
         `;
 
         container.appendChild(toast);
 
-        // Trigger AOS animation for the newly added element
+        // Trigger AOS animation jika pakai AOS
         if (window.AOS) {
             window.AOS.refresh();
         }
 
+        // Auto close
         if (duration > 0) {
             setTimeout(() => {
                 const el = document.getElementById(toastId);
                 if (el) {
-                    // Fade out animation before removing
                     el.style.opacity = '0';
                     el.style.transform = 'translateX(100%)';
                     el.style.transition = 'all 300ms ease-in';
                     setTimeout(() => el.remove(), 300);
                 }
             }, duration);
+        }
+
+        // Penting: panggil lucide.createIcons() setelah menambahkan elemen baru
+        if (window.lucide) {
+            window.lucide.createIcons();
         }
     };
 </script>

@@ -17,9 +17,6 @@ class ClassesIndex extends Component
     public $selectedCategories = [];
 
     #[Url(history: true)]
-    public $selectedRatings = [];
-
-    #[Url(history: true)]
     public $selectedLevels = [];
 
     #[Url(history: true)]
@@ -41,11 +38,6 @@ class ClassesIndex extends Component
         $this->resetPage();
     }
 
-    public function updatedSelectedRatings(): void
-    {
-        $this->resetPage();
-    }
-
     public function updatedIsFree(): void
     {
         $this->resetPage();
@@ -63,7 +55,7 @@ class ClassesIndex extends Component
 
     public function resetFilters()
     {
-        $this->reset(['selectedCategories', 'selectedRatings', 'selectedLevels', 'isFree', 'isPaid', 'sort']);
+        $this->reset(['selectedCategories', 'selectedLevels', 'isFree', 'isPaid', 'sort']);
         $this->resetPage();
     }
 
@@ -109,7 +101,6 @@ class ClassesIndex extends Component
             'classes' => $query->paginate(10),
             'categories' => Category::orderBy('name')->get(),
             'selectedCategories' => $this->selectedCategories,
-            'selectedRatings' => $this->selectedRatings,
             'selectedLevels' => $this->selectedLevels,
             'isFree' => $this->isFree,
             'isPaid' => $this->isPaid,
