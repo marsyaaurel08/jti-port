@@ -24,6 +24,7 @@ class ClassResultResource extends Resource
     protected static ?string $model = CourseClass::class;
     protected static ?string $navigationLabel = 'Class Proggress';
     protected static ?string $pluralLabel = 'Class Proggress';
+    protected static ?string $modelLabel = 'Class Proggress';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
 
@@ -65,5 +66,15 @@ class ClassResultResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (auth()->check()) {
+            return $query->where('instructor_id', auth()->id());
+        }
+
+        return $query;
     }
 }
