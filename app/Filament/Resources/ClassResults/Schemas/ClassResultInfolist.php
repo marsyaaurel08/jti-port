@@ -188,8 +188,8 @@ class ClassResultInfolist
                                                     : 'Belum Selesai';
                                             })
                                             ->badge()
-                                            ->color(fn($state) => str_contains($state, 'Selesai') ? 'success' : 'warning')
-                                            ->icon(fn($state) => str_contains($state, 'Selesai') ? 'heroicon-m-check-circle' : 'heroicon-m-clock'),
+                                            ->color(fn($state) => str_contains($state, 'Belum Selesai') ?  'warning': 'success' )
+                                            ->icon(fn($state) => str_contains($state, 'Belum Selesai') ? 'heroicon-m-x-circle' : 'heroicon-m-check-circle'),
                                     ])
                             ]),
                     ]),
