@@ -138,34 +138,6 @@
                                 </div>
                             </div>
 
-                            {{-- Lokasi/Link Meeting --}}
-                            <div class="flex items-start gap-4 md:col-span-2">
-                                <div
-                                    class="w-12 h-12 rounded-lg bg-jti-yellow/10 flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-6 h-6 text-jti-yellow" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Link Meeting
-                                    </p>
-                                    @if ($class->meeting_link)
-                                        <a href="{{ $class->meeting_link }}" target="_blank"
-                                            class="text-jti-primary hover:text-jti-yellow font-semibold mt-1 inline-flex items-center gap-2 group">
-                                            Klik untuk Bergabung
-                                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4m-4-6l6-6m0 0L21 3m-6 0v12" />
-                                            </svg>
-                                        </a>
-                                    @else
-                                        <p class="text-gray-600 mt-1">Informasi akan diberikan oleh instruktur</p>
-                                    @endif
-                                </div>
-                            </div>
                         </div>
                     </section>
 

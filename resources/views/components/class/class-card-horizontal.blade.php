@@ -1,87 +1,103 @@
-<a href="{{ route('classes.show', $class->slug) }}"
-    class="group flex flex-col sm:flex-row bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-jti-primary/5 transition-all duration-500">
+@props(['class'])
 
-    {{-- Thumbnail Section (Ukuran disamakan dengan Course: sm:w-64 h-44) --}}
-    <div class="sm:w-64 h-44 shrink-0 overflow-hidden relative">
-        <div class="absolute top-3 left-3 z-10">
-            <span
-                class="{{ $class->is_active ? 'bg-emerald-500' : 'bg-gray-500' }} text-white text-[9px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider">
-                {{ $class->is_active ? 'Aktif' : 'Tutup' }}
-            </span>
-        </div>
+<div
+    class="group flex flex-col md:flex-row bg-white border border-slate-200 rounded-md overflow-hidden hover:border-jti-primary/30 hover:shadow-xl transition-all duration-500 relative">
 
-        <img src="{{ $class->course->thumbnail_url ?? 'https://via.placeholder.com/400x300' }}"
-            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            alt="{{ $class->title }}">
-        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+    {{-- Thumbnail Section --}}
+    <div class="md:w-72 h-54 shrink-0 overflow-hidden relative">
+        <a href="{{ route('classes.show', $class->slug) }}" class="block h-full">
+            <img src="{{ $class->course->thumbnail_url ?? 'https://via.placeholder.com/400x300' }}"
+                alt="{{ $class->title }}"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+
+            <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
+        </a>
+
     </div>
 
-    {{-- Info Konten --}}
-    <div class="p-5 flex flex-col grow">
-        <div class="flex justify-between items-start gap-4">
+    {{-- Content Section --}}
+    <div class="p-6 flex flex-col grow relative">
+        <div class="flex justify-between items-start gap-4 mb-3">
             <div class="grow">
-                <h3
-                    class="text-lg font-bold text-jti-primary leading-tight mb-2 group-hover:text-jti-orange transition-colors">
+                <a href="{{ route('classes.show', $class->slug) }}"
+                    class="text-lg md:text-xl font-bold text-slate-800 leading-snug group-hover:text-jti-primary transition-colors duration-300">
                     {{ $class->title }}
-                </h3>
-
-                {{-- Instructor --}}
-                <div class="flex items-center gap-2 mb-3">
-                    <div
-                        class="w-6 h-6 rounded-full bg-jti-primary/5 border border-jti-primary/10 flex items-center justify-center overflow-hidden">
-                        <span
-                            class="text-[10px] font-bold text-jti-primary uppercase">{{ substr($class->instructor->name, 0, 1) }}</span>
-                    </div>
-                    <span class="text-xs font-medium text-gray-500">{{ $class->instructor->name }}</span>
-                </div>
-
-                {{-- Tanggal --}}
-                <div class="flex items-center gap-1.5 text-[11px] text-gray-400 font-medium">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>{{ $class->start_date->format('d M') }} - {{ $class->end_date->format('d M Y') }}</span>
-                </div>
+                </a>
             </div>
 
-            {{-- Harga --}}
-            <div class="text-right shrink-0">
-                <div class="text-lg font-bold text-jti-primary tracking-tight">
+            {{-- Price --}}
+            <div class="shrink-0 text-right">
+                <span class="text-lg font-extrabold text-jti-primary tracking-tight">
                     {{ $class->price > 0 ? 'Rp' . number_format($class->price, 0, ',', '.') : 'Gratis' }}
-                </div>
+                </span>
             </div>
         </div>
 
-        {{-- Meta Data & Progress Bar --}}
-        <div class="mt-auto pt-4 border-t border-gray-50 flex items-center gap-4">
-            <div class="flex flex-col shrink-0">
-                <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Kapasitas</span>
-                <span
-                    class="text-xs font-bold text-gray-700">{{ $class->current_enrolled }}/{{ $class->max_capacity }}</span>
+        {{-- Meta Info (Instructor & Date) --}}
+        <div class="space-y-2 mb-6">
+            <div class="flex items-center gap-2 text-sm text-slate-500">
+                <i data-lucide="user" class="w-4 h-4 text-slate-400" style="stroke-width: 2px;"></i>
+                <span class="font-medium">{{ $class->instructor->name ?? 'Instruktur JTI' }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-slate-500">
+                <i data-lucide="calendar" class="w-4 h-4 text-slate-400" style="stroke-width: 2px;"></i>
+                <span class="text-xs font-semibold uppercase tracking-tight">
+                    {{ $class->start_date?->format('d M') }} — {{ $class->end_date?->format('d M Y') }}
+                </span>
+            </div>
+        </div>
+
+        {{-- Stats Row & Minimalist Cart Action --}}
+        <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                {{-- Capacity Stat --}}
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Kapasitas</span>
+                    <div class="flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-3.5 h-3.5 text-jti-primary" style="stroke-width: 2.5px;"></i>
+                        <span
+                            class="text-xs font-bold text-slate-700">{{ $class->current_enrolled ?? 0 }}/{{ $class->max_capacity ?? 0 }}</span>
+                    </div>
+                </div>
+
+                {{-- Level Stat --}}
+                <div class="flex flex-col border-l border-slate-100 pl-4">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Level</span>
+                    <span
+                        class="text-xs font-bold {{ match (strtolower($class->level)) {
+                            'beginner' => 'text-emerald-600',
+                            'intermediate' => 'text-amber-600',
+                            'advanced' => 'text-rose-600',
+                            default => 'text-slate-600',
+                        } }}">
+                        {{ ucfirst($class->level) }}
+                    </span>
+                </div>
             </div>
 
-            @php
-                $percentage = ($class->current_enrolled / $class->max_capacity) * 100;
-                // Logika 3 Warna
-                $barColor = match (true) {
-                    $percentage >= 90 => 'bg-red-500', // Hampir Penuh
-                    $percentage >= 50 => 'bg-amber-500', // Mulai Terisi
-                    default => 'bg-emerald-500', // Masih Luas
-                };
-            @endphp
+            {{-- Minimalist Cart Button --}}
+            @auth
+                @if (!auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
+                    <div x-data="{ isLoading: false }">
+                        <button
+                            @click="addToCartClass({{ $class->id }}, () => { isLoading = false }); isLoading = true;"
+                            :disabled="isLoading"
+                            class="group/cart relative flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-jti-primary hover:text-white transition-all duration-300 active:scale-90 disabled:opacity-50 border border-slate-100 shadow-sm"
+                            title="Tambah ke Keranjang">
 
-            <div class="grow h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div class="h-full {{ $barColor }} transition-all duration-1000"
-                    style="width: {{ $percentage }}%"></div>
-            </div>
+                            <div x-show="!isLoading" class="relative flex items-center justify-center">
+                                <i data-lucide="shopping-cart"
+                                    class="w-5 h-5 transition-transform duration-300 group-hover/cart:-rotate-12"
+                                    style="stroke-width: 1.8px;"></i>
+                            </div>
 
-            {{-- Icon Indikator klik (Opsional untuk UX) --}}
-            <div class="text-gray-300 group-hover:text-jti-orange transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                </svg>
-            </div>
+                            <div x-show="isLoading" class="animate-spin flex items-center justify-center">
+                                <i data-lucide="loader-2" class="w-5 h-5" style="stroke-width: 2px;"></i>
+                            </div>
+                        </button>
+                    </div>
+                @endif
+            @endauth
         </div>
     </div>
-</a>
+</div>

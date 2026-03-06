@@ -62,7 +62,7 @@
                     </a>
                 @else
                     <a href="{{ route('student.lesson', ['courseSlug' => $slug, 'lessonSlug' => $lessonSlug]) }}"
-                       class="bg-yellow-400 text-sm font-semibold px-4 py-2 rounded-md hover:bg-yellow-500 transition-colors">
+                       class="bg-jti-primary text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-jti-primary-hover transition-colors">
                         Continue
                     </a>
                 @endif

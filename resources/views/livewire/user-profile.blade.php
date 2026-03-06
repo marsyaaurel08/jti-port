@@ -1,168 +1,159 @@
-<div class="bg-[#FAFBFC] min-h-screen">
-    <!-- Sidebar + Content Container -->
-    <div class="max-w-[1440px] mx-auto px-6 lg:px-48 py-16">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
-            <!-- Sidebar -->
-            <div class="lg:col-span-1" wire:ignore>
-                <x-user.sidebar :user="$user" />
+<div class="bg-[#F8FAFC] min-h-screen">
+    <div class="max-w-[1440px] mx-auto px-6 lg:px-24 py-12 md:py-20">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+            <div class="lg:col-span-3" wire:ignore>
+                <div class="sticky top-26">
+                    <x-user.sidebar :user="$this->user" />
+                </div>
             </div>
 
-            <!-- Main Content -->
-            <div class="lg:col-span-3 space-y-12">
-                <!-- Header Section -->
-                <section class="relative">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="w-2 h-6 bg-jti-yellow rounded-full"></span>
-                        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">Profil Saya</h1>
-                    </div>
-                    <p class="text-gray-600 text-lg">Kelola informasi profil dan keamanan akun Anda</p>
-                </section>
+            <div class="lg:col-span-9 space-y-10">
 
-                <!-- Success/Error Messages -->
                 @if (session('success'))
-                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 flex items-start gap-3"
-                        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
-                        <svg class="h-5 w-5 flex-shrink-0 mt-0.5 text-emerald-600" fill="currentColor"
-                            viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <span class="text-sm font-medium">{{ session('success') }}</span>
+                    <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 flex items-center gap-4 shadow-sm shadow-emerald-100/50"
+                        x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                        x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0">
+                        <div
+                            class="flex-shrink-0 w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                            <i data-lucide="check" class="w-6 h-6" style="stroke-width: 3px;"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">Berhasil Diperbarui</p>
+                            <p class="text-xs opacity-80">{{ session('success') }}</p>
+                        </div>
                     </div>
                 @endif
 
-                @if ($errors->any())
-                    <div class="p-4 bg-red-50 border border-red-200 rounded-xl">
-                        <ul class="space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li class="text-red-700 text-sm">{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <!-- Card Container -->
-                <div class="bg-white rounded-2xl border border-gray-200 p-8 lg:p-10">
-                    <!-- Tabs -->
-                    <div class="mb-8 flex gap-6 border-b border-gray-200 pb-0">
-                        <button wire:click="$set('activeTab', 'profile')"
-                            class="px-4 py-3 font-semibold transition-all {{ $activeTab === 'profile' ? 'text-jti-yellow border-b-2 border-jti-yellow' : 'text-gray-600 hover:text-gray-900' }}">
-                            Informasi Profil
-                        </button>
-                        <button wire:click="$set('activeTab', 'password')"
-                            class="px-4 py-3 font-semibold transition-all {{ $activeTab === 'password' ? 'text-jti-yellow border-b-2 border-jti-yellow' : 'text-gray-600 hover:text-gray-900' }}">
-                            Keamanan
-                        </button>
+                <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8">
+                    <div class="flex items-center gap-4 mb-10">
+                        <div class="p-3 bg-slate-50 rounded-xl">
+                            <i data-lucide="user-cog" class="w-6 h-6 text-slate-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Informasi Dasar</h2>
                     </div>
 
-                    <!-- Profile Tab -->
-                    @if ($activeTab === 'profile')
-                        <form wire:submit="updateProfile" class="space-y-6">
-                            <!-- Nama -->
-                            <div>
-                                <label for="name" class="block text-sm font-semibold text-gray-900 mb-2">Nama
-                                    Lengkap</label>
-                                <input type="text" id="name" wire:model="name"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent transition-all"
-                                    required>
-                                @error('name')
-                                    <span class="text-red-600 text-sm mt-1.5 block">{{ $message }}</span>
-                                @enderror
+                    <form wire:submit="updateProfile" class="space-y-10">
+                        <div
+                            class="flex flex-col md:flex-row items-center gap-8 p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                            <div class="relative group">
+                                <div
+                                    class="w-32 h-32 rounded-3xl overflow-hidden ring-4 ring-white shadow-2xl transition-transform duration-500 group-hover:scale-105">
+                                    @if ($avatar)
+                                        <img src="{{ $avatar->temporaryUrl() }}" class="w-full h-full object-cover">
+                                    @elseif ($user->getFirstMediaUrl('avatar'))
+                                        <img src="{{ $user->getFirstMediaUrl('avatar') }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <div
+                                            class="w-full h-full bg-gradient-to-br from-jti-primary to-jti-maroon flex items-center justify-center text-white text-3xl font-bold">
+                                            {{ substr($user->name, 0, 1) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <label
+                                    class="absolute -bottom-2 -right-2 p-2.5 bg-white rounded-xl shadow-lg border border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors text-jti-primary">
+                                    <i data-lucide="camera" class="w-5 h-5"></i>
+                                    <input type="file" wire:model="avatar" accept="image/*" class="hidden">
+                                </label>
                             </div>
 
-                            <!-- Email -->
-                            <div>
-                                <label for="email"
-                                    class="block text-sm font-semibold text-gray-900 mb-2">Email</label>
-                                <input type="email" id="email" wire:model="email"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent transition-all"
-                                    required>
-                                @error('email')
-                                    <span class="text-red-600 text-sm mt-1.5 block">{{ $message }}</span>
-                                @enderror
+                            <div class="flex-1 text-center md:text-left space-y-2">
+                                <h4 class="font-bold text-slate-800">Foto Profil</h4>
+                                <p class="text-sm text-slate-500 max-w-xs leading-relaxed">Gunakan foto asli untuk
+                                    memudahkan verifikasi sertifikat. PNG atau JPG, Maksimal 2MB.</p>
+                                @if ($user->getFirstMediaUrl('avatar'))
+                                    <button type="button" wire:click="deleteAvatar"
+                                        class="text-xs font-bold text-rose-500 hover:text-rose-600 uppercase tracking-widest pt-2">Hapus
+                                        Foto</button>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-slate-700 ml-1">Nama Lengkap</label>
+                                <div class="relative group">
+                                    <i data-lucide="user"
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-jti-primary transition-colors"></i>
+                                    <input type="text" wire:model="name"
+                                        class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-jti-primary/20 transition-all font-medium text-slate-800 placeholder:text-slate-400">
+                                </div>
                             </div>
 
-                            <!-- Submit Button -->
-                            <div class="pt-2">
-                                <button type="submit"
-                                    class="px-6 py-3 bg-jti-yellow hover:bg-jti-maroon text-white font-semibold rounded-lg transition-all hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    wire:loading.attr="disabled">
-                                    <span wire:loading.remove>Simpan Perubahan</span>
-                                    <span wire:loading class="flex items-center gap-2">
-                                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                            </path>
-                                        </svg>
-                                        Menyimpan...
-                                    </span>
-                                </button>
-                            </div>
-                        </form>
-                    @endif
-
-                    <!-- Password Tab -->
-                    @if ($activeTab === 'password')
-                        <form wire:submit="updatePassword" class="space-y-6">
-                            <!-- Current Password -->
-                            <div>
-                                <label for="currentPassword"
-                                    class="block text-sm font-semibold text-gray-900 mb-2">Password Saat Ini</label>
-                                <input type="password" id="currentPassword" wire:model="currentPassword"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent transition-all"
-                                    required>
-                                @error('currentPassword')
-                                    <span class="text-red-600 text-sm mt-1.5 block">{{ $message }}</span>
-                                @enderror
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-slate-700 ml-1">Alamat Email</label>
+                                <div class="relative group">
+                                    <i data-lucide="mail"
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-jti-primary transition-colors"></i>
+                                    <input type="email" wire:model="email"
+                                        class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-jti-primary/20 transition-all font-medium text-slate-800">
+                                </div>
                             </div>
 
-                            <!-- New Password -->
-                            <div>
-                                <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">Password
-                                    Baru</label>
-                                <input type="password" id="password" wire:model="password"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent transition-all"
-                                    required>
-                                @error('password')
-                                    <span class="text-red-600 text-sm mt-1.5 block">{{ $message }}</span>
-                                @enderror
+                            <div class="md:col-span-2 space-y-2">
+                                <label class="text-sm font-bold text-slate-700 ml-1">Biografi Singkat</label>
+                                <textarea wire:model="bio" rows="4"
+                                    class="w-full p-5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-jti-primary/20 transition-all font-medium text-slate-800 resize-none"
+                                    placeholder="Tuliskan pengalaman atau minat belajar Anda..."></textarea>
                             </div>
+                        </div>
 
-                            <!-- Confirm Password -->
-                            <div>
-                                <label for="passwordConfirmation"
-                                    class="block text-sm font-semibold text-gray-900 mb-2">Konfirmasi Password</label>
-                                <input type="password" id="passwordConfirmation" wire:model="passwordConfirmation"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-jti-yellow focus:border-transparent transition-all"
-                                    required>
-                                @error('passwordConfirmation')
-                                    <span class="text-red-600 text-sm mt-1.5 block">{{ $message }}</span>
-                                @enderror
-                            </div>
+                        <div class="flex justify-end pt-6">
+                            <button type="submit" wire:loading.attr="disabled"
+                                class="group relative px-10 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-jti-primary transition-all duration-300 shadow-xl shadow-slate-900/10 hover:shadow-jti-primary/20 flex items-center gap-3 active:scale-95">
+                                <span wire:loading.remove>Simpan Perubahan</span>
+                                <span wire:loading><i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i></span>
+                                <i data-lucide="arrow-right"
+                                    class="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                                    wire:loading.remove></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-                            <!-- Submit Button -->
-                            <div class="pt-2">
-                                <button type="submit"
-                                    class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    wire:loading.attr="disabled">
-                                    <span wire:loading.remove>Ubah Password</span>
-                                    <span wire:loading class="flex items-center gap-2">
-                                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                            </path>
-                                        </svg>
-                                        Mengubah...
-                                    </span>
-                                </button>
-                            </div>
-                        </form>
-                    @endif
+                <div
+                    class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-8 lg:p-12 overflow-hidden relative">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-rose-50/50 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110">
+                    </div>
+
+                    <div class="flex items-center gap-4 mb-10 relative">
+                        <div class="p-3 bg-rose-50 rounded-xl">
+                            <i data-lucide="shield-check" class="w-6 h-6 text-rose-500"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Kata Sandi & Keamanan</h2>
+                    </div>
+
+                    <form wire:submit="updatePassword" class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-sm font-bold text-slate-700 ml-1">Password Saat Ini</label>
+                            <input type="password" wire:model="currentPassword"
+                                class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-200 transition-all font-medium">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-slate-700 ml-1">Password Baru</label>
+                            <input type="password" wire:model="password"
+                                class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-200 transition-all font-medium">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-slate-700 ml-1">Konfirmasi Password Baru</label>
+                            <input type="password" wire:model="passwordConfirmation"
+                                class="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-200 transition-all font-medium">
+                        </div>
+
+                        <div class="md:col-span-2 pt-4 flex items-center justify-between bg-slate-50 p-6 rounded-2xl">
+                            <p class="text-xs text-slate-500 max-w-[240px]">Pastikan password mengandung kombinasi
+                                huruf besar, angka, dan simbol.</p>
+                            <button type="submit"
+                                class="px-8 py-4 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-200">
+                                Perbarui Keamanan
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
