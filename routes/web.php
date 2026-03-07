@@ -27,12 +27,23 @@ Route::prefix('classes')->name('classes.')->group(function () {
     Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
 });
 
+
+Route::middleware(['auth'])->prefix('/user')->name('user.')->group(function () {
+    Route::get('/', function () {
+        // Cek manual apakah sudah verified
+        if (! auth()->user()?->hasVerifiedEmail()) {
+            // Redirect ke halaman prompt Filament (bukan Laravel default)
+            return redirect()->route('filament.user.auth.email-verification.prompt'); // sesuaikan panel ID kamu
+            // atau filament()->getPanel('user')->getEmailVerificationPromptUrl()
+        }
+
+        return redirect()->route('home');
+    })->name('index');
+});
+
 // --- User Dashboard Routes (Authenticated) ---
 // Menggunakan middleware 'auth' yang sekarang akan me-redirect ke filament.user.auth.login jika belum login
 Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->group(function () {
-    Route::get('/user', function () {
-        return redirect('/');
-    });
     // Profil & Keamanan
     Route::get('/', function () {
         return redirect()->route('student.profile');
