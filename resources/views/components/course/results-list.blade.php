@@ -2,7 +2,7 @@
 
 {{-- Course Results List with Pagination --}}
 <div class="grow">
-    <div class="space-y-2">
+    <div class="space-y-4">
         @forelse($courses as $course)
             <x-course.list-card-horizontal :course="$course" />
         @empty

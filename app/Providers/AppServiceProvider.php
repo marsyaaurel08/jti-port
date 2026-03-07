@@ -37,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
         User::observe(UserObserver::class);
 
         Blade::component('layouts.app', 'layouts.app');
+        Blade::component('layouts.user', 'layouts.user');
+
 
         // Cache categories untuk navbar dengan durasi 24 jam - untuk semua user
         View::composer('*', function ($view) {

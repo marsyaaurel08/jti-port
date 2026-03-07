@@ -6,14 +6,11 @@
     'isPaid' => false,
 ])
 
-<aside class="w-full md:w-72 shrink-0 space-y-4" wire:key="sidebar-container">
+<aside class="w-full shrink-0 space-y-4" wire:key="sidebar-container">
 
     {{-- Header Sidebar (Optional: untuk Reset All) --}}
     <div class="flex items-center justify-between px-1 mb-6">
         <h2 class="text-lg font-bold text-slate-800">Filter</h2>
-        <button wire:click="resetFilters" class="text-xs font-semibold text-jti-primary hover:underline">
-            Reset Semua
-        </button>
     </div>
 
     {{-- 1. Group Kategori --}}
@@ -59,14 +56,22 @@
                 <label class="cursor-pointer">
                     <input type="checkbox" wire:model.live="isFree" class="hidden peer">
                     <div
-                        class="px-3 py-2 text-center text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-500 peer-checked:border-jti-primary peer-checked:bg-jti-primary peer-checked:text-white transition-all">
+                        class="px-3 py-2.5 text-center text-xs font-semibold rounded-xl border border-slate-100 bg-white text-slate-500
+            {{-- State: Checked --}}
+            peer-checked:border-jti-yellow peer-checked:bg-jti-yellow peer-checked:text-jti-primary
+            {{-- Animation --}}
+            transition-all duration-300 shadow-sm peer-checked:shadow-jti-yellow/20 active:scale-95">
                         Gratis
                     </div>
                 </label>
                 <label class="cursor-pointer">
                     <input type="checkbox" wire:model.live="isPaid" class="hidden peer">
                     <div
-                        class="px-3 py-2 text-center text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-500 peer-checked:border-jti-primary peer-checked:bg-jti-primary peer-checked:text-white transition-all">
+                        class="px-3 py-2.5 text-center text-xs font-semibold rounded-xl border border-slate-100 bg-white text-slate-500
+            {{-- State: Checked --}}
+            peer-checked:border-jti-yellow peer-checked:bg-jti-yellow peer-checked:text-jti-primary
+            {{-- Animation --}}
+            transition-all duration-300 shadow-sm peer-checked:shadow-jti-yellow/20 active:scale-95">
                         Berbayar
                     </div>
                 </label>

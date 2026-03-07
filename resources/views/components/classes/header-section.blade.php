@@ -8,61 +8,62 @@
 ])
 
 {{-- Header Container --}}
-<div class="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-6 pb-8 border-b border-gray-100/80">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6 pb-8 border-b border-slate-50">
 
     {{-- Left Side: Info & Filter Status --}}
-    <div class="space-y-4">
-        <div class="flex items-center gap-4">
+    <div class="space-y-5">
+        <div class="flex items-center gap-5">
             {{-- Decorative Icon - Glassmorphism style --}}
-            <div
-                class="hidden sm:flex w-12 h-12 items-center justify-center bg-jti-primary/10 rounded-2xl border border-jti-primary/10 shadow-sm">
-                <svg class="w-6 h-6 text-jti-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18 18.246 18.477 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
+            <div class="hidden sm:flex w-14 h-14 items-center justify-center bg-jti-yellow/10 rounded-[1.5rem] border border-jti-yellow/10 shadow-sm text-jti-primary">
+                <i data-lucide="book-open" class="w-6 h-6"></i>
             </div>
 
             <div class="space-y-1">
-                <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+                <h1 class="text-2xl md:text-3xl font-semibold text-slate-800 tracking-tight">
                     {{ number_format($total, 0, ',', '.') }}
-                    <span class="text-gray-400 font-medium text-lg md:text-xl ml-1">Kelas Tersedia</span>
+                    <span class="text-slate-400 font-medium text-lg md:text-xl ml-1">kelas tersedia</span>
                 </h1>
-                <p class="text-sm text-gray-500 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Mengeksplorasi materi pembelajaran terbaik untuk Anda
+                <p class="text-xs text-slate-500 font-medium flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    mengeksplorasi materi pembelajaran terbaik untuk anda
                 </p>
             </div>
         </div>
 
         {{-- Active Filter Badges --}}
         @if (!empty($selectedLevels) || $isFree || $isPaid || !empty($selectedCategories))
-            <div class="flex flex-wrap items-center gap-2 pt-2">
+            <div class="flex flex-wrap items-center gap-2.5 pt-1">
                 {{-- Reset Button --}}
                 <button wire:click="resetFilters"
-                    class="group flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all duration-300 border border-red-100 shadow-sm hover:shadow-md">
-                    <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span class="text-xs font-bold uppercase tracking-wider">Reset Semua</span>
+                    class="group flex items-center gap-2 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-all duration-300 border border-rose-100/50 active:scale-95 shadow-sm capitalize">
+                    <i data-lucide="x" class="w-3.5 h-3.5 transition-transform group-hover:rotate-90"></i>
+                    <span class="text-xs font-semibold">reset filter</span>
                 </button>
 
-                {{-- Visual Indicator for active filters (Contoh) --}}
+                {{-- Visual Indicator for active filters --}}
                 @if ($isFree)
-                    <span
-                        class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-medium rounded-lg border border-gray-200">Gratis</span>
+                    <span class="px-4 py-2 bg-slate-50 text-slate-600 text-[11px] font-semibold rounded-xl border border-slate-100 shadow-sm">Gratis</span>
                 @endif
                 @if ($isPaid)
-                    <span
-                        class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-medium rounded-lg border border-gray-200">Berbayar</span>
+                    <span class="px-4 py-2 bg-slate-50 text-slate-600 text-[11px] font-semibold rounded-xl border border-slate-100 shadow-sm">Berbayar</span>
                 @endif
+
+                {{-- Contoh untuk Categories atau Levels yang terpilih --}}
+                @foreach($selectedLevels as $level)
+                    <span class="px-4 py-2 bg-jti-yellow/10 text-jti-primary text-[11px] font-semibold rounded-xl border border-jti-yellow/20 shadow-sm capitalize">
+                        {{ strtolower($level) }}
+                    </span>
+                @endforeach
             </div>
         @endif
     </div>
 
     {{-- Right Side: Sorting Component --}}
-    <div class="flex items-center gap-3">
-        <x-classes.sort-dropdown :sort="$sort" />
+    <div class="flex items-center gap-4">
+        <div class="flex flex-col gap-1.5">
+            <div class="relative min-w-[220px]">
+                <x-classes.sort-dropdown :sort="$sort" />
+            </div>
+        </div>
     </div>
 </div>
