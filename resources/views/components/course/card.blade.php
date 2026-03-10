@@ -3,7 +3,7 @@
 <div class="h-full" x-data="{ isLoading: false }">
     <div class="relative h-full">
         <div
-            class="group bg-white border border-gray-100 rounded-sm overflow-hidden hover:shadow-[0_20px_50px_rgba(20,33,61,0.12)] transition-all duration-500 flex flex-col h-full relative z-30 font-sans">
+            class="group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-[0_20px_50px_rgba(20,33,61,0.12)] transition-all duration-500 flex flex-col h-full relative z-30 font-sans">
 
             {{-- Image Section --}}
             <div class="relative h-40 shrink-0 overflow-hidden">

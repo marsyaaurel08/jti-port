@@ -69,13 +69,11 @@
 
         {{-- Action Buttons --}}
         <div class="flex flex-col gap-3 mb-8" x-data="{ isLoading: false }">
-            <form action="{{ route('student.cart.add-class', $class->id) }}" method="POST">
-                @csrf
-                <button
-                    class="w-full py-4 bg-jti-yellow text-jti-primary font-bold rounded-xl hover:shadow-[0_0_20px_rgba(252,211,77,0.3)] hover:-translate-y-0.5 transition-all text-sm">
-                    Daftar Sekarang
-                </button>
-            </form>
+            {{-- Checkout Link --}}
+            <a href="{{ auth()->check() ? route('student.checkout.class', $class->slug) : route('filament.user.auth.login') }}"
+                class="w-full py-3.5 bg-jti-yellow text-jti-primary font-semibold rounded-xl hover:bg-amber-400 transition-all text-sm flex items-center justify-center active:scale-[0.98] shadow-sm">
+                daftar sekarang
+            </a>
 
             @if (
                 !auth()->check() ||
@@ -86,10 +84,11 @@
                     class="w-full py-4 bg-white/5 border border-white/10 text-gray-300 font-semibold rounded-xl hover:bg-white/10 transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-2 group">
 
                     <i data-lucide="shopping-cart" x-show="!isLoading"
-                        class="w-4 h-4 group-hover:text-jti-yellow transition-colors"></i>
+                        class="w-4 h-4 text-slate-400 group-hover:text-white transition-colors"></i>
 
-                    <svg x-show="isLoading" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
+                    {{-- Loading Spinner --}}
+                    <svg x-show="isLoading" x-cloak class="w-4 h-4 animate-spin text-jti-primary" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                             stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor"
@@ -97,7 +96,7 @@
                         </path>
                     </svg>
 
-                    <span>Tambah ke Keranjang</span>
+                    <span>tambah ke keranjang</span>
                 </button>
             @endif
         </div>

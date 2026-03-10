@@ -7,7 +7,10 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StudentController;
+use App\Livewire\StudentClassCheckout;
+use App\Livewire\StudentCourseCheckout;
 use App\Livewire\StudentLesson;
+use App\Livewire\StudentOrders;
 use App\Livewire\UserCart;
 use App\Livewire\UserProfile;
 use App\Livewire\UserTransactions;
@@ -27,12 +30,22 @@ Route::prefix('classes')->name('classes.')->group(function () {
     Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
 });
 
+Route::middleware(['auth'])->prefix('/user')->name('user.')->group(function () {
+    Route::get('/', function () {
+        // Cek manual apakah sudah verified
+        if (! auth()->user()?->hasVerifiedEmail()) {
+            // Redirect ke halaman prompt Filament (bukan Laravel default)
+            return redirect()->route('filament.user.auth.email-verification.prompt'); // sesuaikan panel ID kamu
+            // atau filament()->getPanel('user')->getEmailVerificationPromptUrl()
+        }
+
+        return redirect()->route('home');
+    })->name('index');
+});
+
 // --- User Dashboard Routes (Authenticated) ---
 // Menggunakan middleware 'auth' yang sekarang akan me-redirect ke filament.user.auth.login jika belum login
 Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->group(function () {
-    Route::get('/user', function () {
-        return redirect('/');
-    });
     // Profil & Keamanan
     Route::get('/', function () {
         return redirect()->route('student.profile');
@@ -55,6 +68,13 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
     // Keranjang (Authenticated Only)
     Route::post('/cart/add/{course}', [CartController::class, 'store'])->name('cart.add');
     Route::post('/cart/add-class/{courseClass}', [CartController::class, 'storeClass'])->name('cart.add-class');
+
+    // Checkout - Terpisah untuk Course dan Class
+    Route::get('/course/checkout/{slug}', StudentCourseCheckout::class)->name('checkout.course');
+    Route::get('/class/checkout/{slug}', StudentClassCheckout::class)->name('checkout.class');
+
+    // Orders
+    Route::get('/orders', StudentOrders::class)->name('orders');
 
     // Transaksi
     Route::get('/transactions', UserTransactions::class)->name('transactions');

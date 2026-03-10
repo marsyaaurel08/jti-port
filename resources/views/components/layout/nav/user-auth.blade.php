@@ -9,8 +9,8 @@
     </div>
 @else
     {{-- Profile Dropdown Desktop --}}
-    <div class="relative hidden md:block" x-data="{ openProfile: false }" @mouseenter="openProfile = true"
-        @mouseleave="openProfile = false">
+    <div class="relative hidden md:block" x-data="{ openProfile: false, cartCount: {{ count(session('cart', [])) }} }" @mouseenter="openProfile = true"
+        @mouseleave="openProfile = false" @cart-updated.window="cartCount = $event.detail.count">
         <button class="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-all">
             <div
                 class="w-10 h-10 rounded-full bg-jti-primary flex items-center justify-center text-white shadow-sm ring-2 ring-transparent hover:ring-jti-orange/20 transition-all">
@@ -41,8 +41,10 @@
                 <a href="{{ route('student.cart') }}"
                     class="flex items-center justify-between px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">
                     <span>Keranjang Belanja</span>
-                    <span
-                        class="bg-jti-orange text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">9</span>
+                    <template x-if="cartCount > 0">
+                        <span x-text="cartCount"
+                            class="bg-jti-orange text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full"></span>
+                    </template>
                 </a>
                 <a href="{{ route('student.transactions') }}"
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Riwayat

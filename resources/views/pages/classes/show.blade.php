@@ -148,7 +148,7 @@
                     <div class="sticky top-24">
                         {{-- Soft shadow untuk efek kedalaman --}}
                         <div class="absolute -inset-4 bg-gray-200/20 blur-2xl rounded-[32px] -z-10"></div>
-                        <x-classes.enrollment-card :class="$class" />
+                        <x-classes.purchase-card :class="$class" />
                     </div>
                 </div>
 
