@@ -7,7 +7,10 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StudentController;
+use App\Livewire\StudentClassCheckout;
+use App\Livewire\StudentCourseCheckout;
 use App\Livewire\StudentLesson;
+use App\Livewire\StudentOrders;
 use App\Livewire\UserCart;
 use App\Livewire\UserProfile;
 use App\Livewire\UserTransactions;
@@ -26,7 +29,6 @@ Route::prefix('classes')->name('classes.')->group(function () {
     Route::get('/', [ClassesController::class, 'index'])->name('index');
     Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
 });
-
 
 Route::middleware(['auth'])->prefix('/user')->name('user.')->group(function () {
     Route::get('/', function () {
@@ -66,6 +68,13 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
     // Keranjang (Authenticated Only)
     Route::post('/cart/add/{course}', [CartController::class, 'store'])->name('cart.add');
     Route::post('/cart/add-class/{courseClass}', [CartController::class, 'storeClass'])->name('cart.add-class');
+
+    // Checkout - Terpisah untuk Course dan Class
+    Route::get('/course/checkout/{slug}', StudentCourseCheckout::class)->name('checkout.course');
+    Route::get('/class/checkout/{slug}', StudentClassCheckout::class)->name('checkout.class');
+
+    // Orders
+    Route::get('/orders', StudentOrders::class)->name('orders');
 
     // Transaksi
     Route::get('/transactions', UserTransactions::class)->name('transactions');
