@@ -171,4 +171,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             ->logExcept(['password', 'remember_token'])
             ->setDescriptionForEvent(fn (string $eventName) => "User {$eventName}");
     }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 }
