@@ -2,7 +2,7 @@
 
 <a href="/courses/{{ $course->slug }}">
     <div
-        class="group flex flex-col md:flex-row bg-white border border-slate-200 rounded-md overflow-hidden hover:border-jti-primary/30 hover:shadow-xl transition-all duration-500 relative">
+        class="group flex flex-col md:flex-row bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-jti-primary/30 hover:shadow-xl transition-all duration-500 relative">
 
         {{-- Thumbnail Section --}}
         <div class="md:w-72 h-52 shrink-0 overflow-hidden relative">

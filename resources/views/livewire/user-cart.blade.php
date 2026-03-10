@@ -39,7 +39,8 @@
                             class="group p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 hover:bg-slate-50/50 transition-colors">
 
                             {{-- Thumbnail dengan soft border --}}
-                            <div class="relative w-36 h-24 shrink-0 overflow-hidden rounded-xl bg-slate-100 border border-slate-200/50">
+                            <div
+                                class="relative w-36 h-24 shrink-0 overflow-hidden rounded-xl bg-slate-100 border border-slate-200/50">
                                 <img src="{{ $thumbnail ?? 'https://via.placeholder.com/150' }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                             </div>
@@ -47,12 +48,14 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1.5">
                                     {{-- Badge Tipe: Menggunakan warna kuning sebagai aksen --}}
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold {{ $isClass ? 'bg-jti-yellow/10 text-jti-maroon' : 'bg-slate-100 text-slate-500' }}">
+                                    <span
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-semibold {{ $isClass ? 'bg-jti-yellow/10 text-jti-maroon' : 'bg-slate-100 text-slate-500' }}">
                                         {{ $isClass ? 'Live class' : 'Kursus digital' }}
                                     </span>
                                 </div>
 
-                                <h3 class="text-base font-semibold text-slate-900 leading-snug group-hover:text-jti-primary transition-colors">
+                                <h3
+                                    class="text-base font-semibold text-slate-900 leading-snug group-hover:text-jti-primary transition-colors">
                                     {{ $course['title'] }}
                                 </h3>
 
@@ -65,12 +68,19 @@
                             </div>
 
                             <div class="shrink-0">
-                                <button wire:click="removeItem({{ $item['id'] }})"
-                                    wire:loading.attr="disabled"
+                                <button wire:click="removeItem({{ $item['id'] }})" wire:loading.attr="disabled"
                                     class="flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-slate-100 text-slate-300 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-all shadow-sm">
 
                                     <div wire:loading.remove wire:target="removeItem({{ $item['id'] }})">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
+                                            <path d="M10 11v6" />
+                                            <path d="M14 11v6" />
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                            <path d="M3 6h18" />
+                                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        </svg>
                                     </div>
 
                                     <div wire:loading wire:target="removeItem({{ $item['id'] }})">
@@ -83,17 +93,26 @@
                 </div>
 
                 {{-- Summary Section: Dominasi Kuning untuk CTA --}}
-                <div class="p-8 bg-jti-yellow/5 border-t border-jti-yellow/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div
+                    class="p-8 bg-jti-yellow/5 border-t border-jti-yellow/10 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div class="text-center sm:text-left">
                         <p class="text-xs font-medium text-slate-500 mb-1">Total pembayaran</p>
                         <p class="text-2xl font-semibold text-jti-primary">
-                            Rp {{ number_format(collect($cartItems)->sum(fn($i) => ($i['course']['price'] ?? $i['class']['price'])), 0, ',', '.') }}
+                            Rp
+                            {{ number_format(collect($cartItems)->sum(fn($i) => $i['course']['price'] ?? $i['class']['price']), 0, ',', '.') }}
                         </p>
                     </div>
 
-                    <button class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-jti-yellow text-jti-primary font-semibold rounded-xl hover:bg-jti-yellow/90 hover:shadow-lg hover:shadow-jti-yellow/20 transition-all active:scale-95">
+                    <button
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-jti-yellow text-jti-primary font-semibold rounded-xl hover:bg-jti-yellow/90 hover:shadow-lg hover:shadow-jti-yellow/20 transition-all active:scale-95">
                         Lanjutkan ke pembayaran
-                        <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-circle-arrow-right-icon lucide-circle-arrow-right">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="m12 16 4-4-4-4" />
+                            <path d="M8 12h8" />
+                        </svg>
                     </button>
                 </div>
             </div>

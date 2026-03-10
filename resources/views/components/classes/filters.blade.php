@@ -14,7 +14,7 @@
     </div>
 
     {{-- 1. Group Kategori --}}
-    <div class="bg-white border border-slate-200 rounded-md p-5 shadow-sm overflow-hidden"
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm overflow-hidden"
         wire:key="filter-group-categories">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Kategori</h3>
         <div class="space-y-3 max-h-52 overflow-y-auto pr-2 custom-scrollbar">
@@ -33,7 +33,7 @@
     </div>
 
     {{-- 2. Group Level & 3. Group Harga (Digabung dalam satu Card untuk efisiensi) --}}
-    <div class="bg-white border border-slate-200 rounded-md divide-y divide-slate-100 shadow-sm">
+    <div class="bg-white border border-slate-200 rounded-2xl divide-y divide-slate-100 shadow-sm">
         {{-- Section Level --}}
         <div class="p-5" wire:key="filter-group-levels">
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Level</h3>

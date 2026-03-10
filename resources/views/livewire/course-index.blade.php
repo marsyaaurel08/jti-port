@@ -1,6 +1,6 @@
 {{-- Container Utama dengan Background subtle agar card putih lebih menonjol --}}
 <div class="min-h-screen bg-[#F8FAFC]">
-    <div class="max-w-[1440px] mx-auto px-10 lg:px-72 py-8">
+    <div class="max-w-[1440px] mx-auto px-10 md:px-48 py-8">
 
         {{-- Header Section: Diberi margin bottom yang lebih besar agar layout bernapas --}}
         <div class="mb-4">
@@ -17,7 +17,7 @@
 
                 {{-- Info Tambahan di bawah filter (Khas Academix) --}}
                 <div
-                    class="mt-8 p-6 bg-jti-primary rounded-[2rem] text-white overflow-hidden relative group cursor-pointer transition-all hover:shadow-xl hover:shadow-jti-primary/10 active:scale-[0.98]">
+                    class="mt-8 p-6 bg-jti-primary rounded-2xl text-white overflow-hidden relative group cursor-pointer transition-all hover:shadow-xl hover:shadow-jti-primary/10 active:scale-[0.98]">
                     {{-- Konten Utama --}}
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-2">

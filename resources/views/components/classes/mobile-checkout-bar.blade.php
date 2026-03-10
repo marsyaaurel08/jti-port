@@ -24,13 +24,11 @@
         </div>
 
         {{-- Buy Now Button --}}
-        <form action="{{ route('student.cart.add-class', $class->id) }}" method="POST" class="flex-shrink-0 w-32">
-            @csrf
-            <button
-                class="w-full py-3 bg-jti-primary text-white font-semibold rounded-lg hover:bg-jti-maroon transition-all active:scale-95 text-sm">
-                Daftar
-            </button>
-        </form>
+        {{-- Checkout Link --}}
+        <a href="{{ auth()->check() ? route('student.checkout.class', $class->slug) : route('filament.user.auth.login') }}"
+            class="w-full py-3 bg-jti-primary text-white font-semibold rounded-lg hover:bg-jti-maroon transition-all active:scale-95 text-sm">
+            Daftar
+        </a>
     </div>
 </div>
 
