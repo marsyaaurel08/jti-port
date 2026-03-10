@@ -31,6 +31,22 @@ class CourseStudentService implements CourseStudentContract
     {
         $course = $enrollment->course;
 
+        // Handle case where course might be null (deleted course but enrollment still exists)
+        if ($course === null) {
+            return [
+                'id' => null,
+                'title' => 'Course Not Available',
+                'description' => 'This course is no longer available.',
+                'image' => 'https://picsum.photos/400/200',
+                'progress' => 0,
+                'status' => 'unavailable',
+                'enrollment' => $enrollment,
+                'slug' => null,
+                'first_lesson_slug' => null,
+                'last_accessed_lesson_slug' => null,
+            ];
+        }
+
         // Get first lesson slug for navigation
         $firstLessonSlug = null;
         $firstChapter = $course->chapters()->with('lessons')->orderBy('sort_order')->first();
@@ -65,6 +81,11 @@ class CourseStudentService implements CourseStudentContract
     public function calculateProgress(Enrollment $enrollment): int
     {
         $course = $enrollment->course;
+
+        // Handle case where course might be null
+        if ($course === null) {
+            return 0;
+        }
 
         // Calculate progress based on completed lessons vs total lessons
         $totalLessons = $course->total_lessons ?? 0;

@@ -68,9 +68,6 @@ class QuestionsRelationManager extends RelationManager
 
                     Textarea::make('explanation')
                         ->rows(2),
-
-                    Textarea::make('hint')
-                        ->rows(2),
                 ])
                 ->columns(2),
 
