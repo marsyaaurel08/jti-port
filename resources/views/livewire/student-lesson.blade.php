@@ -14,48 +14,53 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-10 max-w-7xl mx-auto mb-32">
+    <div class="h-[calc(100vh-80px)] grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-10 max-w-7xl mx-auto">
         <!-- Sidebar Chapters -->
         <div class="lg:col-span-1">
-            <div class="sticky top-24 bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">
-                    {{ $course['title'] ?? 'Loading...' }}
-                </h2>
-                <div class="space-y-2 max-h-96 overflow-y-auto">
-                    @if (!empty($chapters))
-                        @foreach ($chapters as $chapter)
-                            <div class="mb-4">
-                                <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-tight">
-                                    {{ $chapter['title'] }}</h3>
-                                <div class="space-y-1">
-                                    @foreach ($chapter['lessons'] as $chapterLesson)
-                                        @php
-                                            $isCompleted = in_array($chapterLesson['id'], $completedLessonIds);
-                                            $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
-                                        @endphp
-                                        <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
-                                            class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}"
-                                            wire:navigate>
-                                            <span class="inline-block mr-2">
-                                                @if ($isCompleted)
-                                                    ✓
-                                                @else
-                                                    •
-                                                @endif
-                                            </span>
-                                            {{ $chapterLesson['title'] }}
-                                        </a>
-                                    @endforeach
+            <div class="">
+                <div class="sticky -top-40 bg-white rounded-lg shadow-md border border-gray-200 p-6 h-full overflow-y-auto pb-24">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">
+                        {{ $course['title'] ?? 'Loading...' }}
+                    </h2>
+                    <div class="space-y-2">
+                        @if (!empty($chapters))
+                            @foreach ($chapters as $chapter)
+                                <div class="mb-4">
+                                    <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-tight">
+                                        {{ $chapter['title'] }}</h3>
+                                    <div class="space-y-1">
+                                        @foreach ($chapter['lessons'] as $chapterLesson)
+                                            @php
+                                                $isCompleted = in_array($chapterLesson['id'], $completedLessonIds);
+                                                $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
+                                            @endphp
+
+                                            <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
+                                                class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}"
+                                                wire:navigate>
+                                                <span class="inline-block mr-2">
+                                                    @if ($isCompleted)
+                                                        ✓
+                                                    @else
+                                                        •
+                                                    @endif
+                                                </span>
+                                                {{ $chapterLesson['title'] }}
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    @endif
+                            @endforeach
+
+                        @endif
+                    </div>
                 </div>
+
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="lg:col-span-3">
+        <div class="lg:col-span-3 h-full overflow-y-auto pb-24">
             @if (isset($lesson))
                 <!-- Lesson Header -->
                 <div class="bg-white rounded-lg shadow-md p-8 mb-6">
