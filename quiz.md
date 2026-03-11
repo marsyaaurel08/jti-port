@@ -11,11 +11,6 @@ This document provides JSON examples for each question type.
 
 // question_config
 {
-  "media": {
-    "type": "image",
-    "media_id": 123,
-    "alt_text": "Map of France"
-  },
   "options": [
     { "id": "A", "text": "London" },
     { "id": "B", "text": "Paris" },
@@ -65,9 +60,6 @@ This document provides JSON examples for each question type.
 "The Earth is flat."
 
 // question_config
-{
-  "media": null
-}
 
 // answer_key
 {

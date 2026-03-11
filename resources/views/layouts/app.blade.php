@@ -17,7 +17,11 @@
     <x-alert.toast />
 
     <main class="min-h-screen pt-20">
-        {{ $slot }}
+        @hasSection('content')
+            @yield('content')
+        @else
+            {{ $slot }}
+        @endif
     </main>
 
     @if (!isset($showFooter) || $showFooter)
