@@ -91,7 +91,7 @@
                 @endphp
 
                 @if($currentQuestion['type'] === 'single_choice')
-                    <x-quiz.single-choice :options="$options" :selected="$selectedAnswer" wireModel="selectedAnswer" />
+                    <x-quiz.single-choice :options="$options" :selected="$selectedAnswer" wireModel="selectedAnswer" :questionId="$currentQuestion['id']" />
                 @elseif($currentQuestion['type'] === 'multiple_choice')
                     <x-quiz.multiple-choice :options="$options" :selected="$selectedAnswers" wireModel="selectedAnswers" />
                 @endif

@@ -37,6 +37,8 @@ class QuizAttempt extends Component
 
     public $timeRemaining = 0;
 
+    protected $isLoadingAnswers = false;
+
     public function mount($id): void
     {
         $this->quizId = $id;
@@ -47,12 +49,18 @@ class QuizAttempt extends Component
 
     public function updatedSelectedAnswer(): void
     {
-        $this->saveCurrentAnswer();
+        // Only save if not loading answers and value is not null
+        if (!$this->isLoadingAnswers && $this->selectedAnswer !== null) {
+            $this->saveCurrentAnswer();
+        }
     }
 
     public function updatedSelectedAnswers(): void
     {
-        $this->saveCurrentAnswer();
+        // Only save if not loading answers
+        if (!$this->isLoadingAnswers) {
+            $this->saveCurrentAnswer();
+        }
     }
 
     public function loadQuiz(): void
@@ -93,6 +101,10 @@ class QuizAttempt extends Component
 
     public function loadAnswers(): void
     {
+        // Clear selections first to prevent Livewire from triggering saves during load
+        $this->selectedAnswer = null;
+        $this->selectedAnswers = [];
+
         $this->answeredQuestionIds = QuizAnswer::where('quiz_attempt_id', $this->attempt->id)
             ->pluck('question_id')
             ->toArray();
@@ -115,11 +127,10 @@ class QuizAttempt extends Component
                     $this->selectedAnswer = $answer->user_answer ?? null;
                     $this->selectedAnswers = [];
                 }
-            } else {
-                $this->selectedAnswer = null;
-                $this->selectedAnswers = [];
             }
         }
+
+        $this->isLoadingAnswers = false;
     }
 
     public function goToQuestion($index): void
@@ -130,9 +141,13 @@ class QuizAttempt extends Component
                 $this->saveCurrentAnswer();
             }
 
+            // Set flag to prevent saving during navigation
+            $this->isLoadingAnswers = true;
+
+            // Update index
             $this->currentQuestionIndex = $index;
-            $this->selectedAnswer = null;
-            $this->selectedAnswers = [];
+
+            // Load answers for the new question (this will clear selections and load new ones)
             $this->loadAnswers();
 
             // Save the current question position to database
@@ -151,21 +166,31 @@ class QuizAttempt extends Component
 
     public function nextQuestion(): void
     {
-        if ($this->currentQuestionIndex < count($this->questions) - 1) {
-            $this->goToQuestion($this->currentQuestionIndex + 1);
+        $totalQuestions = count($this->questions);
+        $currentIndex = $this->currentQuestionIndex;
+
+        if ($currentIndex < $totalQuestions - 1) {
+            $this->goToQuestion($currentIndex + 1);
         }
+    }
+
+    #[\Livewire\Attributes\On('nextQuestion')]
+    public function onNextQuestion(): void
+    {
+        $this->nextQuestion();
     }
 
     public function saveCurrentAnswer(): void
     {
         $currentQuestion = $this->questions[$this->currentQuestionIndex];
         $questionType = $currentQuestion['type'] ?? 'single_choice';
+        $questionId = $currentQuestion['id'];
 
         if ($questionType === 'multiple_choice') {
             QuizAnswer::updateOrCreate(
                 [
                     'quiz_attempt_id' => $this->attempt->id,
-                    'question_id' => $currentQuestion['id'],
+                    'question_id' => $questionId,
                 ],
                 [
                     'user_answer' => $this->selectedAnswers,
@@ -181,7 +206,7 @@ class QuizAttempt extends Component
             QuizAnswer::updateOrCreate(
                 [
                     'quiz_attempt_id' => $this->attempt->id,
-                    'question_id' => $currentQuestion['id'],
+                    'question_id' => $questionId,
                 ],
                 [
                     'user_answer' => $this->selectedAnswer,
@@ -191,7 +216,10 @@ class QuizAttempt extends Component
             );
         }
 
-        $this->loadAnswers();
+        // Update answered question IDs for progress tracking
+        if (!in_array($questionId, $this->answeredQuestionIds)) {
+            $this->answeredQuestionIds[] = $questionId;
+        }
     }
 
     public function submitQuiz()
