@@ -3,14 +3,6 @@
 /**
  * QuizAttempt Livewire Component
  *
- * Component ini menangani tampilan dan logika untuk menjawab kuis.
- * Fungsi utama:
- * - Memuat data kuis dan pertanyaan dari database
- * - Membuat atau mengambil attempt kuis yang sedang berjalan
- * - Menyimpan jawaban user untuk setiap pertanyaan
- * - Navigasi antar pertanyaan
- * - Menghitung progress dan waktu tersisa
- * - Submit kuis
  *
  * Route: /student/quiz/attempt/{id}
  */
@@ -79,7 +71,11 @@ class QuizAttempt extends Component
                 'quiz_id' => $this->quizId,
                 'score' => 0,
                 'started_at' => now(),
+                'current_question_index' => 0,
             ]);
+        } else {
+            // Restore the saved question position
+            $this->currentQuestionIndex = $this->attempt->current_question_index ?? 0;
         }
     }
 
@@ -108,6 +104,11 @@ class QuizAttempt extends Component
             $this->currentQuestionIndex = $index;
             $this->selectedAnswer = null;
             $this->loadAnswers();
+
+            // Save the current question position to database
+            $this->attempt->update([
+                'current_question_index' => $this->currentQuestionIndex,
+            ]);
         }
     }
 
