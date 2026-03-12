@@ -25,6 +25,8 @@ class QuizAttempt extends Component
 
     public $selectedAnswer = null;
 
+    public $selectedAnswers = [];
+
     public $quiz = null;
 
     public $questions = [];
@@ -41,6 +43,16 @@ class QuizAttempt extends Component
         $this->loadQuiz();
         $this->initializeAttempt();
         $this->loadAnswers();
+    }
+
+    public function updatedSelectedAnswer(): void
+    {
+        $this->saveCurrentAnswer();
+    }
+
+    public function updatedSelectedAnswers(): void
+    {
+        $this->saveCurrentAnswer();
     }
 
     public function loadQuiz(): void
@@ -87,13 +99,25 @@ class QuizAttempt extends Component
 
         // Load current question's answer if exists
         if (isset($this->questions[$this->currentQuestionIndex])) {
-            $currentQuestionId = $this->questions[$this->currentQuestionIndex]['id'];
+            $currentQuestion = $this->questions[$this->currentQuestionIndex];
+            $currentQuestionId = $currentQuestion['id'];
+            $questionType = $currentQuestion['type'] ?? 'single_choice';
+
             $answer = QuizAnswer::where('quiz_attempt_id', $this->attempt->id)
                 ->where('question_id', $currentQuestionId)
                 ->first();
 
             if ($answer) {
-                $this->selectedAnswer = $answer->user_answer;
+                if ($questionType === 'multiple_choice') {
+                    $this->selectedAnswers = $answer->user_answer ?? [];
+                    $this->selectedAnswer = null;
+                } else {
+                    $this->selectedAnswer = $answer->user_answer ?? null;
+                    $this->selectedAnswers = [];
+                }
+            } else {
+                $this->selectedAnswer = null;
+                $this->selectedAnswers = [];
             }
         }
     }
@@ -101,8 +125,14 @@ class QuizAttempt extends Component
     public function goToQuestion($index): void
     {
         if ($index >= 0 && $index < count($this->questions)) {
+            // Save current answer before navigating (if navigating to a different question)
+            if ($index !== $this->currentQuestionIndex) {
+                $this->saveCurrentAnswer();
+            }
+
             $this->currentQuestionIndex = $index;
             $this->selectedAnswer = null;
+            $this->selectedAnswers = [];
             $this->loadAnswers();
 
             // Save the current question position to database
@@ -122,30 +152,44 @@ class QuizAttempt extends Component
     public function nextQuestion(): void
     {
         if ($this->currentQuestionIndex < count($this->questions) - 1) {
-            $this->saveCurrentAnswer();
             $this->goToQuestion($this->currentQuestionIndex + 1);
         }
     }
 
     public function saveCurrentAnswer(): void
     {
-        if ($this->selectedAnswer === null) {
-            return;
-        }
-
         $currentQuestion = $this->questions[$this->currentQuestionIndex];
+        $questionType = $currentQuestion['type'] ?? 'single_choice';
 
-        QuizAnswer::updateOrCreate(
-            [
-                'quiz_attempt_id' => $this->attempt->id,
-                'question_id' => $currentQuestion['id'],
-            ],
-            [
-                'user_answer' => $this->selectedAnswer,
-                'is_correct' => false,
-                'score_obtained' => 0,
-            ]
-        );
+        if ($questionType === 'multiple_choice') {
+            QuizAnswer::updateOrCreate(
+                [
+                    'quiz_attempt_id' => $this->attempt->id,
+                    'question_id' => $currentQuestion['id'],
+                ],
+                [
+                    'user_answer' => $this->selectedAnswers,
+                    'is_correct' => false,
+                    'score_obtained' => 0,
+                ]
+            );
+        } else {
+            if ($this->selectedAnswer === null) {
+                return;
+            }
+
+            QuizAnswer::updateOrCreate(
+                [
+                    'quiz_attempt_id' => $this->attempt->id,
+                    'question_id' => $currentQuestion['id'],
+                ],
+                [
+                    'user_answer' => $this->selectedAnswer,
+                    'is_correct' => false,
+                    'score_obtained' => 0,
+                ]
+            );
+        }
 
         $this->loadAnswers();
     }
