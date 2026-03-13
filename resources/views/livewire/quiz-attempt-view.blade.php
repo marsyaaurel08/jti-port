@@ -5,7 +5,7 @@
 --}}
 <div class="h-screen flex flex-col bg-gray-50 font-sans text-gray-800 overflow-hidden">
     <!-- Fixed Header -->
-    <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20">
+    <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
         <div class="flex items-center gap-3">
             <a href="#" class="flex items-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -100,7 +100,7 @@
     </div>
 
     <!-- Fixed Footer -->
-    <footer class="flex-shrink-0 bg-white border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center z-20">
+    <footer class="flex-shrink-0 bg-white border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center z-20 sticky bottom-0">
         <button wire:click="previousQuestion" @disabled($currentQuestionIndex === 0) class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm {{ $currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             <span class="hidden sm:inline">Previous Question</span>
