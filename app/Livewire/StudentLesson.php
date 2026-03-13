@@ -101,6 +101,11 @@ class StudentLesson extends Component
                 })
                 ->firstOrFail();
 
+            // Load quiz if lesson type is quiz
+            if ($this->lesson->type === 'quiz') {
+                $this->lesson->load('quiz');
+            }
+
             // Get all chapters with lessons for the sidebar
             $chapters = Chapter::with(['lessons' => function ($query) {
                 $query->orderBy('sort_order');

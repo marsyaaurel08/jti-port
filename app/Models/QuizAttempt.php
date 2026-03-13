@@ -17,6 +17,7 @@ class QuizAttempt extends Model
         'score',
         'started_at',
         'finished_at',
+        'current_question_index',
     ];
 
     protected function casts(): array
