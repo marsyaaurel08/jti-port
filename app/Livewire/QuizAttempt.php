@@ -44,7 +44,86 @@ class QuizAttempt extends Component
         $this->quizId = $id;
         $this->loadQuiz();
         $this->initializeAttempt();
+        // Don't load answers here - wait for localStorage data
         $this->loadAnswers();
+    }
+
+    /**
+     * Load quiz data from localStorage (called by Alpine.js)
+     */
+    #[\Livewire\Attributes\On('loadFromLocalStorage')]
+    public function loadFromLocalStorage($data): void
+    {
+        if (!$data || !isset($data['answers'])) {
+            return;
+        }
+
+        // Restore current question index from localStorage
+        if (isset($data['currentQuestionIndex'])) {
+            $this->currentQuestionIndex = $data['currentQuestionIndex'];
+            // Update database
+            if ($this->attempt) {
+                $this->attempt->update([
+                    'current_question_index' => $this->currentQuestionIndex,
+                ]);
+            }
+        }
+
+        // Restore answers from localStorage
+        foreach ($data['answers'] as $questionId => $answerData) {
+            $this->restoreAnswerFromLocalStorage($questionId, $answerData);
+        }
+
+        // Refresh answered question IDs
+        $this->answeredQuestionIds = QuizAnswer::where('quiz_attempt_id', $this->attempt->id)
+            ->pluck('question_id')
+            ->toArray();
+
+        // Load current question's answer
+        $this->loadAnswers();
+    }
+
+    /**
+     * Restore a single answer from localStorage data
+     */
+    private function restoreAnswerFromLocalStorage($questionId, $answerData): void
+    {
+        if (!isset($answerData['answer'])) {
+            return;
+        }
+
+        $userAnswer = $answerData['answer'];
+        $questionType = $answerData['questionType'] ?? 'single_choice';
+
+        if ($questionType === 'multiple_choice') {
+            QuizAnswer::updateOrCreate(
+                [
+                    'quiz_attempt_id' => $this->attempt->id,
+                    'question_id' => $questionId,
+                ],
+                [
+                    'user_answer' => $userAnswer,
+                    'is_correct' => false,
+                    'score_obtained' => 0,
+                ]
+            );
+        } else {
+            if ($userAnswer === null) {
+                return;
+            }
+
+            QuizAnswer::updateOrCreate(
+                [
+                    'quiz_attempt_id' => $this->attempt->id,
+                    'question_id' => $questionId,
+                ],
+                [
+                    'user_answer' => $userAnswer,
+                    'is_correct' => false,
+                    'score_obtained' => 0,
+                ]
+            );
+        }
     }
 
     public function updatedSelectedAnswer(): void
@@ -154,6 +233,9 @@ class QuizAttempt extends Component
             $this->attempt->update([
                 'current_question_index' => $this->currentQuestionIndex,
             ]);
+
+            // Dispatch event to update localStorage
+            $this->dispatch('question-navigated', index: $index);
         }
     }
 
@@ -230,7 +312,39 @@ class QuizAttempt extends Component
             'finished_at' => now(),
         ]);
 
+        // Dispatch event to clear localStorage
+        $this->dispatch('quiz-submitted');
+
         return redirect()->route('quiz.result', $this->attempt->id);
+    }
+
+    /**
+     * Submit quiz from localStorage (called by Alpine.js)
+     */
+    #[\Livewire\Attributes\On('submitFromLocalStorage')]
+    public function submitFromLocalStorage($data): void
+    {
+        if (!$data || !isset($data['answers'])) {
+            return;
+        }
+
+        // Save all answers from localStorage to database
+        foreach ($data['answers'] as $questionId => $answerData) {
+            $this->restoreAnswerFromLocalStorage($questionId, $answerData);
+        }
+
+        // Update current question index from localStorage
+        if (isset($data['currentQuestionIndex'])) {
+            $this->currentQuestionIndex = $data['currentQuestionIndex'];
+            $this->attempt->update([
+                'current_question_index' => $this->currentQuestionIndex,
+            ]);
+        }
+
+        // Refresh answered question IDs
+        $this->answeredQuestionIds = QuizAnswer::where('quiz_attempt_id', $this->attempt->id)
+            ->pluck('question_id')
+            ->toArray();
     }
 
     public function getCurrentQuestion(): ?array

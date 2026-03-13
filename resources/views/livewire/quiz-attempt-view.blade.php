@@ -3,7 +3,9 @@
     File ini menangani tampilan UI untuk menjawab kuis.
     Component: app/Livewire/QuizAttempt.php
 --}}
-<div class="h-screen flex flex-col bg-gray-50 font-sans text-gray-800 overflow-hidden">
+<div class="h-screen flex flex-col bg-gray-50 font-sans text-gray-800 overflow-hidden" data-quiz-id="{{ $quizId }}">
+    <!-- Plain JavaScript localStorage (no Alpine.js to avoid conflicts) -->
+    <script src="{{ asset('js/quiz-local-storage-plain.js') }}" defer></script>
     <!-- Fixed Header -->
     <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
         <div class="flex items-center gap-3">
@@ -45,7 +47,8 @@
                         $isCurrent = $index == $currentQuestionIndex;
                         $isAnswered = in_array($question['id'], $answeredQuestionIds);
                     @endphp
-                    <button wire:click="goToQuestion({{ $index }})" class="w-7 h-7 rounded text-xs font-semibold transition-all
+                    <button wire:click="goToQuestion({{ $index }})"
+                            class="w-7 h-7 rounded text-xs font-semibold transition-all
                         {{ $isCurrent ? 'bg-[#ffc107] text-white shadow-md scale-110' : '' }}
                         {{ !$isCurrent && $isAnswered ? 'bg-green-100 text-green-600 border border-green-200' : '' }}
                         {{ !$isCurrent && !$isAnswered ? 'bg-gray-100 text-gray-400 border border-gray-200' : '' }}">
@@ -91,9 +94,9 @@
                 @endphp
 
                 @if($currentQuestion['type'] === 'single_choice')
-                    <x-quiz.single-choice :options="$options" :selected="$selectedAnswer" wireModel="selectedAnswer" :questionId="$currentQuestion['id']" />
+                    <x-quiz.single-choice :options="$options" :selected="$selectedAnswer" wireModel="selectedAnswer" :questionId="$currentQuestion['id']" :questionType="'single_choice'" />
                 @elseif($currentQuestion['type'] === 'multiple_choice')
-                    <x-quiz.multiple-choice :options="$options" :selected="$selectedAnswers" wireModel="selectedAnswers" />
+                    <x-quiz.multiple-choice :options="$options" :selected="$selectedAnswers" wireModel="selectedAnswers" :questionType="'multiple_choice'" :questionId="$currentQuestion['id']" />
                 @endif
             @endif
         </main>
@@ -101,20 +104,23 @@
 
     <!-- Fixed Footer -->
     <footer class="flex-shrink-0 bg-white border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center z-20 sticky bottom-0">
-        <button wire:click="previousQuestion" @disabled($currentQuestionIndex === 0) class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm {{ $currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
+        <button wire:click="previousQuestion"
+                @disabled($currentQuestionIndex === 0) class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm {{ $currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             <span class="hidden sm:inline">Previous Question</span>
             <span class="sm:hidden">Previous</span>
         </button>
 
         @if($currentQuestionIndex < count($questions) - 1)
-            <button wire:click="nextQuestion" class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm">
+            <button wire:click="nextQuestion"
+                    class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm">
                 <span class="hidden sm:inline">Next Question</span>
                 <span class="sm:hidden">Next</span>
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
         @else
-            <button wire:click="submitQuiz" class="flex items-center px-4 md:px-6 py-2 rounded-lg bg-[#ffc107] text-white hover:bg-yellow-500 transition-colors font-semibold text-sm">
+            <button wire:click="submitQuiz"
+                    class="flex items-center px-4 md:px-6 py-2 rounded-lg bg-[#ffc107] text-white hover:bg-yellow-500 transition-colors font-semibold text-sm">
                 <span class="hidden sm:inline">Submit Quiz</span>
                 <span class="sm:hidden">Submit</span>
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>

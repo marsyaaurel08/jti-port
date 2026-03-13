@@ -2,6 +2,8 @@
     'options' => [],
     'selected' => [], // Mengharapkan array, misal: [1, 3]
     'wireModel' => 'selectedAnswers',
+    'questionType' => 'multiple_choice',
+    'questionId' => null,
 ])
 
 <div class="space-y-3 md:space-y-4 pb-16">
@@ -18,6 +20,7 @@
                 <input type="checkbox"
                     wire:model.live="{{ $wireModel }}"
                     value="{{ $option['id'] }}"
+                    onchange="dispatchQuizAnswerSelected({{ $questionId ?? 'null' }}, this.value, '{{ $questionType }}')"
                     class="peer opacity-0 absolute h-full w-full cursor-pointer">
 
                 {{-- Custom Styled Checkbox Box --}}

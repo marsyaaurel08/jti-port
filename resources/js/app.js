@@ -7,6 +7,7 @@ import { createIcons, icons } from "lucide";
 import Splide from "@splidejs/splide";
 import "@splidejs/splide/css";
 import "./cart.js"; // ← Import cart functionality
+import "./quiz-local-storage.js"; // ← Import quiz localStorage functionality
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 createIcons({ icons });

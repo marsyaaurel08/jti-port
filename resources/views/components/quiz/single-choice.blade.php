@@ -6,6 +6,7 @@
     'selected' => null,
     'wireModel' => 'selectedAnswer',
     'questionId' => null,
+    'questionType' => 'single_choice',
 ])
 
 <div wire:key="question-{{ $questionId ?? 'default' }}" class="space-y-3 md:space-y-4 pb-16">
@@ -17,6 +18,7 @@
                     name="answer_{{ $questionId ?? 'default' }}"
                     wire:model.live="{{ $wireModel }}"
                     value="{{ $option['id'] }}"
+                    onchange="dispatchQuizAnswerSelected({{ $questionId ?? 'null' }}, {{ $option['id'] }}, '{{ $questionType }}')"
                     class="peer opacity-0 absolute h-full w-full cursor-pointer">
 
                 {{-- Custom Styled Radio Button --}}
