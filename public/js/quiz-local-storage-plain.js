@@ -184,6 +184,25 @@
             }
         }
 
+        // Add event listeners to all quiz inputs
+        const quizInputs = document.querySelectorAll('.quiz-input');
+        quizInputs.forEach(input => {
+            input.addEventListener('change', function(e) {
+                const questionElement = this.closest('[data-question-id]');
+                const questionId = questionElement?.dataset.questionId;
+                const questionType = questionElement?.dataset.questionType;
+                const value = parseInt(this.value);
+
+                if (questionId) {
+                    // Dispatch event to save to localStorage
+                    const event = new CustomEvent('quiz-answer-selected', {
+                        detail: { questionId, answer: value, questionType }
+                    });
+                    document.dispatchEvent(event);
+                }
+            });
+        });
+
         // Listen for answer selection events
         document.addEventListener('quiz-answer-selected', function(e) {
             const { questionId, answer, questionType } = e.detail;
@@ -194,6 +213,81 @@
         document.addEventListener('question-navigated', function(e) {
             const { index } = e.detail;
             updateCurrentQuestionIndex(quizId, index);
+
+            // Load the answer for the new question from localStorage and update UI
+            const savedData = getQuizData(quizId);
+            if (savedData && savedData.answers) {
+                // Find the quiz element and its questions
+                const quizElement = document.querySelector('[data-quiz-id]');
+                if (quizElement) {
+                    // Get all question elements
+                    const questionElements = document.querySelectorAll('[data-question-id]');
+                    if (questionElements.length > index) {
+                        const questionElement = questionElements[index];
+                        const questionId = questionElement.dataset.questionId;
+                        const questionType = questionElement.dataset.questionType;
+
+                        // Find the answer for this question from localStorage
+                        if (savedData.answers[questionId]) {
+                            const answerData = savedData.answers[questionId];
+
+                            // Update the UI directly (bypass Livewire for performance)
+                            if (questionType === 'multiple_choice') {
+                                // For multiple choice, check/uncheck the appropriate checkboxes
+                                const checkboxes = questionElement.querySelectorAll('input[type="checkbox"]');
+                                checkboxes.forEach(checkbox => {
+                                    checkbox.checked = answerData.answer.includes(parseInt(checkbox.value));
+                                });
+                            } else {
+                                // For single choice, select the appropriate radio button
+                                const radios = questionElement.querySelectorAll('input[type="radio"]');
+                                radios.forEach(radio => {
+                                    radio.checked = (parseInt(radio.value) === answerData.answer);
+                                });
+                            }
+
+                            // Trigger change events to update the visual state
+                            const inputs = questionElement.querySelectorAll('input');
+                            inputs.forEach(input => {
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+        // Listen for request to send localStorage data to Livewire (on submission)
+        document.addEventListener('requestLocalStorageData', function() {
+            const savedData = exportQuizData(quizId);
+            if (savedData && savedData.answers && Object.keys(savedData.answers).length > 0) {
+                // Find Livewire component
+                const quizElement = document.querySelector('[data-quiz-id]');
+                if (quizElement) {
+                    const livewireComponent = quizElement.closest('[wire\\:id]');
+                    if (livewireComponent && window.Livewire) {
+                        const component = window.Livewire.find(livewireComponent.getAttribute('wire:id'));
+                        if (component) {
+                            // Send localStorage data to Livewire
+                            component.call('submitFromLocalStorage', savedData);
+                            // Then finalize the submission
+                            component.call('finalizeSubmission');
+                        }
+                    }
+                }
+            } else {
+                // No data in localStorage, just finalize
+                const quizElement = document.querySelector('[data-quiz-id]');
+                if (quizElement) {
+                    const livewireComponent = quizElement.closest('[wire\\:id]');
+                    if (livewireComponent && window.Livewire) {
+                        const component = window.Livewire.find(livewireComponent.getAttribute('wire:id'));
+                        if (component) {
+                            component.call('finalizeSubmission');
+                        }
+                    }
+                }
+            }
         });
 
         // Listen for quiz submitted event

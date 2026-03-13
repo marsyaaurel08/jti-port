@@ -16,10 +16,9 @@
                 {{-- Hidden Native Radio for Livewire --}}
                 <input type="radio"
                     name="answer_{{ $questionId ?? 'default' }}"
-                    wire:model.live="{{ $wireModel }}"
+                    wire:model="{{ $wireModel }}"
                     value="{{ $option['id'] }}"
-                    onchange="dispatchQuizAnswerSelected({{ $questionId ?? 'null' }}, {{ $option['id'] }}, '{{ $questionType }}')"
-                    class="peer opacity-0 absolute h-full w-full cursor-pointer">
+                    class="peer opacity-0 absolute h-full w-full cursor-pointer quiz-input">
 
                 {{-- Custom Styled Radio Button --}}
                 <div class="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 transition-colors flex items-center justify-center

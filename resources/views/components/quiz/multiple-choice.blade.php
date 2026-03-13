@@ -18,10 +18,9 @@
             <div class="relative flex items-center justify-center">
                 {{-- Hidden Native Checkbox untuk Livewire --}}
                 <input type="checkbox"
-                    wire:model.live="{{ $wireModel }}"
+                    wire:model="{{ $wireModel }}"
                     value="{{ $option['id'] }}"
-                    onchange="dispatchQuizAnswerSelected({{ $questionId ?? 'null' }}, this.value, '{{ $questionType }}')"
-                    class="peer opacity-0 absolute h-full w-full cursor-pointer">
+                    class="peer opacity-0 absolute h-full w-full cursor-pointer quiz-input">
 
                 {{-- Custom Styled Checkbox Box --}}
                 <div class="w-4 h-4 md:w-5 md:h-5 rounded border-2 transition-colors flex items-center justify-center
