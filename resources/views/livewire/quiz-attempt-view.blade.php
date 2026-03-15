@@ -4,8 +4,6 @@
     Component: app/Livewire/QuizAttempt.php
 --}}
 <div class="h-screen flex flex-col bg-gray-50 font-sans text-gray-800 overflow-hidden" data-quiz-id="{{ $quizId }}">
-    <!-- Plain JavaScript localStorage (no Alpine.js to avoid conflicts) -->
-    <script src="{{ asset('js/quiz-local-storage-plain.js') }}" defer></script>
     <!-- Fixed Header -->
     <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
         <div class="flex items-center gap-3">
@@ -95,9 +93,9 @@
 
                 <div data-question-id="{{ $currentQuestion['id'] }}" data-question-type="{{ $currentQuestion['type'] }}">
                     @if($currentQuestion['type'] === 'single_choice')
-                        <x-quiz.single-choice :options="$options" :selected="$selectedAnswer" wireModel="selectedAnswer" :questionId="$currentQuestion['id']" :questionType="'single_choice'" />
+                        <x-quiz.single-choice :options="$options" :selected="$answers[$currentQuestion['id']] ?? null" wireModel="answers.{{ $currentQuestion['id'] }}" :questionId="$currentQuestion['id']" :questionType="'single_choice'" />
                     @elseif($currentQuestion['type'] === 'multiple_choice')
-                        <x-quiz.multiple-choice :options="$options" :selected="$selectedAnswers" wireModel="selectedAnswers" :questionType="'multiple_choice'" :questionId="$currentQuestion['id']" />
+                        <x-quiz.multiple-choice :options="$options" :selected="$multipleChoiceAnswers[$currentQuestion['id']] ?? []" wireModel="multipleChoiceAnswers.{{ $currentQuestion['id'] }}" :questionType="'multiple_choice'" :questionId="$currentQuestion['id']" />
                     @endif
                 </div>
             @endif
@@ -122,58 +120,59 @@
             </button>
         @else
             <button wire:click="confirmSubmit"
+                    wire:key="submit-button"
                     wire:loading.attr="disabled"
                     class="flex items-center px-4 md:px-6 py-2 rounded-lg bg-[#ffc107] text-white hover:bg-yellow-500 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                <span wire:loading wire:target="submitQuiz" class="hidden sm:inline">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Submitting...
-                </span>
-                <span wire:loading.remove wire:target="submitQuiz" class="hidden sm:inline">Submit Quiz</span>
-                <span wire:loading.remove wire:target="submitQuiz" class="sm:hidden">Submit</span>
-                <svg wire:loading.remove wire:target="submitQuiz" class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="hidden sm:inline">Submit Quiz</span>
+                <span class="sm:hidden">Submit</span>
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </button>
         @endif
     </footer>
 
     <!-- Submit Confirmation Modal -->
     @if($showSubmitConfirmation)
-        <div class="fixed inset-0 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 md:p-8 transform transition-all">
-                <div class="text-center mb-6">
-                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
-                        <svg class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Are you sure you want to submit?</h3>
-                    <p class="text-gray-600 text-sm md:text-base">
-                        You have answered <span class="font-semibold text-[#ffc107]">{{ $this->getAnsweredCount() }}</span> out of
-                        <span class="font-semibold">{{ $this->getTotalQuestions() }}</span> questions.
-                    </p>
-                    @if($this->getAnsweredCount() < $this->getTotalQuestions())
-                        <p class="text-red-500 text-sm mt-2 font-medium">
-                            You still have {{ $this->getTotalQuestions() - $this->getAnsweredCount() }} unanswered question(s).
-                        </p>
-                    @endif
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 backdrop-blur-sm" wire:click="cancelSubmit"></div>
+
+            <!-- Modal Content -->
+            <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 z-10">
+                <!-- Warning Icon -->
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
                 </div>
 
+                <!-- Modal Title -->
+                <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">
+                    Submit Quiz?
+                </h3>
+
+                <!-- Modal Message -->
+                <p class="text-gray-600 text-center mb-6">
+                    Are you sure you want to submit your quiz? You have answered <strong>{{ $this->getAnsweredCount() }}</strong> out of <strong>{{ $this->getTotalQuestions() }}</strong> questions. This action cannot be undone.
+                </p>
+
+                <!-- Modal Actions -->
                 <div class="flex gap-3">
                     <button wire:click="cancelSubmit"
-                            class="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-semibold text-sm">
+                            class="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-semibold text-sm">
                         Cancel
                     </button>
                     <button wire:click="submitQuiz"
                             wire:loading.attr="disabled"
-                            class="flex-1 px-4 py-3 rounded-lg bg-[#ffc107] text-white hover:bg-yellow-500 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                        <svg wire:loading wire:target="submitQuiz" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span wire:loading.remove wire:target="submitQuiz">Yes, Submit</span>
-                        <span wire:loading wire:target="submitQuiz">Submitting...</span>
+                            class="flex-1 px-4 py-2 rounded-lg bg-[#ffc107] text-white hover:bg-yellow-500 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            onclick="if(window.QuizLocalStorage) window.QuizLocalStorage.setSubmitting(true)">
+                        <span wire:loading wire:target="submitQuiz">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Submitting...
+                        </span>
+                        <span wire:loading.remove wire:target="submitQuiz">Confirm Submit</span>
                     </button>
                 </div>
             </div>
