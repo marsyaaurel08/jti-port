@@ -5,7 +5,7 @@
 --}}
 <div class="h-screen flex flex-col bg-gray-50 font-sans text-gray-800 overflow-hidden" data-quiz-id="{{ $quizId }}">
     <!-- Fixed Header -->
-    <header class="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
+    <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
         <div class="flex items-center gap-3">
             <a href="#" class="flex items-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -22,8 +22,8 @@
             </button>
         </div>
 
-        <div class="bg-yellow-50 border border-[#ffc107] rounded-lg px-2 py-1.5 flex items-center shadow-sm">
-            <svg class="w-3.5 h-3.5 text-[#ffc107] mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
+        <div class="bg-yellow-50 border border-jti-yellow rounded-lg px-2 py-1.5 flex items-center shadow-sm">
+            <svg class="w-3.5 h-3.5 text-jti-yellow mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
             <span class="text-base sm:text-lg md:text-xl font-mono font-normal tracking-widest text-gray-700">{{ $this->formatTime($timeRemaining) }}</span>
         </div>
     </header>
@@ -31,12 +31,12 @@
     <!-- Main Content Area with Sidebar -->
     <div class="flex flex-1 overflow-hidden relative">
         <!-- Sidebar (hidden on mobile by default) -->
-        <aside id="sidebar" class="absolute md:relative z-10 flex-shrink-0 w-64 bg-white border-r border-gray-200 p-4 md:p-6 hidden md:block h-full overflow-y-auto">
+        <aside id="sidebar" class="absolute md:relative z-10 shrink-0 w-64 bg-white border-r border-gray-200 p-4 md:p-6 hidden md:block h-full overflow-y-auto">
             <h2 class="font-bold text-gray-900 mb-2 text-sm">Test Progress</h2>
             <p class="text-xs text-gray-500 mb-4">{{ $this->getAnsweredCount() }} of {{ $this->getTotalQuestions() }} Answered</p>
 
             <div class="w-full bg-gray-100 rounded-full h-1.5 mb-6">
-                <div class="bg-[#ffc107] h-1.5 rounded-full" style="width: {{ $this->getProgressPercentage() }}%"></div>
+                <div class="bg-jti-yellow h-1.5 rounded-full" style="width: {{ $this->getProgressPercentage() }}%"></div>
             </div>
 
             <div class="grid grid-cols-5 gap-2 mb-6">
@@ -47,7 +47,7 @@
                     @endphp
                     <button wire:click="goToQuestion({{ $index }})"
                             class="w-7 h-7 rounded text-xs font-semibold transition-all
-                        {{ $isCurrent ? 'bg-[#ffc107] text-white shadow-md scale-110' : '' }}
+                        {{ $isCurrent ? 'bg-jti-yellow text-white shadow-md scale-110' : '' }}
                         {{ !$isCurrent && $isAnswered ? 'bg-green-100 text-green-600 border border-green-200' : '' }}
                         {{ !$isCurrent && !$isAnswered ? 'bg-gray-100 text-gray-400 border border-gray-200' : '' }}">
                         {{ $index + 1 }}
@@ -60,7 +60,7 @@
                     <span class="w-3 h-3 rounded-full bg-green-100 border border-green-300 mr-2"></span> Answered
                 </div>
                 <div class="flex items-center text-xs text-gray-500">
-                    <span class="w-3 h-3 rounded-full bg-[#ffc107] mr-2"></span> Current
+                    <span class="w-3 h-3 rounded-full bg-jti-yellow mr-2"></span> Current
                 </div>
                 <div class="flex items-center text-xs text-gray-500">
                     <span class="w-3 h-3 rounded-full bg-gray-200 mr-2"></span> Unanswered
@@ -73,7 +73,7 @@
             <nav class="flex text-sm text-gray-400 mb-4 md:mb-6 font-medium">
                 <span>Practice Test</span>
                 <span class="mx-2">></span>
-                <span class="text-[#ffc107]">Question {{ $this->getQuestionNumber() }}</span>
+                <span class="text-jti-yellow">Question {{ $this->getQuestionNumber() }}</span>
             </nav>
 
             @php $currentQuestion = $this->getCurrentQuestion(); @endphp
@@ -103,7 +103,7 @@
     </div>
 
     <!-- Fixed Footer -->
-    <footer class="flex-shrink-0 bg-white border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center z-20 sticky bottom-0">
+    <footer class="shrink-0 bg-white border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center z-20 sticky bottom-0">
         <button wire:click="previousQuestion"
                 @disabled($currentQuestionIndex === 0) class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm {{ $currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
@@ -122,7 +122,7 @@
             <button wire:click="confirmSubmit"
                     wire:key="submit-button"
                     wire:loading.attr="disabled"
-                    class="flex items-center px-4 md:px-6 py-2 rounded-lg bg-[#ffc107] text-white hover:bg-yellow-500 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="flex items-center px-4 md:px-6 py-2 rounded-lg bg-jti-yellow text-white hover:bg-yellow-500 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                 <span class="hidden sm:inline">Submit Quiz</span>
                 <span class="sm:hidden">Submit</span>
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -163,7 +163,7 @@
                     </button>
                     <button wire:click="submitQuiz"
                             wire:loading.attr="disabled"
-                            class="flex-1 px-4 py-2 rounded-lg bg-[#ffc107] text-white hover:bg-yellow-500 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="flex-1 px-4 py-2 rounded-lg bg-jti-yellow text-white hover:bg-yellow-500 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             onclick="if(window.QuizLocalStorage) window.QuizLocalStorage.setSubmitting(true)">
                         <span wire:loading wire:target="submitQuiz">
                             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

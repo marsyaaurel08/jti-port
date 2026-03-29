@@ -1,4 +1,4 @@
-<div>
+<div class="flex flex-col min-h-screen">
     <!-- Session Flash Messages -->
     @if (session('success'))
         <div class="fixed top-4 right-4 bg-green-50 border border-green-200 rounded-lg text-green-700 p-4 max-w-md z-50"
@@ -14,11 +14,22 @@
         </div>
     @endif
 
-    <div class="h-[calc(100vh-80px)] grid grid-cols-1 lg:grid-cols-4 gap-6 px-6 py-10 max-w-7xl mx-auto">
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 px-2 py-10 max-w-screen-2xl mx-auto pb-20">
         <!-- Sidebar Chapters -->
         <div class="lg:col-span-1">
             <div class="">
                 <div class="sticky -top-40 bg-white rounded-lg shadow-md border border-gray-200 p-6 h-full overflow-y-auto pb-24">
+                    <!-- Progress Bar -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <p class="text-xs text-gray-500 mb-2 uppercase tracking-wide">Progress Kursus</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="bg-jti-yellow h-2 rounded-full transition-all" style="width: {{ $progress }}%">
+                            </div>
+                        </div>
+                        {{-- <p class="text-sm font-bold text-gray-900">{{ $progress }}%</p> --}}
+                        <p class="text-xs text-gray-500">{{ count($completedLessonIds) }}/{{ $course['total_lessons'] ?? 0 }} pelajaran</p>
+                    </div>
+
                     <h2 class="text-lg font-bold text-gray-900 mb-4">
                         {{ $course['title'] ?? 'Loading...' }}
                     </h2>
@@ -36,8 +47,7 @@
                                             @endphp
 
                                             <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
-                                                class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}"
-                                                wire:navigate>
+                                                class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                                                 <span class="inline-block mr-2">
                                                     @if ($isCompleted)
                                                         ✓
@@ -79,7 +89,7 @@
                     @if ($lesson->type === 'video' && $this->videoEmbedUrl)
                         <div class="relative w-full" style="padding-bottom: 56.25%;">
                             <iframe src="{{ $this->videoEmbedUrl }}"
-                                class="absolute top-0 left-0 w-full h-full border-0" allowfullscreen=""
+                                class="absolute top-0 left-0 w-full h-full border-0"
                                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
                         </div>
                     @elseif ($lesson->type === 'text' && $lesson->content_text)
@@ -119,63 +129,6 @@
                     @endif
                 </div>
 
-                <!-- Actions -->
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-2">Status Pelajaran</p>
-                            @if ($isLessonCompleted)
-                                <span
-                                    class="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">✓
-                                    Selesai</span>
-                            @else
-                                <span
-                                    class="inline-block px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg font-medium">Belum
-                                    Selesai</span>
-                            @endif
-                        </div>
-                        @if (!$isLessonCompleted)
-                            <button wire:click="markAsCompleted" wire:loading.attr="disabled"
-                                class="px-6 py-2.5 bg-jti-yellow hover:bg-jti-maroon text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                                <span wire:loading.remove>Tandai Selesai</span>
-                                <span wire:loading>
-                                    <svg class="animate-spin h-5 w-5 inline" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                            stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                </span>
-                            </button>
-                        @else
-                            <button wire:click="markAsIncomplete" wire:loading.attr="disabled"
-                                class="px-6 py-2.5 bg-gray-400 hover:bg-gray-500 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                                <span wire:loading.remove>Tandai Belum Selesai</span>
-                                <span wire:loading>
-                                    <svg class="animate-spin h-5 w-5 inline" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                            stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                </span>
-                            </button>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Progress -->
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <p class="text-sm text-gray-600 mb-2">Progress Kursus</p>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-jti-yellow h-2 rounded-full transition-all" style="width: {{ $progress }}%">
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-700 mt-2 font-semibold">{{ $progress }}% Selesai
-                        ({{ count($completedLessonIds) }}/{{ $course['total_lessons'] ?? 0 }} pelajaran)</p>
-                </div>
             @else
                 <div class="bg-white rounded-lg shadow-md p-8 text-center">
                     <p class="text-gray-600">Loading materi...</p>
@@ -184,33 +137,53 @@
         </div>
     </div>
 
-    <!-- Navigation -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                @if ($previousLesson)
-                    <a href="{{ route('student.lesson', [$courseSlug, $previousLesson['slug']]) }}"
-                        class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium rounded-lg transition-colors"
-                        wire:navigate>
-                        ← Sebelumnya
-                    </a>
-                @else
-                    <div></div>
-                @endif
-
-                @if ($nextLesson)
-                    <a href="{{ route('student.lesson', [$courseSlug, $nextLesson['slug']]) }}"
-                        class="px-6 py-2.5 bg-jti-yellow hover:bg-jti-maroon text-white font-medium rounded-lg transition-colors"
-                        wire:navigate>
-                        Selanjutnya →
-                    </a>
-                @else
-                    <div class="text-gray-600 font-medium">
-                        ✓ Kursus Selesai!
-                    </div>
-                @endif
+    <!-- Fixed Footer -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center z-50">
+        @if ($previousLesson)
+            <a href="{{ route('student.lesson', [$courseSlug, $previousLesson['slug']]) }}"
+               class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <span class="hidden sm:inline">Previous Lesson</span>
+                <span class="sm:hidden">Previous</span>
+            </a>
+        @else
+            <div class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-400 font-semibold text-sm opacity-50">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <span class="hidden sm:inline">Previous Lesson</span>
+                <span class="sm:hidden">Previous</span>
             </div>
-        </div>
-    </div>
+        @endif
+
+        @if ($nextLesson)
+            <button wire:click="markAsCompletedAndNext"
+                    wire:loading.attr="disabled"
+                    class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                <span class="hidden sm:inline wire:loading.remove">Next Lesson</span>
+                <span class="sm:hidden wire:loading.remove">Next</span>
+                <svg class="w-5 h-5 ml-2 wire:loading.remove" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                <span wire:loading class="animate-spin h-5 w-5 ml-2">
+                    <svg fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </span>
+            </button>
+        @else
+            <div class="flex items-center px-4 md:px-6 py-2 rounded-lg bg-jti-yellow text-white font-semibold text-sm">
+                <span class="hidden sm:inline">Course Completed!</span>
+                <span class="sm:hidden">Completed!</span>
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+        @endif
+    </footer>
 </div>
+
 
