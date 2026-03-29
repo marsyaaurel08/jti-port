@@ -21,11 +21,13 @@ class LogSelfHealingsTable
 
                 TextColumn::make('user.name')
                     ->searchable()
-                    ->description(fn (LogSelfHealing $record): string => $record->invoice_number),
+                    ->description(fn(LogSelfHealing $record): string => $record->invoice_number),
 
                 TextColumn::make('order_type')
+                    ->label('Order Type')
+                    ->translateLabel()
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'course' => 'info',
                         'class' => 'warning',
                     }),

@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ClassesResource extends Resource
 {
@@ -25,8 +26,9 @@ class ClassesResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $pluralLabel = 'Classes';
-
     protected static ?string $navigationLabel = 'Classes';
+    protected static string|UnitEnum|null $navigationGroup = 'Classes';
+
 
 
     public static function form(Schema $schema): Schema

@@ -19,6 +19,7 @@ use Filament\Tables\Table;
 class LogSelfHealingResource extends Resource
 {
     protected static ?string $model = LogSelfHealing::class;
+    protected static ?string $pluralLabel = 'Riwayat Transaksi';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
