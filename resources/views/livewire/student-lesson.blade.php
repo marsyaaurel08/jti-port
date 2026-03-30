@@ -145,7 +145,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                <span class="hidden sm:inline">Previous Lesson</span>
+                <span class="hidden sm:inline">Materi Sebelumnya</span>
                 <span class="sm:hidden">Previous</span>
             </a>
         @else
@@ -153,7 +153,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                <span class="hidden sm:inline">Previous Lesson</span>
+                <span class="hidden sm:inline">Materi Sebelumnya</span>
                 <span class="sm:hidden">Previous</span>
             </div>
         @endif
@@ -162,7 +162,7 @@
             <button wire:click="markAsCompletedAndNext"
                     wire:loading.attr="disabled"
                     class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                <span class="hidden sm:inline wire:loading.remove">Next Lesson</span>
+                <span class="hidden sm:inline wire:loading.remove">Materi Selanjutnya</span>
                 <span class="sm:hidden wire:loading.remove">Next</span>
                 <svg class="w-5 h-5 ml-2 wire:loading.remove" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
