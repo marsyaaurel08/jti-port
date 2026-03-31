@@ -99,7 +99,7 @@
                     @elseif ($lesson->type === 'quiz' && $lesson->quiz)
                         <div class="p-8 text-center">
                             <div class="mb-6">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto text-[#ffc107] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto text-jti-yellow mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                                 </svg>
                                 <h3 class="text-xl font-bold text-gray-900 mb-2">Quiz Tersedia</h3>
@@ -114,7 +114,7 @@
                                 </p>
                             </div>
                             <a href="{{ route('student.quiz.attempt', $lesson->quiz->id) }}"
-                               class="inline-flex items-center px-6 py-3 bg-[#ffc107] hover:bg-yellow-500 text-white font-semibold rounded-lg transition-colors">
+                               class="inline-flex items-center px-6 py-3 bg-jti-yellow hover:bg-yellow-500 text-white font-semibold rounded-lg transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -122,6 +122,11 @@
                                 Mulai Quiz
                             </a>
                         </div>
+
+                        <!-- Quiz Score History Component -->
+                        @if ($lesson->quiz)
+                            <livewire:quiz-score-history :quizId="$lesson->quiz->id" />
+                        @endif
                     @else
                         <div class="p-8 text-center text-gray-600">
                             <p>Konten tidak tersedia</p>
@@ -176,7 +181,7 @@
             </button>
         @else
             <div class="flex items-center px-4 md:px-6 py-2 rounded-lg bg-jti-yellow text-white font-semibold text-sm">
-                <span class="hidden sm:inline">Course Completed!</span>
+                <span class="hidden sm:inline">Materi Selesai</span>
                 <span class="sm:hidden">Completed!</span>
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
