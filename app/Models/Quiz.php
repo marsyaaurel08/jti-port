@@ -15,6 +15,7 @@ class Quiz extends Model
         'lesson_id',
         'pass_score',
         'time_limit_minutes',
+        'total_score_weight',
     ];
 
     protected function casts(): array
@@ -22,6 +23,7 @@ class Quiz extends Model
         return [
             'pass_score' => 'integer',
             'time_limit_minutes' => 'integer',
+            'total_score_weight' => 'integer',
         ];
     }
 
