@@ -7,6 +7,7 @@ use App\Filament\Resources\Courses\Pages\EditCourse;
 use App\Filament\Resources\Courses\Pages\ListCourses;
 use App\Filament\Resources\Courses\Pages\ViewCourse;
 use App\Filament\Resources\Courses\Pages\ViewCourseMaterials;
+use App\Filament\Resources\Courses\Pages\ViewCourseProgress;
 use App\Filament\Resources\Courses\Schemas\CourseForm;
 use App\Filament\Resources\Courses\Schemas\CourseInfolist;
 use App\Filament\Resources\Courses\Tables\CoursesTable;
@@ -54,6 +55,7 @@ class CourseResource extends Resource
             'create' => CreateCourse::route('/create'),
             'view' => ViewCourse::route('/{record}'),
             'materials' => ViewCourseMaterials::route('/{record}/materials'),
+            'progress' => ViewCourseProgress::route('/{record}/progress'),
             'edit' => EditCourse::route('/{record}/edit'),
         ];
     }

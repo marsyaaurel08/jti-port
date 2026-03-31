@@ -37,6 +37,32 @@ class Enrollment extends Model
         ];
     }
 
+    protected $appends = [
+        'progress_percentage',
+        'status',
+    ];
+
+    public function getProgressPercentageAttribute(): float
+    {
+        if (!$this->course || $this->course->total_lessons === 0) {
+            return 0.0;
+        }
+        return round(($this->completed_lesson_count / $this->course->total_lessons) * 100, 2);
+    }
+
+    public function getStatusAttribute(): string
+    {
+        if ($this->is_completed) {
+            return 'completed';
+        }
+
+        if ($this->expires_at && $this->expires_at->isPast()) {
+            return 'expired';
+        }
+
+        return 'active';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
