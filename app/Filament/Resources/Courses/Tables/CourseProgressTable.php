@@ -25,10 +25,10 @@ class CourseProgressTable
                     ->sortable()
                     ->icon('heroicon-m-calendar-days'),
 
-                TextColumn::make('completed_lesson_count')
+                TextColumn::make('actual_completed_lesson_count')
                     ->label('Materi Selesai')
                     ->alignCenter()
-                    ->formatStateUsing(fn($record) => $record->completed_lesson_count . ' / ' . $record->course->total_lessons)
+                    ->formatStateUsing(fn($record) => $record->actual_completed_lesson_count . ' / ' . $record->course->total_lessons)
                     ->icon('heroicon-m-check-badge'),
 
                 TextColumn::make('progress_percentage')
@@ -84,11 +84,11 @@ class CourseProgressTable
                             [$min, $max] = explode('-', $data['value']);
                             return $query->whereHas('course', function ($q) use ($min, $max) {
                                 $q->whereRaw('(
-                                    CASE
-                                        WHEN total_lessons = 0 THEN 0
-                                        ELSE (completed_lesson_count / total_lessons) * 100
-                                    END
-                                ) BETWEEN ? AND ?', [$min, $max]);
+                                    SELECT COUNT(*)
+                                    FROM course_progress
+                                    WHERE course_progress.enrollment_id = enrollments.id
+                                    AND course_progress.is_completed = 1
+                                ) / total_lessons * 100 BETWEEN ? AND ?', [$min, $max]);
                             });
                         }
                         return $query;

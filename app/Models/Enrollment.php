@@ -40,14 +40,24 @@ class Enrollment extends Model
     protected $appends = [
         'progress_percentage',
         'status',
+        'actual_completed_lesson_count',
     ];
+
+
+    //  Get the actual completed lesson count from CourseProgress records.
+    //  This is the single source of truth for lesson completion.
+
+    public function getActualCompletedLessonCountAttribute(): int
+    {
+        return $this->progress()->where('is_completed', true)->count();
+    }
 
     public function getProgressPercentageAttribute(): float
     {
         if (!$this->course || $this->course->total_lessons === 0) {
             return 0.0;
         }
-        return round(($this->completed_lesson_count / $this->course->total_lessons) * 100, 2);
+        return round(($this->actual_completed_lesson_count / $this->course->total_lessons) * 100, 2);
     }
 
     public function getStatusAttribute(): string

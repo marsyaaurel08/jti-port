@@ -149,7 +149,7 @@ class ClassResultInfolist
                                             ->label('📈 Status Progres')
                                             ->state(function ($record) {
                                                 $total = $record->course->total_lessons ?? 0;
-                                                $completed = $record->completed_lesson_count ?? 0;
+                                                $completed = $record->actual_completed_lesson_count ?? 0;
 
                                                 // Hitung persentase
                                                 $percent = $total > 0 ? ($completed / $total) * 100 : 0;
@@ -188,7 +188,7 @@ class ClassResultInfolist
                                                     : 'Belum Selesai';
                                             })
                                             ->badge()
-                                            ->color(fn($state) => str_contains($state, 'Belum Selesai') ?  'warning': 'success' )
+                                            ->color(fn($state) => str_contains($state, 'Belum Selesai') ?  'warning' : 'success')
                                             ->icon(fn($state) => str_contains($state, 'Belum Selesai') ? 'heroicon-m-x-circle' : 'heroicon-m-check-circle'),
                                     ])
                             ]),
