@@ -16,7 +16,7 @@ class CourseIndex extends Component
     public $selectedCategories = [];
 
     #[Url(history: true)]
-    public $selectedRatings = [];
+    public $selectedRatings = '';
 
     #[Url(history: true)]
     public $selectedLevels = [];
@@ -63,7 +63,7 @@ class CourseIndex extends Component
     public function resetFilters()
     {
         $this->selectedCategories = [];
-        $this->selectedRatings = [];
+        $this->selectedRatings = '';
         $this->selectedLevels = [];
         $this->isFree = false;
         $this->isPaid = false;
@@ -77,11 +77,7 @@ class CourseIndex extends Component
         $query = Course::query()->where('status', 'published');
 
         if (! empty($this->selectedRatings)) {
-            $query->where(function ($q) {
-                foreach ($this->selectedRatings as $rating) {
-                    $q->orWhere('avg_rating', '>=', (float) $rating);
-                }
-            });
+            $query->where('avg_rating', '>=', (float) $this->selectedRatings);
         }
 
         if (! empty($this->selectedCategories)) {
