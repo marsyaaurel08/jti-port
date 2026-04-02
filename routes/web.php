@@ -78,6 +78,11 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
 
     // Transaksi
     Route::get('/transactions', UserTransactions::class)->name('transactions');
+
+    //Quiz Attempt
+    Route::get('/quiz/attempt/{id}', function ($id) {
+        return view('pages.quiz-attempt-page', ['quizId' => $id]);
+    })->name('quiz.attempt');
 });
 
 // --- Social Login Routes ---
