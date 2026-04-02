@@ -71,6 +71,11 @@ class StudentLesson extends Component
 
     public function loadLesson(): void
     {
+        // Log::info('loadLesson called', [
+        //     'courseSlug' => $this->courseSlug,
+        //     'lessonSlug' => $this->lessonSlug,
+        // ]);
+
         try {
             $user = Auth::user();
 
@@ -148,6 +153,38 @@ class StudentLesson extends Component
             $this->previousLesson = $currentLessonIndex > 0 ? $allLessons[$currentLessonIndex - 1]->toArray() : null;
             $this->nextLesson = $currentLessonIndex < $allLessons->count() - 1 ? $allLessons[$currentLessonIndex + 1]->toArray() : null;
 
+            // Log::info('Lesson navigation determined', [
+            //     'current_lesson_id' => $this->lesson->id,
+            //     'current_lesson_slug' => $this->lesson->slug,
+            //     'has_previous' => $this->previousLesson !== null,
+            //     'has_next' => $this->nextLesson !== null,
+            //     'is_lesson_completed' => $this->isLessonCompleted,
+            //     'next_lesson_slug' => $this->nextLesson['slug'] ?? null,
+            // ]);
+
+            // Auto-mark last lesson as completed when there's no next lesson
+            if ($this->nextLesson === null && !$this->isLessonCompleted) {
+                $existingProgress = CourseProgress::where('enrollment_id', $this->enrollment->id)
+                    ->where('lesson_id', $this->lesson->id)
+                    ->first();
+
+                if ($existingProgress) {
+                    $existingProgress->update(['is_completed' => true]);
+                } else {
+                    CourseProgress::create([
+                        'enrollment_id' => $this->enrollment->id,
+                        'lesson_id' => $this->lesson->id,
+                        'is_completed' => true,
+                    ]);
+                }
+
+                $this->isLessonCompleted = true;
+
+                // Recalculate progress percentage
+                $completedCount = count($this->completedLessonIds) + 1;
+                $this->progress = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
+            }
+
             // Update last accessed lesson
             $this->enrollment->update([
                 'last_accessed_lesson_id' => $this->lesson->id,
@@ -201,6 +238,46 @@ class StudentLesson extends Component
         } catch (\Exception $e) {
             Log::error('Failed to mark lesson as incomplete: ' . $e->getMessage());
             session()->flash('error', 'Gagal mengubah status pelajaran. Silakan coba lagi.');
+        }
+    }
+
+    public function markAsCompletedAndNext(): void
+    {
+        Log::info('markAsCompletedAndNext called', [
+            'lesson_id' => $this->lesson->id,
+            'has_next_lesson' => $this->nextLesson !== null,
+            'next_lesson_slug' => $this->nextLesson['slug'] ?? null,
+            'is_lesson_completed' => $this->isLessonCompleted,
+        ]);
+
+        try {
+            // Mark current lesson as completed
+            $existingProgress = CourseProgress::where('enrollment_id', $this->enrollment->id)
+                ->where('lesson_id', $this->lesson->id)
+                ->first();
+
+            if ($existingProgress) {
+                $existingProgress->update(['is_completed' => true]);
+            } else {
+                CourseProgress::create([
+                    'enrollment_id' => $this->enrollment->id,
+                    'lesson_id' => $this->lesson->id,
+                    'is_completed' => true,
+                ]);
+            }
+
+            // Log::info('Lesson marked as completed', ['lesson_id' => $this->lesson->id]);
+
+            // Navigate to next lesson
+            if ($this->nextLesson) {
+                Log::info('Redirecting to next lesson', ['slug' => $this->nextLesson['slug']]);
+                $this->redirect(route('student.lesson', [$this->courseSlug, $this->nextLesson['slug']]));
+            } else {
+                Log::warning('No next lesson found', ['lesson_id' => $this->lesson->id]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to mark lesson as completed and navigate: ' . $e->getMessage());
+            session()->flash('error', 'Gagal menandai pelajaran. Silakan coba lagi.');
         }
     }
 

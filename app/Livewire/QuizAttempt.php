@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Quiz;
 use App\Models\QuizAttempt as QuizAttemptModel;
 use App\Models\QuizAnswer;
+use App\Services\QuizScoringService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
@@ -329,6 +330,12 @@ class QuizAttempt extends Component
             'attempt_id' => $this->attempt->id,
             'isSubmitting' => $this->isSubmitting,
         ]);
+
+        // Grade the quiz attempt
+        Log::info('QuizAttempt::finalizeSubmission() - About to grade the attempt');
+        $scoringService = new QuizScoringService();
+        $scoringService->gradeAttempt($this->attempt);
+        Log::info('QuizAttempt::finalizeSubmission() - Attempt graded');
 
         Log::info('QuizAttempt::finalizeSubmission() - About to update attempt with finished_at');
         $this->attempt->update([

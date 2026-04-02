@@ -37,3 +37,5 @@ class QuizAnswer extends Model
         return $this->belongsTo(Question::class);
     }
 }
+
+// rrr
