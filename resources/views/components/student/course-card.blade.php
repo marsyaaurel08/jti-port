@@ -18,7 +18,7 @@
     $canNavigate = !empty($slug) && !empty($lessonSlug);
 @endphp
 
-<div class="border rounded-xl overflow-hidden bg-white">
+<div class="border  border-gray-100 rounded-xl overflow-hidden bg-white">
 
     <div class="h-40 bg-gray-200">
         <img src="{{ $image }}" class="w-full h-full object-cover" alt="{{ $title }}">

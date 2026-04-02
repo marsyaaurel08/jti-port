@@ -34,7 +34,7 @@
                         <span class="text-sm font-bold text-gray-100">{{ number_format($course->avg_rating, 1) }}</span>
                     </div>
                     <span class="text-[11px] font-medium text-gray-500 uppercase tracking-widest">
-                        <span class="text-gray-300">2.1M+</span> Enrolled
+                        <span class="text-gray-300">2.1M+</span> Terdaftar
                     </span>
                 </div>
 
@@ -51,7 +51,7 @@
                             default => 'border-white/20 text-white/60 bg-white/5',
                         };
                     @endphp
-                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Difficulty</span>
+                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Level</span>
                     <span class="{{ $levelStyles }} px-4 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider">
                         {{ $course->level }}
                     </span>

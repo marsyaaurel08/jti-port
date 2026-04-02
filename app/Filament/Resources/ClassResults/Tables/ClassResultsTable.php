@@ -38,7 +38,7 @@ class ClassResultsTable
             ])
             ->actions([
                 ViewAction::make()
-                    ->label('Lihat Detail Nilai'),
+                    ->label('Lihat Detail'),
             ]);
     }
 }

@@ -23,13 +23,25 @@ class DemoSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create 3 users (or get existing)
+        // Create 3 student users (or get existing)
         $users = [];
         for ($i = 1; $i <= 3; $i++) {
             $users[$i] = User::firstOrCreate(
                 ['email' => "peserta{$i}@example.com"],
                 [
                     'name' => "User {$i}",
+                    'password' => Hash::make('password'),
+                ]
+            );
+        }
+
+        // Create 5 instructor users
+        $instructors = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $instructors[$i] = User::firstOrCreate(
+                ['email' => "instructor{$i}@example.com"],
+                [
+                    'name' => "Instructor {$i}",
                     'password' => Hash::make('password'),
                 ]
             );
@@ -91,7 +103,7 @@ class DemoSeeder extends Seeder
                         'chapter_id' => $chapter->id,
                         'title' => "Lesson {$lessonCounter}: Introduction",
                         'type' => 'video',
-                        'slug' => strtolower(str_replace(' ', '-', $title))."-lesson-{$lessonCounter}",
+                        'slug' => strtolower(str_replace(' ', '-', $title)) . "-lesson-{$lessonCounter}",
                         'content_url' => 'https://example.com/video.mp4',
                         'content_text' => 'Lesson content goes here...',
                         'duration_seconds' => 600, // 10 minutes
@@ -100,6 +112,38 @@ class DemoSeeder extends Seeder
                     ]);
                 }
             }
+        }
+
+        // =============================================
+        // Create Classes (1 per first 10 courses)
+        // =============================================
+        foreach ($allCourses as $index => $course) {
+            if ($index >= 10) {
+                break; // Only create classes for first 10 courses
+            }
+
+            $instructorKey = ($index % 5) + 1;
+            $startDate = now()->addDays(rand(1, 30));
+            $endDate = (clone $startDate)->addDays(rand(30, 90));
+            $randomId = $index + 1;
+
+            CourseClass::create([
+                'course_id' => $course->id,
+                'category_id' => $course->category_id,
+                'instructor_id' => $instructors[$instructorKey]->id,
+                'thumbnail_url' => "https://picsum.photos/400/200?random={$randomId}",
+                'description' => "Class description for {$course->title}",
+                'level' => $course->level,
+                'slug' => strtolower(str_replace(' ', '-', $course->title)),
+                'title' => $course->title,
+                'price' => $course->price,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'max_capacity' => rand(20, 50),
+                'current_enrolled' => rand(5, 30),
+                'meeting_link' => 'https://meet.google.com/abc-defg-hij',
+                'is_active' => true,
+            ]);
         }
 
         // User 3 orders 6 courses (courses 1-6)
@@ -111,7 +155,7 @@ class DemoSeeder extends Seeder
         // Create 1 order for user ID 3
         $order = Order::create([
             'user_id' => $users[3]->id,
-            'invoice_number' => 'INV-'.time(),
+            'invoice_number' => 'INV-' . time(),
             'subtotal' => $totalAmount,
             'discount_amount' => 0.00,
             'total_amount' => $totalAmount,
@@ -150,6 +194,7 @@ class DemoSeeder extends Seeder
             [
                 'name' => 'Instructor User',
                 'password' => Hash::make('password'),
+                'role' => 'pengajar',
             ]
         );
 
@@ -174,7 +219,7 @@ class DemoSeeder extends Seeder
         // Create order for class (shared order for all 3 students)
         $classOrder = Order::create([
             'user_id' => $users[1]->id,
-            'invoice_number' => 'INV-CLASS-'.time(),
+            'invoice_number' => 'INV-CLASS-' . time(),
             'subtotal' => 149.99 * 3,
             'discount_amount' => 0.00,
             'total_amount' => 149.99 * 3,
@@ -230,7 +275,7 @@ class DemoSeeder extends Seeder
             'message' => 'Sistem mendeteksi transaksi sudah sukses di payment gateway namun status di lokal masih pending. Melakukan sinkronisasi otomatis.',
             'payload' => [
                 'gateway' => 'midtrans',
-                'transaction_id' => 'TRX-'.uniqid(),
+                'transaction_id' => 'TRX-' . uniqid(),
                 'verification_status' => 'settlement',
                 'retry_attempt' => 1,
             ],
@@ -255,20 +300,31 @@ class DemoSeeder extends Seeder
 
         $this->command->info('- Created 2 self-healing logs (1 course, 1 class)');
 
-        $this->command->info('Demo data seeded successfully!');
-        $this->command->info('- Created 3 users');
+        $this->command->info('');
+        $this->command->info('=== Demo Data Seeding Complete ===');
+        $this->command->info('- Created 3 student users');
+        $this->command->info('- Created 5 instructor users');
         $this->command->info('- Created 1 category');
         $this->command->info('- Created 11 courses with 2 chapters and 10 lessons each');
-        $this->command->info('- Created 1 order with 6 order items for user 3');
-        $this->command->info('- Created 6 enrollments:');
-        $this->command->info('  * 5 courses: 5 lessons completed (true), 5 lessons not completed (false), is_completed: false');
-        $this->command->info('  * 1 course: All 10 lessons completed (is_completed: true, 100% complete)');
         $this->command->info('');
-        $this->command->info('- Created 1 class: "Laravel Fundamentals - Advanced Batch"');
-        $this->command->info('- Enrolled 3 students in the class:');
+        $this->command->info('=== Course Classes ===');
+        $this->command->info('- Created 10 classes (1 per each of first 10 courses)');
+        $this->command->info('');
+        $this->command->info('=== Course Enrollments ===');
+        $this->command->info('- Created 1 order with 6 order items for user 3');
+        $this->command->info('- Created 6 course enrollments:');
+        $this->command->info('  * 5 courses: 50% progress (5/10 lessons), not completed');
+        $this->command->info('  * 1 course: 100% progress (10/10 lessons), COMPLETED');
+        $this->command->info('');
+        $this->command->info('=== Class Enrollments ===');
+        $this->command->info('- Created 1 special class: "Laravel Fundamentals - Advanced Batch"');
+        $this->command->info('- Enrolled 3 students in the special class:');
         $this->command->info('  * Student 1 (peserta1@example.com): 30% progress (3/10 lessons)');
         $this->command->info('  * Student 2 (peserta2@example.com): 60% progress (6/10 lessons)');
-        $this->command->info('  * Student 3 (peserta3@example.com): 100% progress (10/10 lessons, COMPLETED)');
+        $this->command->info('  * Student 3 (peserta3@example.com): 100% progress (10/10 lessons), COMPLETED');
+        $this->command->info('');
+        $this->command->info('=== System Logs ===');
+        $this->command->info('- Created 2 self-healing logs for system integrity verification');
     }
 
     /**
@@ -300,7 +356,7 @@ class DemoSeeder extends Seeder
             'expires_at' => now()->addYear(),
             'is_completed' => $isCompleted,
             'completed_at' => $isCompleted ? now() : null,
-            'certificate_code' => $isCompleted ? 'CERT-'.strtoupper(uniqid()) : null,
+            'certificate_code' => $isCompleted ? 'CERT-' . strtoupper(uniqid()) : null,
             'certificate_url' => $isCompleted ? 'https://example.com/certificate.pdf' : null,
             'completed_lesson_count' => $completedLessonCount,
             'last_accessed_lesson_id' => $lessons[$completedLessonCount - 1]->id ?? $lessons[0]->id,
@@ -347,7 +403,7 @@ class DemoSeeder extends Seeder
             'expires_at' => now()->addMonths(6),
             'is_completed' => $isCompleted,
             'completed_at' => $isCompleted ? now() : null,
-            'certificate_code' => $isCompleted ? 'CERT-CLASS-'.strtoupper(uniqid()) : null,
+            'certificate_code' => $isCompleted ? 'CERT-CLASS-' . strtoupper(uniqid()) : null,
             'certificate_url' => $isCompleted ? 'https://example.com/certificate.pdf' : null,
             'completed_lesson_count' => $completedLessonCount,
             'last_accessed_lesson_id' => $lessons[$completedLessonCount - 1]->id ?? $lessons[0]->id,

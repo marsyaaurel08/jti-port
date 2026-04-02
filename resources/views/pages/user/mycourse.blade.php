@@ -1,5 +1,5 @@
 <x-student.layout.index :user="$user">
-    <div class="max-w-7xl mx-auto px-6">
+    <div class="px-6 md:px-48">
 
         {{-- Header: Perbaikan kontras dan spacing --}}
         <div class="mb-10">
@@ -34,7 +34,7 @@
 
         {{-- Grid: Spacing antar card diperluas sedikit --}}
         @if ($courses->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 @foreach ($courses as $course)
                     <x-student.course-card
                         :image="$course['image']"

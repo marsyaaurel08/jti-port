@@ -18,6 +18,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ClassResultResource extends Resource
 {
@@ -25,8 +26,9 @@ class ClassResultResource extends Resource
     protected static ?string $navigationLabel = 'Class Proggress';
     protected static ?string $pluralLabel = 'Class Proggress';
     protected static ?string $modelLabel = 'Class Proggress';
+    protected static string|UnitEnum|null $navigationGroup = 'Classes';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBarSquare;
 
     public static function form(Schema $schema): Schema
     {
@@ -72,6 +74,9 @@ class ClassResultResource extends Resource
         $query = parent::getEloquentQuery();
 
         if (auth()->check()) {
+            if (str_contains(auth()->user()->email ?? '', '@admin')) {
+                return $query;
+            }
             return $query->where('instructor_id', auth()->id());
         }
 
