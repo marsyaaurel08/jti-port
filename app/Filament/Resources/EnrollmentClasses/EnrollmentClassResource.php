@@ -30,7 +30,7 @@ class EnrollmentClassResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Classes';
 
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
     public static function form(Schema $schema): Schema
     {

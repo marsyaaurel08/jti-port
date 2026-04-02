@@ -28,7 +28,7 @@ class ClassResultResource extends Resource
     protected static ?string $modelLabel = 'Class Proggress';
     protected static string|UnitEnum|null $navigationGroup = 'Classes';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBarSquare;
 
     public static function form(Schema $schema): Schema
     {
