@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['user', 'admin', 'super_admin', 'pengajar'])->default('user'); // Menambahkan field role sesuai gambar
 
             // Field tambahan dari gambar
             $table->text('bio')->nullable();
