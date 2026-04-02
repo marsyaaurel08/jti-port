@@ -60,7 +60,8 @@ class EnrollmentCourseInfolist
                                     ->label('Berakhir')
                                     ->icon('heroicon-m-calendar-date-range')
                                     ->dateTime('d M Y')
-                                    ->color('danger'),                            ])
+                                    ->color('danger'),
+                            ])
                             ->columnSpan(1),
 
                         // Baris Baru: Progress
@@ -69,7 +70,7 @@ class EnrollmentCourseInfolist
                             ->schema([
                                 Grid::make(4)
                                     ->schema([
-                                        TextEntry::make('completed_lesson_count')
+                                        TextEntry::make('actual_completed_lesson_count')
                                             ->label('Materi Selesai')
                                             ->icon('heroicon-m-check-badge')
                                             ->suffix(' Materi'),
@@ -107,13 +108,13 @@ class EnrollmentCourseInfolist
                                         TextEntry::make('certificate_url')
                                             ->label('Dokumen')
                                             ->icon('heroicon-m-arrow-down-tray')
-                                            ->formatStateUsing(fn () => 'Unduh Sertifikat')
-                                            ->url(fn ($state) => $state, true)
+                                            ->formatStateUsing(fn() => 'Unduh Sertifikat')
+                                            ->url(fn($state) => $state, true)
                                             ->color('primary'),
                                     ]),
                             ])
                             ->columnSpan(3)
-                            ->visible(fn ($record) => $record->is_completed),
+                            ->visible(fn($record) => $record->is_completed),
                     ])
                     ->columnSpanFull(),
             ]);

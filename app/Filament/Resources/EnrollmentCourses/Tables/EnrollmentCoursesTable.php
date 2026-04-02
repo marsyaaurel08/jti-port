@@ -35,7 +35,7 @@ class EnrollmentCoursesTable
                     ->color('info')
                     ->searchable(),
 
-                TextColumn::make('completed_lesson_count')
+                TextColumn::make('actual_completed_lesson_count')
                     ->label('Materi Selesai')
                     ->alignCenter()
                     ->suffix(' Materi'),

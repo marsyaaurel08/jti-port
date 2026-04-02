@@ -24,7 +24,7 @@ class EnrollmentsRelationManager extends RelationManager
                     ->searchable(),
 
                 // Menampilkan progres berdasarkan jumlah materi selesai
-                TextColumn::make('completed_lesson_count')
+                TextColumn::make('actual_completed_lesson_count')
                     ->label('Materi Selesai')
                     ->suffix(fn($record) => " / " . ($record->course->total_lessons ?? 0)),
 
@@ -33,7 +33,7 @@ class EnrollmentsRelationManager extends RelationManager
                     ->label('Progres (%)')
                     ->state(function ($record) {
                         $total = $record->course->total_lessons ?? 1;
-                        $done = $record->completed_lesson_count ?? 0;
+                        $done = $record->actual_completed_lesson_count ?? 0;
                         return number_format(($done / $total) * 100, 1) . '%';
                     })
                     ->badge()

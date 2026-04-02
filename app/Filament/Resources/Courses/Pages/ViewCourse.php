@@ -20,6 +20,11 @@ class ViewCourse extends ViewRecord
                 ->label('View Course Materials')
                 ->icon('heroicon-m-academic-cap')
                 ->url(fn(): string => route('filament.admin.resources.courses.materials', $this->record)),
+            Action::make('progress')
+                ->label('View Progress')
+                ->icon('heroicon-m-chart-pie')
+                ->color('info')
+                ->url(fn(): string => route('filament.admin.resources.courses.progress', $this->record)),
             EditAction::make(),
         ];
     }

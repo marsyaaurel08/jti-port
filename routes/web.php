@@ -6,6 +6,7 @@ use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\HomeController;
+// use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\StudentController;
 use App\Livewire\StudentClassCheckout;
 use App\Livewire\StudentCourseCheckout;
@@ -83,6 +84,9 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
     Route::get('/quiz/attempt/{id}', function ($id) {
         return view('pages.quiz-attempt-page', ['quizId' => $id]);
     })->name('quiz.attempt');
+
+    // Quiz Result
+    // Route::get('/quiz/attempt/{attempt}/result', [QuizAttemptController::class, 'showResult'])->name('quiz.attempt.result');
 });
 
 // --- Social Login Routes ---

@@ -87,9 +87,9 @@ class CourseStudentService implements CourseStudentContract
             return 0;
         }
 
-        // Calculate progress based on completed lessons vs total lessons
+        // Using actual_completed_lesson_count which counts from CourseProgress records (single source of truth)
         $totalLessons = $course->total_lessons ?? 0;
-        $completedLessons = $enrollment->completed_lesson_count ?? 0;
+        $completedLessons = $enrollment->actual_completed_lesson_count ?? 0;
 
         return $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
     }
