@@ -305,14 +305,6 @@
                         <i data-lucide="arrow-right" class="w-5 h-5" wire:loading.remove
                             wire:target="processPayment"></i>
                     </button>
-
-                    <div class="flex flex-col items-center gap-4 mt-8 pt-6 border-t border-white/5">
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-                            <span class="text-[10px] font-medium text-slate-300 tracking-wider">SECURE
-                                CHECKOUT</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

@@ -36,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('staff')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->brandname('jti-port')
             ->brandLogo(asset('img/logo-jti.png'))
