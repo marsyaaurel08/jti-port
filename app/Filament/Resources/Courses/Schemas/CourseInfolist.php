@@ -25,7 +25,7 @@ class CourseInfolist
                                 SpatieMediaLibraryImageEntry::make('thumbnail')
                                     ->label('Thumbnail')
                                     ->collection('thumbnail')
-                                    
+
                                     ]),
                         Grid::make(2)
                             ->schema([
@@ -34,8 +34,6 @@ class CourseInfolist
                                     ->size('text-lg')
                                     ->weight('font-bold')
                                     ->columnSpanFull(),
-                                TextEntry::make('slug')
-                                    ->label('Slug'),
                                 TextEntry::make('category.name')
                                     ->label('Kategori'),
                                 TextEntry::make('description')
@@ -61,9 +59,6 @@ class CourseInfolist
                                         'published' => 'success',
                                         'archived' => 'warning',
                                     }),
-                                TextEntry::make('total_duration')
-                                    ->label('Total Durasi')
-                                    ->formatStateUsing(fn(int $state): string => $state . ' menit'),
                                 TextEntry::make('total_lessons')
                                     ->label('Total Pelajaran'),
                                 TextEntry::make('avg_rating')

@@ -17,7 +17,7 @@ class CourseMaterialsInfolist
     {
         return $schema
             ->components([
-                Section::make('📚 Course Materials')
+                Section::make('📚 Detail Materi')
                     ->icon('heroicon-m-academic-cap')
                     ->description('Semua bab dan materi dalam kursus ini')
                     ->schema([
@@ -36,11 +36,11 @@ class CourseMaterialsInfolist
                                             ->formatStateUsing(fn($record): string => $record->lessons->count() . ' Materi')
                                             ->badge()
                                             ->color('info'),
-                                        TextEntry::make('total_duration')
-                                            ->label('Total Durasi')
-                                            ->formatStateUsing(fn($record): string => floor($record->lessons->sum('duration_seconds') / 60) . ' Menit')
-                                            ->badge()
-                                            ->color('gray'),
+                                        // TextEntry::make('total_duration')
+                                        //     ->label('Total Durasi')
+                                        //     ->formatStateUsing(fn($record): string => floor($record->lessons->sum('duration_seconds') / 60) . ' Menit')
+                                        //     ->badge()
+                                        //     ->color('gray'),
                                     ]),
                                 RepeatableEntry::make('lessons')
                                     ->label('Materi')
@@ -73,11 +73,11 @@ class CourseMaterialsInfolist
                                                     ->visible(fn($record): bool => $record->type === 'text')
                                                     ->markdown()
                                                     ->columnSpanFull(),
-                                                TextEntry::make('duration_seconds')
-                                                    ->label('Durasi')
-                                                    ->formatStateUsing(fn(int $state): string => floor($state / 60) . 'm ' . ($state % 60) . 's')
-                                                    ->badge()
-                                                    ->color('gray'),
+                                                // TextEntry::make('duration_seconds')
+                                                //     ->label('Durasi')
+                                                //     ->formatStateUsing(fn(int $state): string => floor($state / 60) . 'm ' . ($state % 60) . 's')
+                                                //     ->badge()
+                                                //     ->color('gray'),
                                                 TextEntry::make('is_free_preview')
                                                     ->label('Preview Gratis')
                                                     ->badge()

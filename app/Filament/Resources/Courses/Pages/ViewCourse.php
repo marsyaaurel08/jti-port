@@ -17,11 +17,11 @@ class ViewCourse extends ViewRecord
     {
         return [
             Action::make('materials')
-                ->label('View Course Materials')
+                ->label('Lihat Daftar Materi')
                 ->icon('heroicon-m-academic-cap')
                 ->url(fn(): string => route('filament.admin.resources.courses.materials', $this->record)),
             Action::make('progress')
-                ->label('View Progress')
+                ->label('Lihat Progress')
                 ->icon('heroicon-m-chart-pie')
                 ->color('info')
                 ->url(fn(): string => route('filament.admin.resources.courses.progress', $this->record)),

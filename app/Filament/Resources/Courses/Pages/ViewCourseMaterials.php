@@ -18,10 +18,12 @@ class ViewCourseMaterials extends ViewRecord
     {
         return [
             Action::make('back')
-                ->label('Back to Course Details')
+                ->label('Kembali ke Detail Course')
                 ->icon('heroicon-m-arrow-left')
                 ->url(fn(): string => route('filament.admin.resources.courses.view', $this->record)),
-            EditAction::make(),
+            EditAction::make()
+                ->label('Edit Course')
+                ->url(fn(): string => route('filament.admin.resources.courses.edit', $this->record)),
         ];
     }
 
@@ -32,6 +34,6 @@ class ViewCourseMaterials extends ViewRecord
 
     public function getTitle(): string
     {
-        return 'Course Materials: ' . $this->record->title;
+        return 'Course : ' . $this->record->title;
     }
 }

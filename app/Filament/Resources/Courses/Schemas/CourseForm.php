@@ -61,11 +61,11 @@ class CourseForm
                                 ->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])
                                 ->default('draft')
                                 ->required(),
-                            TextInput::make('total_duration')
-                                ->label('Total Durasi (menit)')
-                                ->required()
-                                ->numeric()
-                                ->default(0),
+                            // TextInput::make('total_duration')
+                            //     ->label('Total Durasi (menit)')
+                            //     ->required()
+                            //     ->numeric()
+                            //     ->default(0),
                             TextInput::make('total_lessons')
                                 ->label('Total Pelajaran')
                                 ->required()
@@ -107,10 +107,10 @@ class CourseForm
                                             RichEditor::make('content_text')
                                                 ->label('Content Text')
                                                 ->visible(fn($get) => $get('type') === 'text'),
-                                            TextInput::make('duration_seconds')
-                                                ->label('Durasi (menit)')
-                                                ->numeric()
-                                                ->required(),
+                                            // TextInput::make('duration_seconds')
+                                            //     ->label('Durasi (menit)')
+                                            //     ->numeric()
+                                            //     ->required(),
                                             Select::make('is_free_preview')
                                                 ->label('Preview Gratis')
                                                 ->options([0 => 'Tidak', 1 => 'Ya'])

@@ -22,7 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CourseResource extends Resource
 {
-    protected static ?string $model = Course::class;
+
+    protected static ?string $pluralModelLabel = 'Daftar Course';    protected static ?string $model = Course::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
