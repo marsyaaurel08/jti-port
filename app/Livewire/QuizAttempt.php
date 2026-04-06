@@ -28,6 +28,10 @@ class QuizAttempt extends Component
 
     public $multipleChoiceAnswers = [];
 
+    public $matchingAnswers = [];
+
+    public $dragDropAnswers = [];
+
     public $answeredQuestionIds = [];
 
     public $timeRemaining = 0;
@@ -160,6 +164,10 @@ class QuizAttempt extends Component
             $this->answers[$questionId] = $answer;
         } elseif ($questionType === 'multiple_choice') {
             $this->multipleChoiceAnswers[$questionId] = is_array($answer) ? $answer : [];
+        } elseif ($questionType === 'matching') {
+            $this->matchingAnswers[$questionId] = is_array($answer) ? $answer : [];
+        } elseif ($questionType === 'drag_drop_sorting') {
+            $this->dragDropAnswers[$questionId] = is_array($answer) ? $answer : [];
         }
     }
 
@@ -265,6 +273,8 @@ class QuizAttempt extends Component
             'attempt_id' => $this->attempt->id,
             'answers' => $this->answers,
             'multipleChoiceAnswers' => $this->multipleChoiceAnswers,
+            'matchingAnswers' => $this->matchingAnswers,
+            'dragDropAnswers' => $this->dragDropAnswers,
             'showSubmitConfirmation' => $this->showSubmitConfirmation,
         ]);
 
@@ -296,6 +306,40 @@ class QuizAttempt extends Component
 
         // Process multiple choice answers from Livewire property
         foreach ($this->multipleChoiceAnswers as $questionId => $answer) {
+            if (!empty($answer)) {
+                QuizAnswer::updateOrCreate(
+                    [
+                        'quiz_attempt_id' => $this->attempt->id,
+                        'question_id' => $questionId,
+                    ],
+                    [
+                        'user_answer' => json_encode($answer),
+                        'is_correct' => false,
+                        'score_obtained' => 0,
+                    ]
+                );
+            }
+        }
+
+        // Process matching answers from Livewire property
+        foreach ($this->matchingAnswers as $questionId => $answer) {
+            if (!empty($answer)) {
+                QuizAnswer::updateOrCreate(
+                    [
+                        'quiz_attempt_id' => $this->attempt->id,
+                        'question_id' => $questionId,
+                    ],
+                    [
+                        'user_answer' => json_encode($answer),
+                        'is_correct' => false,
+                        'score_obtained' => 0,
+                    ]
+                );
+            }
+        }
+
+        // Process drag drop sorting answers from Livewire property
+        foreach ($this->dragDropAnswers as $questionId => $answer) {
             if (!empty($answer)) {
                 QuizAnswer::updateOrCreate(
                     [

@@ -180,6 +180,67 @@
                         component.call("loadFromLocalStorage", savedData);
                     }
                 }
+
+                // Also restore UI directly for all questions
+                setTimeout(() => {
+                    const questionElements =
+                        document.querySelectorAll("[data-question-id]");
+
+                    questionElements.forEach((questionElement) => {
+                        const questionId =
+                            questionElement.dataset.questionId;
+                        const questionType =
+                            questionElement.dataset.questionType;
+
+                        if (savedData.answers[questionId]) {
+                            const answerData =
+                                savedData.answers[questionId];
+
+                            // Update UI directly
+                            if (
+                                questionType === "multiple_choice"
+                            ) {
+                                const checkboxes =
+                                    questionElement.querySelectorAll(
+                                        'input[type="checkbox"]',
+                                    );
+                                checkboxes.forEach((checkbox) => {
+                                    checkbox.checked =
+                                        answerData.answer.includes(
+                                            parseInt(
+                                                checkbox.value,
+                                            ),
+                                        );
+                                });
+                            } else if (questionType === "matching") {
+                                // Restore matching dropdown values
+                                const allSelects =
+                                    questionElement.querySelectorAll(
+                                        "select.quiz-input",
+                                    );
+                                allSelects.forEach((select) => {
+                                    const itemId = select.name
+                                        .split("_")
+                                        .pop();
+                                    if (answerData.answer[itemId]) {
+                                        select.value =
+                                            answerData.answer[itemId];
+                                    }
+                                });
+                            } else {
+                                const radios =
+                                    questionElement.querySelectorAll(
+                                        'input[type="radio"]',
+                                    );
+                                radios.forEach((radio) => {
+                                    radio.checked =
+                                        String(radio.value) ===
+                                        String(answerData.answer);
+                                });
+                            }
+                        }
+                    });
+                }, 300);
             }
 
             // Use event delegation for dynamically created inputs
@@ -248,6 +309,52 @@
                     },
                     true,
                 );
+
+                // Add separate change event listener for select elements (matching questions)
+                quizContainer.addEventListener(
+                    "change",
+                    function (e) {
+                        const select = e.target.closest("select.quiz-input");
+                        if (!select) return;
+
+                        // Skip saving if we're currently navigating
+                        if (isNavigating) {
+                            return;
+                        }
+
+                        const questionElement =
+                            select.closest("[data-question-id]");
+                        const questionId = questionElement?.dataset.questionId;
+                        const questionType =
+                            questionElement?.dataset.questionType;
+
+                        if (!questionId || questionType !== "matching") return;
+
+                        // For matching questions, collect all select dropdown values
+                        const allSelects =
+                            questionElement.querySelectorAll(
+                                "select.quiz-input",
+                            );
+                        const selectedMatches = {};
+                        allSelects.forEach((select) => {
+                            const itemId = select.name.split("_").pop();
+                            if (select.value && select.value !== "") {
+                                selectedMatches[itemId] = select.value;
+                            }
+                        });
+
+                        // Dispatch event to save to localStorage with object of selected matches
+                        const event = new CustomEvent("quiz-answer-selected", {
+                            detail: {
+                                questionId,
+                                answer: selectedMatches,
+                                questionType,
+                            },
+                        });
+                        document.dispatchEvent(event);
+                    },
+                    true,
+                );
             }
 
             // Listen for answer selection events
@@ -301,6 +408,21 @@
                                             answerData.answer.includes(
                                                 parseInt(checkbox.value),
                                             );
+                                    });
+                                } else if (questionType === "matching") {
+                                    // Restore matching dropdown values
+                                    const allSelects =
+                                        questionElement.querySelectorAll(
+                                            "select.quiz-input",
+                                        );
+                                    allSelects.forEach((select) => {
+                                        const itemId = select.name
+                                            .split("_")
+                                            .pop();
+                                        if (answerData.answer[itemId]) {
+                                            select.value =
+                                                answerData.answer[itemId];
+                                        }
                                     });
                                 } else {
                                     const radios =
@@ -365,6 +487,25 @@
                                                             checkbox.value,
                                                         ),
                                                     );
+                                            });
+                                        } else if (
+                                            questionType === "matching"
+                                        ) {
+                                            // Restore matching dropdown values
+                                            const allSelects =
+                                                questionElement.querySelectorAll(
+                                                    "select.quiz-input",
+                                                );
+                                            allSelects.forEach((select) => {
+                                                const itemId = select.name
+                                                    .split("_")
+                                                    .pop();
+                                                if (answerData.answer[itemId]) {
+                                                    select.value =
+                                                        answerData.answer[
+                                                            itemId
+                                                        ];
+                                                }
                                             });
                                         } else {
                                             const radios =
