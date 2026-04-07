@@ -90,7 +90,7 @@ class CoursesTable
                 ViewAction::make()
                     ->label('Detail')
                     ->icon('heroicon-o-eye'),
-                EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -23,7 +23,8 @@ use UnitEnum;
 
 class CourseResource extends Resource
 {
-    protected static ?string $model = Course::class;
+
+    protected static ?string $pluralModelLabel = 'Daftar Course';    protected static ?string $model = Course::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     protected static string|UnitEnum|null $navigationGroup = 'Courses';

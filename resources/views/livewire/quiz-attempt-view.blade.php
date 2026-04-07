@@ -96,6 +96,21 @@
                         <x-quiz.single-choice :options="$options" :selected="$answers[$currentQuestion['id']] ?? null" wireModel="answers.{{ $currentQuestion['id'] }}" :questionId="$currentQuestion['id']" :questionType="'single_choice'" />
                     @elseif($currentQuestion['type'] === 'multiple_choice')
                         <x-quiz.multiple-choice :options="$options" :selected="$multipleChoiceAnswers[$currentQuestion['id']] ?? []" wireModel="multipleChoiceAnswers.{{ $currentQuestion['id'] }}" :questionType="'multiple_choice'" :questionId="$currentQuestion['id']" />
+                    @elseif($currentQuestion['type'] === 'drag_drop_sorting')
+                        <x-quiz.drag-drop-sorting
+                            :items="$config['items'] ?? []"
+                            :selected="$dragDropAnswers[$currentQuestion['id']] ?? []"
+                            wireModel="dragDropAnswers"
+                            :questionId="$currentQuestion['id']"
+                        />
+                    @elseif($currentQuestion['type'] === 'matching')
+                        <x-quiz.matching
+                            :items="$config['items'] ?? []"
+                            :matches="$config['matches'] ?? []"
+                            :selected="$matchingAnswers[$currentQuestion['id']] ?? []"
+                            wireModel="matchingAnswers"
+                            :questionId="$currentQuestion['id']"
+                />
                     @endif
                 </div>
             @endif

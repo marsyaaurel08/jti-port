@@ -11,6 +11,180 @@ import "./cart.js"; // ← Import cart functionality
 // ── Icons ────────────────────────────────────────────────────────────────────
 createIcons({ icons });
 
+// ── Quiz Alpine Components ────────────────────────────────────────────────
+window.dragDropComponent = function({ initialItems, wireModel, questionId }) {
+    return {
+        items: initialItems,
+        dragIndex: null,
+
+        init() {
+            document.addEventListener('restore-question', (e) => {
+                if (e.detail.questionId === this.questionId && e.detail.questionType === 'drag_drop_sorting') {
+                    if (e.detail.answer && Array.isArray(e.detail.answer)) {
+                        const orderedIds = e.detail.answer;
+                        const itemsMap = {};
+                        initialItems.forEach(item => {
+                            itemsMap[item.id] = item;
+                        });
+                        this.items = orderedIds.map(id => itemsMap[id]).filter(item => item);
+                    }
+                }
+            });
+        },
+
+        dragStart(index) {
+            this.dragIndex = index;
+        },
+
+        drop(index) {
+            const temp = this.items[this.dragIndex];
+            this.items.splice(this.dragIndex, 1);
+            this.items.splice(index, 0, temp);
+            this.updateState();
+        },
+
+        reset() {
+            this.items = [...initialItems];
+            this.updateState();
+        },
+
+        updateState() {
+            const orderedIds = this.items.map(i => parseInt(i.id));
+            const livewireEl = this.$root.closest('[wire\\:id]');
+            if (livewireEl && window.Livewire) {
+                const component = window.Livewire.find(livewireEl.getAttribute('wire:id'));
+                if (component) {
+                    component.set(`${wireModel}.${questionId}`, orderedIds);
+                }
+            }
+            const event = new CustomEvent('quiz-answer-selected', {
+                detail: {
+                    questionId: this.questionId,
+                    answer: orderedIds,
+                    questionType: 'drag_drop_sorting'
+                }
+            });
+            document.dispatchEvent(event);
+        }
+    };
+};
+
+window.matchingComponent = function({ items, matches, selected, wireModel, questionId }) {
+    return {
+        items: items,
+        matches: matches,
+        selected: Array.isArray(selected) ? {} : (selected || {}),
+        wireModel: wireModel,
+        questionId: questionId,
+        draggedItemId: null,
+        hoveredMatchId: null,
+
+        init() {
+            document.addEventListener('restore-question', (e) => {
+                if (e.detail.questionId === this.questionId && e.detail.questionType === 'matching') {
+                    this.selected = e.detail.answer || {};
+                }
+            });
+        },
+
+        get availableItems() {
+            const matchedItemIds = Object.values(this.selected);
+            return this.items.filter(item => !matchedItemIds.includes(item.id));
+        },
+
+        getMatchedItem(matchId) {
+            const itemId = Object.keys(this.selected).find(key => this.selected[key] === matchId);
+            if (!itemId) return null;
+            return this.items.find(item => item.id === itemId);
+        },
+
+        getItemNumber(itemId) {
+            const index = this.items.findIndex(item => item.id === itemId);
+            return index + 1;
+        },
+
+        getMatchLetter(matchId) {
+            const index = this.matches.findIndex(match => match.id === matchId);
+            return String.fromCharCode(97 + index);
+        },
+
+        getMatchZoneClass(matchId) {
+            const hasMatch = !!this.getMatchedItem(matchId);
+            const isHovered = this.hoveredMatchId === matchId;
+            if (hasMatch) return 'border-[#ffc107] bg-yellow-50/30';
+            else if (isHovered) return 'border-[#ffc107] border-dashed bg-yellow-50/50';
+            else return 'border-gray-200 bg-white';
+        },
+
+        dragStart(event, itemId) {
+            this.draggedItemId = itemId;
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', itemId);
+            event.target.classList.add('opacity-50');
+        },
+
+        dragEnd(event) {
+            this.draggedItemId = null;
+            this.hoveredMatchId = null;
+            event.target.classList.remove('opacity-50');
+        },
+
+        dragOver(event, matchId) {
+            const matchedItem = this.getMatchedItem(matchId);
+            if (!matchedItem) {
+                this.hoveredMatchId = matchId;
+                event.dataTransfer.dropEffect = 'move';
+            }
+        },
+
+        dragLeave(event, matchId) {
+            this.hoveredMatchId = null;
+        },
+
+        drop(event, matchId) {
+            event.preventDefault();
+            this.hoveredMatchId = null;
+            const itemId = event.dataTransfer.getData('text/plain');
+            if (!itemId || !this.draggedItemId) return;
+            const existingMatchId = this.selected[itemId];
+            if (existingMatchId) delete this.selected[itemId];
+            this.selected[itemId] = matchId;
+            this.updateState();
+        },
+
+        removeMatch(matchId) {
+            const itemId = Object.keys(this.selected).find(key => this.selected[key] === matchId);
+            if (itemId) {
+                delete this.selected[itemId];
+                this.updateState();
+            }
+        },
+
+        resetAll() {
+            this.selected = {};
+            this.updateState();
+        },
+
+        updateState() {
+            const livewireEl = this.$root.closest('[wire\\:id]');
+            if (livewireEl && window.Livewire) {
+                const component = window.Livewire.find(livewireEl.getAttribute('wire:id'));
+                if (component) {
+                    component.set(`${this.wireModel}.${this.questionId}`, this.selected);
+                }
+            }
+            const event = new CustomEvent('quiz-answer-selected', {
+                detail: {
+                    questionId: this.questionId,
+                    answer: this.selected,
+                    questionType: 'matching'
+                }
+            });
+            document.dispatchEvent(event);
+        }
+    };
+};
+
 // ── Alpine ───────────────────────────────────────────────────────────────────
 Alpine.plugin(collapse);
 Alpine.plugin(intersect);

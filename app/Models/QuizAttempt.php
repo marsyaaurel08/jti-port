@@ -21,6 +21,7 @@ class QuizAttempt extends Model
         'total_score_obtained',
     ];
 
+    public $dragDropAnswers = [];
     protected function casts(): array
     {
         return [
