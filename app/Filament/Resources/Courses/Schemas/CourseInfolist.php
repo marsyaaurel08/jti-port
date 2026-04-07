@@ -31,20 +31,23 @@ class CourseInfolist
                             ->schema([
                                 TextEntry::make('title')
                                     ->label('Judul Kursus')
-                                    ->size('text-lg')
+                                    // ->size('text-lg')
                                     ->weight('font-bold')
+                                    ->icon('heroicon-o-book-open')
                                     ->columnSpanFull(),
                                 TextEntry::make('category.name')
-                                    ->label('Kategori'),
+                                    ->label('Kategori')
+                                    ->icon('heroicon-o-tag'),
                                 TextEntry::make('description')
                                     ->label('Deskripsi')
-                                    ->markdown()
+                                    ->icon('heroicon-o-document-text')
                                     ->columnSpanFull(),
                                 TextEntry::make('price')
                                     ->label('Harga')
-                                    ->money(),
+                                    ->icon('heroicon-o-currency-dollar'),
                                 TextEntry::make('level')
                                     ->label('Level')
+                                    ->icon('heroicon-o-academic-cap')
                                     ->badge()
                                     ->color(fn(string $state): string => match ($state) {
                                         'beginner' => 'success',
@@ -54,16 +57,23 @@ class CourseInfolist
                                 TextEntry::make('status')
                                     ->label('Status')
                                     ->badge()
+                                    ->icon(fn(string $state): string => match ($state) {
+                                        'draft' => 'heroicon-o-eye-slash',
+                                        'published' => 'heroicon-o-eye',
+                                        'archived' => 'heroicon-o-archive-box',
+                                    })
                                     ->color(fn(string $state): string => match ($state) {
                                         'draft' => 'gray',
                                         'published' => 'success',
                                         'archived' => 'warning',
                                     }),
                                 TextEntry::make('total_lessons')
-                                    ->label('Total Pelajaran'),
+                                    ->label('Total Pelajaran')
+                                    ->icon('heroicon-o-document-text'),
                                 TextEntry::make('avg_rating')
                                     ->label('Rating Rata-rata')
-                                    ->formatStateUsing(fn(float $state): string => number_format($state, 1) . ' / 5.0'),
+                                    ->formatStateUsing(fn(float $state): string => number_format($state, 1) . ' / 5.0')
+                                    ->icon('heroicon-o-star'),
                             ]),
                     ])
                     ->columnSpanFull(),

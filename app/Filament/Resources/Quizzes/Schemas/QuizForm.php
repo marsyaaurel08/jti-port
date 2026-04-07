@@ -13,12 +13,13 @@ class QuizForm
     {
         return $schema
             ->components([
-                ComponentsSection::make('Quiz Settings')
-                    ->description('Configure the quiz passing score and time limit')
+                ComponentsSection::make('Pengaturan Kuis')
+
+                    ->description('Konfigurasi nilai kelulusan dan batas waktu kuis')
                     ->schema([
                         TextInput::make('pass_score')
-                            ->label('Passing Score (%)')
-                            ->helperText('Minimum score required to pass the quiz')
+                            ->label('Nilai Kelulusan (%)')
+                            ->helperText('Nilai minimum yang diperlukan untuk lulus kuis')
                             ->required()
                             ->numeric()
                             ->minValue(1)
@@ -27,8 +28,8 @@ class QuizForm
                             ->suffix('%'),
 
                         TextInput::make('time_limit_minutes')
-                            ->label('Time Limit (Minutes)')
-                            ->helperText('Leave empty for unlimited time')
+                            ->label('Batas Waktu (Menit)')
+                            ->helperText('Kosongkan untuk waktu tak terbatas')
                             ->numeric()
                             ->minValue(1)
                             ->nullable(),
