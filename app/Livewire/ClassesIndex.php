@@ -28,6 +28,9 @@ class ClassesIndex extends Component
     #[Url(history: true)]
     public $sort = 'latest';
 
+    #[Url(history: true)]
+    public $search = '';
+
     public function updatedSelectedCategories(): void
     {
         $this->resetPage();
@@ -53,9 +56,14 @@ class ClassesIndex extends Component
         $this->resetPage();
     }
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
-        $this->reset(['selectedCategories', 'selectedLevels', 'isFree', 'isPaid', 'sort']);
+        $this->reset(['selectedCategories', 'selectedLevels', 'isFree', 'isPaid', 'sort', 'search']);
         $this->resetPage();
     }
 
@@ -64,6 +72,22 @@ class ClassesIndex extends Component
         // Eager loading instructor dan course untuk optimasi N+1 query
         $query = CourseClass::with(['instructor', 'course.category'])
             ->where('is_active', '1');
+
+        // Filter berdasarkan search keyword
+        if (! empty($this->search)) {
+            $search = strtolower(trim($this->search));
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"])
+                    ->orWhereHas('course', function ($q) use ($search) {
+                        $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                            ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
+                    })
+                    ->orWhereHas('instructor', function ($q) use ($search) {
+                        $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                    });
+            });
+        }
 
         // Filter Berdasarkan Kategori Course
         if (! empty($this->selectedCategories)) {
@@ -105,6 +129,7 @@ class ClassesIndex extends Component
             'isFree' => $this->isFree,
             'isPaid' => $this->isPaid,
             'sort' => $this->sort,
+            'search' => $this->search,
         ]);
     }
 }
