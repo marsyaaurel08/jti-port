@@ -84,7 +84,7 @@
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-slate-700">Nama lengkap <span
                                     class="text-red-500">*</span></label>
-                            <input type="text" wire:model="fullName" placeholder="Masukkan nama lengkap"
+                            <input type="text" wire:model="fullName" placeholder="Masukkan nama lengkap" disabled
                                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-jti-yellow focus:bg-white focus:border-transparent outline-none transition duration-200 placeholder:text-slate-400">
                             @error('fullName')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -95,7 +95,7 @@
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-slate-700">Email <span
                                     class="text-red-500">*</span></label>
-                            <input type="email" wire:model="email" placeholder="contoh@email.com"
+                            <input type="email" wire:model="email" placeholder="contoh@email.com" disabled
                                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-jti-yellow focus:bg-white focus:border-transparent outline-none transition duration-200 placeholder:text-slate-400">
                             @error('email')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -322,6 +322,7 @@
     </style>
     {{-- VA Instructions Modal --}}
     @if ($showVAInstructions && !empty($vaData))
-        <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions" />
+        <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions"
+            :redirectRoute="$redirectRoute" />
     @endif
 </div>
