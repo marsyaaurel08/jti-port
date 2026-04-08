@@ -6,6 +6,7 @@ use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PaymentCallbackController;
 // use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\StudentController;
 use App\Livewire\StudentClassCheckout;
@@ -15,6 +16,7 @@ use App\Livewire\StudentOrders;
 use App\Livewire\UserCart;
 use App\Livewire\UserProfile;
 use App\Livewire\UserTransactions;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 // --- Public Routes ---
@@ -93,3 +95,21 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
 Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])->name('socialite.redirect');
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('socialite.callback');
 Route::delete('/auth/{provider}/unlink', [SocialiteController::class, 'unlink'])->middleware('auth')->name('socialite.unlink');
+
+// --- Payment Callback Routes ---
+Route::prefix('api/payments')->name('payments.')->group(function () {
+    // BNI Webhook - Public route (no auth required)
+    Route::post('/bni-callback', [PaymentCallbackController::class, 'bniCallback'])
+        ->name('bni.callback')
+        ->withoutMiddleware(VerifyCsrfToken::class);
+
+    // Payment Status Check - Protected route
+    Route::post('/status', [PaymentCallbackController::class, 'checkPaymentStatus'])
+        ->middleware('auth')
+        ->name('status');
+
+    // Get Order Payment Details - Protected route
+    Route::get('/order/{order}', [PaymentCallbackController::class, 'getOrderPayment'])
+        ->middleware('auth')
+        ->name('order.detail');
+});
