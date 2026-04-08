@@ -30,6 +30,9 @@ class CourseIndex extends Component
     #[Url(history: true)]
     public $sort = 'latest';
 
+    #[Url(history: true)]
+    public $search = '';
+
     public function updatedSelectedCategories(): void
     {
         $this->resetPage();
@@ -60,6 +63,11 @@ class CourseIndex extends Component
         $this->resetPage();
     }
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
         $this->selectedCategories = [];
@@ -68,6 +76,7 @@ class CourseIndex extends Component
         $this->isFree = false;
         $this->isPaid = false;
         $this->sort = 'latest';
+        $this->search = '';
 
         $this->resetPage();
     }
@@ -75,6 +84,18 @@ class CourseIndex extends Component
     public function render()
     {
         $query = Course::query()->where('status', 'published');
+
+        // Filter berdasarkan search keyword
+        if (! empty($this->search)) {
+            $search = strtolower(trim($this->search));
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"])
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                    });
+            });
+        }
 
         if (! empty($this->selectedRatings)) {
             $query->where('avg_rating', '>=', (float) $this->selectedRatings);
@@ -115,6 +136,7 @@ class CourseIndex extends Component
             'isFree' => $this->isFree,
             'isPaid' => $this->isPaid,
             'sort' => $this->sort,
+            'search' => $this->search,
         ]);
     }
 }

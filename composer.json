@@ -12,6 +12,7 @@
         "php": "^8.2",
         "bezhansalleh/filament-language-switch": "^4.1",
         "bezhansalleh/filament-shield": "^4.0",
+        "bni-api/bni-php": "^2.3",
         "diogogpinto/filament-auth-ui-enhancer": "^2.0",
         "dutchcodingcompany/filament-socialite": "^3.0",
         "filament/filament": "^4.0",

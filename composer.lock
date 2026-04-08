@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28116dfc5ece2071c6d4f710b1586dbc",
+    "content-hash": "1539b1558ec0b4b650209fa9b83279b2",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -534,6 +534,52 @@
                 }
             ],
             "time": "2026-01-20T09:46:32+00:00"
+        },
+        {
+            "name": "bni-api/bni-php",
+            "version": "2.3.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bni-api/bni-php-sdk.git",
+                "reference": "6cfda97be10dee272587524ffc7eb2a28c659a59"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bni-api/bni-php-sdk/zipball/6cfda97be10dee272587524ffc7eb2a28c659a59",
+                "reference": "6cfda97be10dee272587524ffc7eb2a28c659a59",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "7.*"
+            },
+            "require-dev": {
+                "codeception/codeception": "4.2.x-dev",
+                "codeception/module-asserts": "^1.0.0",
+                "codeception/module-phpbrowser": "^1.0.0",
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BniApi\\BniPhp\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "BNI-APM",
+                    "email": "bni.dgl.apm@gmail.com"
+                }
+            ],
+            "description": "Official BNI API SDK for PHP",
+            "support": {
+                "issues": "https://github.com/bni-api/bni-php-sdk/issues",
+                "source": "https://github.com/bni-api/bni-php-sdk/tree/2.3.4"
+            },
+            "time": "2024-09-18T07:09:47+00:00"
         },
         {
             "name": "brick/math",
