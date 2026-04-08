@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectGuestsTo(fn () => route('filament.user.auth.login'));
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Clean up old activity logs (older than 365 days)
