@@ -20,7 +20,8 @@
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                         </span>
                         <p class="text-xs text-slate-500 font-medium">
-                            Batas waktu: {{ $vaData['expired_at']->diffInHours(now()) }} jam ke depan
+                            Batas waktu: {{ \Carbon\Carbon::parse($vaData['expired_at'])->diffInHours(now()) }} jam ke
+                            depan
                         </p>
                     </div>
                 </div>
@@ -58,10 +59,10 @@
                             <button
                                 @click="navigator.clipboard.writeText('{{ $vaData['va_number'] }}'); $dispatch('notify', {message: 'Nomor VA berhasil disalin!'})"
                                 class="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all active:scale-90 group border border-white/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round"
-                                    class="lucide lucide-copy-icon lucide-copy">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-copy-icon lucide-copy">
                                     <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
                                     <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                                 </svg>
@@ -114,7 +115,8 @@
                     </div>
                     <p class="text-sm text-amber-900 leading-relaxed">
                         Selesaikan pembayaran sebelum <span
-                            class="font-bold underline">{{ $vaData['expired_at']->format('d M Y, H:i') }} WIB</span>.
+                            class="font-bold underline">{{ \Carbon\Carbon::parse($vaData['expired_at'])->format('d M Y, H:i') }}
+                            WIB</span>.
                         Pesanan akan dibatalkan otomatis jika melewati batas waktu.
                     </p>
                 </div>

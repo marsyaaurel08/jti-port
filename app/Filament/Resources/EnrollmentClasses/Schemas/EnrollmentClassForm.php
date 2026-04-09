@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\EnrollmentClasses\Schemas;
 
-use App\Models\CourseClass;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 
 class EnrollmentClassForm
@@ -21,15 +21,16 @@ class EnrollmentClassForm
                     ->description('Pendaftaran manual oleh admin untuk siswa ke kelas spesifik.')
                     ->schema([
                         Select::make('class_id')
-                            ->relationship('class', 'title', fn($query) => $query->where('is_active', true))
+                            ->relationship('class', 'title', fn ($query) => $query->where('is_active', true))
                             ->label('Pilih Kelas')
                             ->searchable()
                             ->preload()
                             ->required()
                             ->live()
                             ->afterStateUpdated(function ($state, $set) {
-                                if (!$state) {
+                                if (! $state) {
                                     $set('available_slots', 0);
+
                                     return;
                                 }
 
@@ -48,8 +49,12 @@ class EnrollmentClassForm
                             ->prefix('Sisa:')
                             ->suffix(' Kursi'),
 
+                        View::make('filament.components.quota-full-warning')
+                            ->hidden(fn (Get $get) => empty($get('class_id')) || (int) $get('available_slots') > 0),
+
                         Repeater::make('students')
                             ->label('Daftar Siswa')
+                            ->hidden(fn (Get $get) => empty($get('class_id')) || (int) $get('available_slots') <= 0)
                             ->schema([
                                 Select::make('user_id')
                                     ->relationship('user', 'name')
@@ -68,9 +73,10 @@ class EnrollmentClassForm
                             // LOGIKA PEMBATASAN TOMBOL TAMBAH
                             ->maxItems(function (Get $get) {
                                 $slots = (int) $get('available_slots');
+
                                 return $slots > 0 ? $slots : 0;
                             })
-                            
+
                             ->minItems(1)
                             ->collapsed()
                             ->cloneable()

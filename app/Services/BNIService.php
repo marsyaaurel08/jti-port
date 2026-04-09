@@ -3,16 +3,14 @@
 namespace App\Services;
 
 use App\Models\Order;
-use BniApi\BniPhp\Bni;
 use BniApi\BniPhp\api\Ecollection;
+use BniApi\BniPhp\Bni;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 /**
  * BNI Service untuk integrasi Virtual Account payment menggunakan Ecollection
- *
- * @package App\Services
  */
 class BNIService
 {
@@ -38,16 +36,14 @@ class BNIService
 
     /**
      * Create Virtual Account for payment
+     * Currently using fallback VA - BNI API integration can be enabled later
      *
-     * @param Order $order
      * @return array Virtual Account data
-     *
-     * @throws Exception
      */
     public function createVirtualAccount(Order $order): array
     {
         try {
-            Log::info('Creating BNI Virtual Account', [
+            Log::info('Creating Virtual Account', [
                 'order_id' => $order->id,
                 'invoice_number' => $order->invoice_number,
                 'total_amount' => $order->total_amount,
@@ -87,19 +83,44 @@ class BNIService
 
             return $vaData;
         } catch (Exception $e) {
-            Log::error('Failed to create BNI Virtual Account', [
+            Log::error('Failed to create Virtual Account', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage(),
             ]);
 
-            throw $e;
+            // Return fallback VA as last resort
+            return $this->createFallbackVirtualAccount($order);
         }
+    }
+
+    /**
+     * Create fallback Virtual Account when BNI API fails
+     * Plan B mechanism untuk menampilkan VA default
+     *
+     * @return array Fallback Virtual Account data
+     */
+    public function createFallbackVirtualAccount(Order $order): array
+    {
+        $expiredAt = Carbon::now()->addHours(24);
+
+        return [
+            'va_number' => '0098765432100',
+            'bank_code' => '009',
+            'bank_name' => 'BNI',
+            'account_holder' => $order->user->name,
+            'amount' => $order->total_amount,
+            'expired_at' => $expiredAt->toIso8601String(),
+            'description' => "Transfer untuk Invoice {$order->invoice_number}",
+            'status' => 'pending',
+            'is_fallback_va' => true,
+            'response_code' => 'FALLBACK',
+            'response_message' => 'Menggunakan Virtual Account Backup - Verifikasi Manual Diperlukan',
+        ];
     }
 
     /**
      * Get payment status from BNI
      *
-     * @param Order $order
      * @return array Payment status data
      *
      * @throws Exception
@@ -139,7 +160,7 @@ class BNIService
     /**
      * Verify payment webhook from BNI
      *
-     * @param array $payload Webhook payload from BNI
+     * @param  array  $payload  Webhook payload from BNI
      * @return bool Whether payment is verified
      */
     public function verifyWebhookPayload(array $payload): bool
@@ -159,9 +180,6 @@ class BNIService
 
     /**
      * Handle payment confirmation webhook from BNI
-     *
-     * @param array $payload
-     * @return bool
      */
     public function handlePaymentWebhook(array $payload): bool
     {
@@ -202,8 +220,6 @@ class BNIService
     /**
      * Inactive/Cancel Virtual Account
      *
-     * @param Order $order
-     * @return bool
      *
      * @throws Exception
      */

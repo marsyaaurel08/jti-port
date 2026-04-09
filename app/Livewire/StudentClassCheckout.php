@@ -5,7 +5,9 @@ namespace App\Livewire;
 use App\Models\CourseClass;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\UserCart;
 use App\Services\VABankService;
+use App\Services\BNIService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -100,6 +102,8 @@ class StudentClassCheckout extends Component
 
     public array $vaData = [];
 
+    public string $redirectRoute = 'student.orders';
+
     public function mount(string $slug): void
     {
         $this->class = CourseClass::where('slug', $slug)->firstOrFail();
@@ -133,7 +137,7 @@ class StudentClassCheckout extends Component
 
         // Mock: Apply 10% discount
         $this->discountAmount = $this->getProductPrice() * 0.10;
-        $this->promoMessage = 'Kode promo berhasil diterapkan! Diskon: Rp'.number_format($this->discountAmount, 0, ',', '.');
+        $this->promoMessage = 'Kode promo berhasil diterapkan! Diskon: Rp' . number_format($this->discountAmount, 0, ',', '.');
         $this->promoApplied = true;
     }
 
@@ -284,19 +288,35 @@ class StudentClassCheckout extends Component
             // Create Order Item
             OrderItem::create([
                 'order_id' => $order->id,
-                'course_id' => null,
+                'course_id' => $this->class->course_id,
                 'class_id' => $this->class->id,
                 'price_at_purchase' => $this->getTotalAmount(),
                 'item_name' => $this->class->title,
             ]);
 
-            // Always generate BNI VA regardless of transfer method
-            $vaService = new VABankService;
-            $this->vaData = $vaService->generateBNIVA($order);
+            // Generate BNI Virtual Account using BNI Ecollection API
+            $bniService = new BNIService;
+            $vaDataResponse = $bniService->createVirtualAccount($order);
+
+            // Store BNI details in order
+            $order->update([
+                'bni_transaction_id' => $vaDataResponse['va_number'] ?? null,
+                'bni_va_number' => $vaDataResponse['va_number'] ?? null,
+                'is_fallback_va' => $vaDataResponse['is_fallback'] ?? false,
+                'bni_va_expired_at' => $vaDataResponse['expired_at'] ?? null,
+            ]);
+
+            $this->vaData = $vaDataResponse;
             $this->showVAInstructions = true;
+
+            // Clear cart items after order created
+            $this->clearCartItems();
+
+            // Flash success notification
+            session()->flash('success', 'Nomor Virtual Account berhasil dibuat. Silakan lakukan transfer sesuai instruksi.');
         } catch (\Exception $e) {
             $this->isProcessing = false;
-            session()->flash('error', 'Gagal memproses pembayaran: '.$e->getMessage());
+            session()->flash('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
         }
 
         $this->isProcessing = false;
@@ -304,13 +324,23 @@ class StudentClassCheckout extends Component
 
     public function generateInvoiceNumber(): string
     {
-        return 'INV-'.date('YmdHis').'-'.Auth::id();
+        return 'INV-' . date('YmdHis') . '-' . Auth::id();
     }
 
     public function closeModal(): void
     {
         $this->showVAInstructions = false;
         $this->vaData = [];
+        // Redirect to orders page
+        redirect()->route('student.orders');
+    }
+
+    private function clearCartItems(): void
+    {
+        // Remove cart item for this class
+        UserCart::where('user_id', Auth::id())
+            ->where('class_id', $this->class->id)
+            ->delete();
     }
 
     public function render()

@@ -3,21 +3,32 @@
 namespace App\Livewire;
 
 use App\Models\Order;
-use App\Services\VABankService;
+use App\Services\BNIService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class StudentOrders extends Component
 {
+    use WithFileUploads;
+
     public ?object $user = null;
 
     public bool $showVAInstructions = false;
 
+    public bool $showProofUpload = false;
+
+    public bool $showProofView = false;
+
     public array $vaData = [];
 
     public ?Order $selectedOrder = null;
+
+    #[Validate('nullable|image|max:5120')]
+    public $paymentProof = null;
 
     public array $transferMethods = [
         'bni_mobile' => [
@@ -211,8 +222,7 @@ class StudentOrders extends Component
         }
 
         $this->selectedOrder = $order;
-        $vaService = new VABankService;
-        $this->vaData = $vaService->generateBNIVA($order);
+        $this->vaData = $order->getVaData();
         $this->showVAInstructions = true;
     }
 
@@ -220,6 +230,121 @@ class StudentOrders extends Component
     {
         $this->showVAInstructions = false;
         $this->vaData = [];
+        $this->selectedOrder = null;
+    }
+
+    public function openProofUpload($orderId): void
+    {
+        $order = Order::findOrFail($orderId);
+
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($order->status !== 'pending') {
+            session()->flash('error', 'Order ini sudah dibayar atau tidak dapat diverifikasi');
+
+            return;
+        }
+
+        $this->selectedOrder = $order;
+        $this->paymentProof = null;
+        $this->showProofUpload = true;
+    }
+
+    public function closeProofUpload(): void
+    {
+        $this->showProofUpload = false;
+        $this->paymentProof = null;
+        $this->selectedOrder = null;
+    }
+
+    public function uploadPaymentProof(): void
+    {
+        if (! $this->selectedOrder) {
+            session()->flash('error', 'Order tidak ditemukan');
+
+            return;
+        }
+
+        $this->validate();
+
+        try {
+            // Simpan file dengan timestamp dan order ID untuk keunikan
+            $filename = 'proof_'.$this->selectedOrder->id.'_'.now()->timestamp.'.'.$this->paymentProof->extension();
+
+            $path = $this->paymentProof->storeAs(
+                'payments/proof',
+                $filename,
+                'public'
+            );
+
+            // Update order dengan path file
+            $this->selectedOrder->update([
+                'payment_proof' => $path,
+            ]);
+
+            session()->flash('success', 'Bukti pembayaran berhasil diupload. Admin akan memverifikasi dalam waktu 1x24 jam.');
+
+            $this->closeProofUpload();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal mengupload bukti pembayaran: '.$e->getMessage());
+        }
+    }
+
+    public function cancelOrder($orderId): void
+    {
+        try {
+            $order = Order::findOrFail($orderId);
+
+            // Check authorization
+            if ($order->user_id !== Auth::id()) {
+                abort(403, 'Anda tidak memiliki izin untuk membatalkan order ini');
+            }
+
+            // Only allow cancellation of pending orders
+            if ($order->status !== 'pending') {
+                session()->flash('error', 'Hanya order yang masih pending yang dapat dibatalkan');
+
+                return;
+            }
+
+            // Update order status to cancelled
+            $order->update(['status' => 'cancelled']);
+
+            session()->flash('success', 'Order berhasil dibatalkan');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal membatalkan order: '.$e->getMessage());
+        }
+    }
+
+    public function viewProof($orderId): void
+    {
+        try {
+            $order = Order::findOrFail($orderId);
+
+            // Check authorization
+            if ($order->user_id !== Auth::id()) {
+                abort(403, 'Anda tidak memiliki izin untuk melihat bukti ini');
+            }
+
+            // Check if proof exists
+            if (! $order->payment_proof) {
+                session()->flash('error', 'Bukti pembayaran tidak ditemukan');
+
+                return;
+            }
+
+            $this->selectedOrder = $order;
+            $this->showProofView = true;
+        } catch (\Exception $e) {
+            session()->flash('error', 'Gagal membuka bukti pembayaran: '.$e->getMessage());
+        }
+    }
+
+    public function closeProofView(): void
+    {
+        $this->showProofView = false;
         $this->selectedOrder = null;
     }
 

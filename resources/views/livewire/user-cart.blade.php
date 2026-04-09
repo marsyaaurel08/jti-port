@@ -1,6 +1,10 @@
 <x-layouts.user :user="$this->user">
     @if (empty($cartItems))
         {{-- Empty State: Lebih minimalis --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Keranjang Saya</h1>
+            <p class="text-gray-600 mt-2">Lihat semua item yang telah Anda tambahkan</p>
+        </div>
         <div class="bg-white rounded-[2rem] border border-slate-100 p-16 text-center shadow-sm">
             <div class="relative inline-flex mb-6">
                 {{-- Subtle Glow Kuning --}}
@@ -23,97 +27,83 @@
         <div class="space-y-6">
             {{-- Header --}}
             <div class="px-2">
-                <h2 class="text-2xl font-semibold text-jti-primary tracking-tight">Keranjang belanja</h2>
-                <p class="text-sm text-slate-500 font-medium">Kelola item pilihan anda sebelum melakukan pembayaran</p>
+                <h2 class="text-2xl font-bold text-jti-primary tracking-tight">Keranjang Belanja</h2>
+                <p class="text-sm text-slate-500 font-medium mt-1">Selesaikan pembayaran per item untuk akses instan</p>
             </div>
 
             <div class="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
                 <div class="divide-y divide-slate-50">
                     @foreach ($cartItems as $item)
                         @php
-                            $course = $item['course'] ?? $item['class'];
-                            $thumbnail = $course['thumbnail_url'] ?? null;
-                            $isClass = isset($item['class_id']) && $item['class_id'] !== null;
+                            $isClass = !is_null($item['class_id']);
+                            $courseOrClass = $isClass ? $item['class'] : $item['course'];
+                            $slug = $courseOrClass['slug'] ?? '';
+                            $routeName = $isClass ? 'checkout.class' : 'checkout.course';
                         @endphp
+
                         <div wire:key="{{ $item['id'] }}"
-                            class="group p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 hover:bg-slate-50/50 transition-colors">
+                            class="group p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6 hover:bg-slate-50/50 transition-all duration-300">
 
-                            {{-- Thumbnail dengan soft border --}}
-                            <div
-                                class="relative w-36 h-24 shrink-0 overflow-hidden rounded-xl bg-slate-100 border border-slate-200/50">
-                                <img src="{{ $thumbnail ?? 'https://via.placeholder.com/150' }}"
-                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                            </div>
-
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 mb-1.5">
-                                    {{-- Badge Tipe: Menggunakan warna kuning sebagai aksen --}}
+                            {{-- Thumbnail dengan Badge Status --}}
+                            <div class="relative shrink-0">
+                                <div
+                                    class="w-40 h-24 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200/50 shadow-sm">
+                                    <img src="{{ $courseOrClass['thumbnail_url'] ?? 'https://via.placeholder.com/150' }}"
+                                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                </div>
+                                {{-- Floating Badge --}}
+                                <div class="absolute -top-2 -left-2 shadow-sm">
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-semibold {{ $isClass ? 'bg-jti-yellow/10 text-jti-maroon' : 'bg-slate-100 text-slate-500' }}">
-                                        {{ $isClass ? 'Live class' : 'Kursus digital' }}
+                                        class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider
+                                {{ $isClass ? 'bg-amber-400 text-jti-primary' : 'bg-jti-primary text-white' }}">
+                                        {{ $isClass ? 'Kelas' : 'Course' }}
                                     </span>
                                 </div>
+                            </div>
 
+                            {{-- Konten --}}
+                            <div class="flex-1 min-w-0 text-center md:text-left">
                                 <h3
-                                    class="text-base font-semibold text-slate-900 leading-snug group-hover:text-jti-primary transition-colors">
-                                    {{ $course['title'] }}
+                                    class="text-lg font-bold text-slate-900 leading-snug group-hover:text-jti-primary transition-colors line-clamp-2">
+                                    {{ $courseOrClass['title'] }}
                                 </h3>
 
-                                <div class="flex items-center gap-1.5 mt-2">
-                                    <span class="text-xs font-medium text-slate-400">Harga:</span>
-                                    <span class="text-sm font-semibold text-jti-primary">
-                                        Rp {{ number_format($course['price'], 0, ',', '.') }}
-                                    </span>
+                                <div class="flex items-center justify-center md:justify-start gap-3 mt-3">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Harga</span>
+                                        <span class="text-lg font-extrabold text-jti-primary">
+                                            Rp {{ number_format($courseOrClass['price'], 0, ',', '.') }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="shrink-0">
+                            {{-- Actions Group --}}
+                            <div
+                                class="shrink-0 flex items-center gap-4 w-full md:w-auto border-t md:border-0 pt-4 md:pt-0">
+                                {{-- Tombol Hapus: Lebih subtle --}}
                                 <button wire:click="removeItem({{ $item['id'] }})" wire:loading.attr="disabled"
-                                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-slate-100 text-slate-300 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-all shadow-sm">
+                                    title="Hapus dari keranjang"
+                                    class="flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90">
 
                                     <div wire:loading.remove wire:target="removeItem({{ $item['id'] }})">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
-                                            <path d="M10 11v6" />
-                                            <path d="M14 11v6" />
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                            <path d="M3 6h18" />
-                                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                        </svg>
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
                                     </div>
-
                                     <div wire:loading wire:target="removeItem({{ $item['id'] }})">
-                                        <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-rose-500"></i>
+                                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
                                     </div>
                                 </button>
+
+                                {{-- Tombol Checkout: Lebih menonjol --}}
+                                <a href="{{ route("student.$routeName", $slug) }}"
+                                    class="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-3.5 bg-jti-yellow text-jti-primary font-bold rounded-2xl hover:bg-jti-yellow/90 hover:shadow-xl hover:shadow-jti-yellow/20 transition-all active:scale-95 whitespace-nowrap">
+                                    <span>Bayar Sekarang</span>
+                                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                </a>
                             </div>
                         </div>
                     @endforeach
-                </div>
-
-                {{-- Summary Section: Dominasi Kuning untuk CTA --}}
-                <div
-                    class="p-8 bg-jti-yellow/5 border-t border-jti-yellow/10 flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div class="text-center sm:text-left">
-                        <p class="text-xs font-medium text-slate-500 mb-1">Total pembayaran</p>
-                        <p class="text-2xl font-semibold text-jti-primary">
-                            Rp
-                            {{ number_format(collect($cartItems)->sum(fn($i) => $i['course']['price'] ?? $i['class']['price']), 0, ',', '.') }}
-                        </p>
-                    </div>
-
-                    <button
-                        class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-jti-yellow text-jti-primary font-semibold rounded-xl hover:bg-jti-yellow/90 hover:shadow-lg hover:shadow-jti-yellow/20 transition-all active:scale-95">
-                        Lanjutkan ke pembayaran
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-circle-arrow-right-icon lucide-circle-arrow-right">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="m12 16 4-4-4-4" />
-                            <path d="M8 12h8" />
-                        </svg>
-                    </button>
                 </div>
             </div>
         </div>
