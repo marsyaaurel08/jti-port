@@ -24,23 +24,6 @@
 
             {{-- Stats & Level --}}
             <div class="flex flex-wrap items-center gap-6">
-                {{-- Rating Section --}}
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm">
-                        <span class="text-lg font-bold text-yellow-400">{{ number_format($class->avg_rating, 1) }}</span>
-                        <div class="flex text-yellow-400">
-                            {{-- Icon Star --}}
-                            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                        </div>
-                    </div>
-                    <span class="text-xs font-medium text-gray-400">
-                        <span class="text-gray-200">2.1M+</span> Pelajar
-                    </span>
-                </div>
-
-                {{-- Vertical Separator --}}
-                <div class="hidden md:block w-px h-6 bg-white/10"></div>
-
                 {{-- Level Badge --}}
                 <div class="flex items-center gap-3">
                     @php

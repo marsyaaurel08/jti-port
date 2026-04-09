@@ -33,7 +33,7 @@
             </a>
             <div class="py-2">
                 <a href="{{ route('student.my-courses') }}"
-                    class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Kursus
+                    class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Course
                     Saya</a>
                 <a href="{{ route('student.my-classes') }}"
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Kelas

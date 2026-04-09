@@ -35,7 +35,7 @@
         </div>
 
         <div class="flex gap-4 grow justify-end">
-            <x-layout.nav.search-bar />
+            {{-- <x-layout.nav.search-bar /> --}}
             {{-- Right Side Actions --}}
             <div class="flex items-center gap-2 md:gap-5">
                 {{-- Logika Pembeda Auth --}}

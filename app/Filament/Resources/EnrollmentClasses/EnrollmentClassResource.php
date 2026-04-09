@@ -23,11 +23,11 @@ class EnrollmentClassResource extends Resource
 {
     protected static ?string $model = Enrollment::class;
 
-    protected static ?string $navigationLabel = 'Class Enrollments';
-    protected static ?string $pluralLabel = 'Class Enrollments';
-    protected static ?string $modelLabel = 'Class Enrollments';
+    protected static ?string $navigationLabel = 'Pendaftaran Kelas';
+    protected static ?string $pluralLabel = 'Pendaftaran Kelas';
+    protected static ?string $modelLabel = 'Pendaftaran Kelas';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Classes';
+    protected static string|UnitEnum|null $navigationGroup = 'Kelas';
 
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;

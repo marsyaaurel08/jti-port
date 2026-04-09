@@ -41,17 +41,13 @@ class OrdersHistoryInfolist
                                                 ->icon(fn (string $state): string => match ($state) {
                                                     'paid' => 'heroicon-m-check-circle',
                                                     'pending' => 'heroicon-m-clock',
-                                                    'failed' => 'heroicon-m-x-circle',
                                                     'cancelled' => 'heroicon-m-x-circle',
-                                                    'expired' => 'heroicon-m-exclamation-circle',
                                                     default => 'heroicon-m-minus-circle',
                                                 })
                                                 ->color(fn (string $state): string => match ($state) {
                                                     'paid' => 'success',
                                                     'pending' => 'warning',
-                                                    'failed' => 'danger',
                                                     'cancelled' => 'danger',
-                                                    'expired' => 'warning',
                                                     default => 'gray',
                                                 }),
 

@@ -24,7 +24,7 @@
             {{-- Links --}}
             <div class="py-2">
                 <a href="{{ route('student.enrolled') }}"
-                    class="block px-6 py-2 text-sm font-semibold hover:bg-jti-light/30">Kursus Saya</a>
+                    class="block px-6 py-2 text-sm font-semibold hover:bg-jti-light/30">Course Saya</a>
                 <hr class="my-1 border-gray-50">
                 <form method="POST" action="{{ route('filament.admin.auth.logout') }}">
                     @csrf

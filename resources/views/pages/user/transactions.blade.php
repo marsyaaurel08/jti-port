@@ -61,9 +61,9 @@
                                                     @elseif ($transaction->status === 'pending')
                                                         <span
                                                             class="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">Menunggu</span>
-                                                    @elseif ($transaction->status === 'failed')
+                                                    @elseif ($transaction->status === 'cancelled')
                                                         <span
-                                                            class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">Gagal</span>
+                                                            class="inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">Dibatalkan</span>
                                                     @else
                                                         <span
                                                             class="inline-block px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-semibold">{{ ucfirst($transaction->status) }}</span>
