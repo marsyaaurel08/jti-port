@@ -57,7 +57,7 @@ RUN git config --global --add safe.directory /var/www/html && \
 # Menjalankan sebagai user www-data untuk keamanan terbaik
 USER www-data
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --optimize-autoloader --no-interaction
 
 # Balik lagi ke root untuk menjalankan php-fpm
 USER root
