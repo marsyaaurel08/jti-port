@@ -11,7 +11,7 @@ use Livewire\Component;
 
 #[Layout('layouts.app')]
 
-class UserCart extends Component
+class StudentCart extends Component
 {
     public $cartItems = [];
 
@@ -139,6 +139,6 @@ class UserCart extends Component
 
     public function render()
     {
-        return view('livewire.user-cart');
+        return view('livewire.student-cart');
     }
 }

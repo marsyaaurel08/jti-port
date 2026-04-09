@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 
-class UserTransactions extends Component
+class StudentTransactions extends Component
 {
     use WithPagination;
 
@@ -67,6 +67,6 @@ class UserTransactions extends Component
 
     public function render()
     {
-        return view('livewire.user-transactions');
+        return view('livewire.student-transactions');
     }
 }
