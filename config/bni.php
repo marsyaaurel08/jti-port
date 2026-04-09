@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'default_va' => env('DEFAULT_VA', '8277087781881441'),
     // BNI API Environment: 'sandbox' or 'prod'
     'environment' => env('BNI_ENVIRONMENT', 'sandbox'),
 

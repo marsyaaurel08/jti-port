@@ -50,7 +50,7 @@ class UserTransactions extends Component
         return match ($status) {
             'paid' => 'green',
             'pending' => 'yellow',
-            'failed' => 'red',
+            'cancelled' => 'red',
             default => 'gray',
         };
     }
@@ -60,7 +60,7 @@ class UserTransactions extends Component
         return match ($status) {
             'paid' => 'Lunas',
             'pending' => 'Menunggu',
-            'failed' => 'Gagal',
+            'cancelled' => 'Dibatalkan',
             default => ucfirst($status),
         };
     }

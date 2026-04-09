@@ -3,9 +3,9 @@
 
         {{-- Header: Perbaikan kontras dan spacing --}}
         <div class="mb-10">
-            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">My Courses</h1>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Course Saya</h1>
             <p class="mt-2 text-base text-slate-500 max-w-2xl">
-                Manage and track your certification progress at JTI PORT.
+                Kelola dan pantau perkembangan sertifikasi Anda di JTI PORT.
             </p>
         </div>
 
@@ -14,9 +14,9 @@
             @php
                 $activeFilter = request('filter', 'all');
                 $tabs = [
-                    'all' => 'All Courses',
-                    'in-progress' => 'In Progress',
-                    'completed' => 'Completed'
+                    'all' => 'Semua Course',
+                    'in-progress' => 'Sedang Berlangsung',
+                    'completed' => 'Selesai'
                 ];
             @endphp
 

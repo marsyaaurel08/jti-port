@@ -38,8 +38,6 @@ class OrdersHistoriesTable
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
                         'paid' => 'success',
-                        'failed' => 'danger',
-                        'expired' => 'warning',
                         default => 'gray',
                     })
                     ->sortable(),

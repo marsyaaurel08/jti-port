@@ -104,7 +104,7 @@ class BNIService
         $expiredAt = Carbon::now()->addHours(24);
 
         return [
-            'va_number' => '0098765432100',
+            'va_number' => config('bni.default_va'),
             'bank_code' => '009',
             'bank_name' => 'BNI',
             'account_holder' => $order->user->name,
@@ -352,8 +352,6 @@ class BNIService
         return match ($bniStatus) {
             'APPROVED', '1', '0' => 'paid',
             'PENDING', '2' => 'pending',
-            'FAILED', '3' => 'failed',
-            'EXPIRED', '4' => 'expired',
             default => 'pending',
         };
     }

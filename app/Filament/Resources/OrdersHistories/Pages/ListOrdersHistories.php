@@ -25,25 +25,15 @@ class ListOrdersHistories extends ListRecords
         return [
             'all' => Tab::make('Semua')
                 ->icon('heroicon-o-list-bullet'),
-
             'pending' => Tab::make('Menunggu Pembayaran')
                 ->icon('heroicon-o-clock')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'pending')),
-            'cancelled' => Tab::make('Dibatalkan')
-                ->icon('heroicon-o-x-circle')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'cancelled')),
-
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('status', 'pending')),
             'paid' => Tab::make('Berhasil Dibayar')
                 ->icon('heroicon-o-check-circle')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'paid')),
-
-            'failed' => Tab::make('Gagal')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('status', 'paid')),
+            'cancelled' => Tab::make('Dibatalkan')
                 ->icon('heroicon-o-x-circle')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'failed')),
-
-            'expired' => Tab::make('Kadaluarsa')
-                ->icon('heroicon-o-exclamation-circle')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'expired')),
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('status', 'cancelled')),
         ];
     }
 

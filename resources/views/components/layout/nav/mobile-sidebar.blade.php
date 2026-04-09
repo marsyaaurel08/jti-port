@@ -131,7 +131,7 @@
                     <div class="space-y-1">
                         @php
                             $userMenus = [
-                                ['route' => 'student.my-courses', 'label' => 'Kursus Saya'],
+                                ['route' => 'student.my-courses', 'label' => 'Course Saya'],
                                 ['route' => 'student.my-classes', 'label' => 'Kelas Saya'],
                                 ['route' => 'student.cart', 'label' => 'Keranjang Belanja', 'count' => true],
                                 ['route' => 'student.transactions', 'label' => 'Riwayat Transaksi'],

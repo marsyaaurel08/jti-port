@@ -24,9 +24,9 @@ class ClassesResource extends Resource
     protected static ?string $model = CourseClass::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAcademicCap;
-    protected static ?string $pluralLabel = 'Classes';
-    protected static ?string $navigationLabel = 'Classes';
-    protected static string|UnitEnum|null $navigationGroup = 'Classes';
+    protected static ?string $pluralLabel = 'Daftar Kelas';
+    protected static ?string $navigationLabel = 'Daftar Kelas';
+    protected static string|UnitEnum|null $navigationGroup = 'Kelas';
 
 
 

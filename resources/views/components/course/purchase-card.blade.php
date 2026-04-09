@@ -82,23 +82,6 @@
             @endif
         </div>
 
-        {{-- Coupon Section: Minimalis --}}
-        <div x-data="{ openCoupon: false }" class="mb-8 group">
-            <button @click="openCoupon = !openCoupon"
-                class="w-full text-center text-[11px] font-medium text-gray-500 hover:text-jti-yellow transition-colors">
-                Punya kode kupon?
-            </button>
-
-            <div x-show="openCoupon" x-transition class="mt-4 flex gap-2">
-                <input type="text" placeholder="Masukkan kode"
-                    class="flex-1 px-4 py-2 text-xs bg-white/5 border border-white/10 rounded-lg text-white focus:border-jti-yellow outline-none transition-all placeholder:text-gray-700">
-                <button
-                    class="px-4 py-2 bg-gray-100 text-black text-[11px] font-bold rounded-lg hover:bg-white transition-colors">
-                    Terapkan
-                </button>
-            </div>
-        </div>
-
         {{-- Features List --}}
         <div class="border-t border-white/5 pt-6">
             <h5 class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-4">Termasuk di dalamnya:</h5>
