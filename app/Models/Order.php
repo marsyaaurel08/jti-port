@@ -108,4 +108,21 @@ class Order extends Model
     {
         return $this->hasMany(Enrollment::class);
     }
+
+    public function getVaData(): array
+    {
+        return [
+            'va_number' => $this->bni_va_number,
+            'bank_code' => '009',
+            'bank_name' => 'BNI',
+            'account_holder' => $this->user->name,
+            'amount' => $this->total_amount,
+            'expired_at' => $this->bni_va_expired_at->toIso8601String(),
+            'description' => "Transfer untuk Invoice {$this->invoice_number}",
+            'status' => $this->status,
+            'is_fallback_va' => $this->is_fallback_va,
+            'response_code' => 'FALLBACK',
+            'response_message' => 'Menggunakan Virtual Account Backup - Verifikasi Manual Diperlukan',
+        ];
+    }
 }
