@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Course;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\UserCart;
 use App\Services\BNIService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -100,6 +101,8 @@ class StudentCourseCheckout extends Component
 
     public array $vaData = [];
 
+    public string $redirectRoute = 'student.orders';
+
     public function mount(string $slug): void
     {
         $this->course = Course::where('slug', $slug)->firstOrFail();
@@ -133,7 +136,7 @@ class StudentCourseCheckout extends Component
 
         // Mock: Apply 10% discount
         $this->discountAmount = $this->getProductPrice() * 0.10;
-        $this->promoMessage = 'Kode promo berhasil diterapkan! Diskon: Rp' . number_format($this->discountAmount, 0, ',', '.');
+        $this->promoMessage = 'Kode promo berhasil diterapkan! Diskon: Rp'.number_format($this->discountAmount, 0, ',', '.');
         $this->promoApplied = true;
     }
 
@@ -291,24 +294,28 @@ class StudentCourseCheckout extends Component
             ]);
 
             // Generate BNI Virtual Account using BNI Ecollection API
-            $bniService = new BNIService();
+            $bniService = new BNIService;
             $vaDataResponse = $bniService->createVirtualAccount($order);
 
             // Store BNI details in order
             $order->update([
                 'bni_transaction_id' => $vaDataResponse['va_number'] ?? null,
                 'bni_va_number' => $vaDataResponse['va_number'] ?? null,
+                'is_fallback_va' => $vaDataResponse['is_fallback'] ?? false,
                 'bni_va_expired_at' => $vaDataResponse['expired_at'] ?? null,
             ]);
 
             $this->vaData = $vaDataResponse;
             $this->showVAInstructions = true;
 
+            // Clear cart items after order created
+            $this->clearCartItems();
+
             // Flash success notification
             session()->flash('success', 'Nomor Virtual Account berhasil dibuat. Silakan lakukan transfer sesuai instruksi.');
         } catch (\Exception $e) {
             $this->isProcessing = false;
-            session()->flash('error', 'Gagal membuat Virtual Account: ' . $e->getMessage());
+            session()->flash('error', 'Gagal membuat Virtual Account: '.$e->getMessage());
         }
 
         $this->isProcessing = false;
@@ -316,13 +323,23 @@ class StudentCourseCheckout extends Component
 
     public function generateInvoiceNumber(): string
     {
-        return 'INV-' . date('YmdHis') . '-' . Auth::id();
+        return 'INV-'.date('YmdHis').'-'.Auth::id();
     }
 
     public function closeModal(): void
     {
         $this->showVAInstructions = false;
         $this->vaData = [];
+        // Redirect to orders page
+        redirect()->route('student.orders');
+    }
+
+    private function clearCartItems(): void
+    {
+        // Remove cart item for this course
+        UserCart::where('user_id', Auth::id())
+            ->where('course_id', $this->course->id)
+            ->delete();
     }
 
     public function render()
