@@ -20,7 +20,8 @@
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                         </span>
                         <p class="text-xs text-slate-500 font-medium">
-                            Batas waktu: {{ $vaData['expired_at']->diffInHours(now()) }} jam ke depan
+                            Batas waktu: {{ \Carbon\Carbon::parse($vaData['expired_at'])->diffInHours(now()) }} jam ke
+                            depan
                         </p>
                     </div>
                 </div>
@@ -115,7 +116,8 @@
                     </div>
                     <p class="text-sm text-amber-900 leading-relaxed">
                         Selesaikan pembayaran sebelum <span
-                            class="font-bold underline">{{ $vaData['expired_at']->format('d M Y, H:i') }} WIB</span>.
+                            class="font-bold underline">{{ \Carbon\Carbon::parse($vaData['expired_at'])->format('d M Y, H:i') }}
+                            WIB</span>.
                         Pesanan akan dibatalkan otomatis jika melewati batas waktu.
                     </p>
                 </div>
@@ -124,7 +126,7 @@
             {{-- Footer --}}
             <div class="px-8 py-6 border-t border-slate-100 bg-slate-50/50">
                 <button
-                    @click="show = false; @if ($redirectRoute) window.location.href = '{{ $redirectRoute }}'; @else $wire.closeModal(); @endif"
+                    @click="show = false; @if ($redirectRoute) window.location.href = '{{ route($redirectRoute) }}'; @else $wire.closeModal(); @endif"
                     class="w-full py-4 bg-jti-yellow text-jti-primary font-bold rounded-2xl hover:bg-amber-400 transition-all shadow-lg shadow-amber-200 active:scale-[0.98]">
                     Tutup
                 </button>

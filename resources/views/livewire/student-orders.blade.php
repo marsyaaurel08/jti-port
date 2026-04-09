@@ -1,126 +1,223 @@
 <x-layouts.user :user="$this->user">
     @if ($orders->isEmpty())
-        {{-- Compact Modern Empty State --}}
-        <div class="relative py-16 flex flex-col items-center text-center">
-            <div class="absolute inset-0 flex items-center justify-center -z-10 opacity-20">
-                <div class="w-48 h-48 bg-jti-yellow rounded-full blur-[100px]"></div>
-            </div>
+        {{-- Empty State: Dibuat konsisten dengan Cart --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Pesanan Saya</h1>
+            <p class="text-gray-600 mt-2">Pantau status pembayaran dan riwayat transaksi Anda</p>
+        </div>
 
-            <div
-                class="w-24 h-24 bg-white rounded-[2rem] shadow-xl flex items-center justify-center mb-8 rotate-3 hover:rotate-0 transition-transform duration-500 border border-slate-50">
-                <i data-lucide="ghost" class="w-10 h-10 text-slate-300"></i>
+        <div class="bg-white rounded-4xl border border-slate-100 p-16 text-center shadow-sm">
+            <div class="relative inline-flex mb-6">
+                {{-- Subtle Glow Kuning --}}
+                <div class="absolute inset-0 bg-jti-yellow/20 rounded-full blur-2xl"></div>
+                <div class="relative w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
+                    <i data-lucide="ghost" class="w-10 h-10" style="stroke-width: 1.2px;"></i>
+                </div>
             </div>
-
-            <h3 class="text-2xl font-bold text-slate-900 tracking-tight mb-3">Semua beres!</h3>
-            <p class="text-sm text-slate-500 font-medium max-w-xs leading-relaxed mb-8">
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">Semua beres!</h3>
+            <p class="text-slate-500 max-w-xs mx-auto mb-8 text-sm leading-relaxed font-medium">
                 Tidak ada tagihan yang menggantung. Saatnya menambah ilmu baru hari ini?
             </p>
-
             <a href="{{ route('courses.index') }}"
-                class="bg-jti-primary text-white px-8 py-3.5 rounded-xl text-sm font-bold hover:shadow-lg transition-all duration-300 active:scale-95">
+                class="inline-flex items-center gap-2 px-6 py-3 bg-jti-primary text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-jti-primary/20 transition-all active:scale-95 group">
                 Cari Kursus
+                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
             </a>
         </div>
     @else
-        <div class="space-y-8">
-            {{-- Compact Header --}}
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 px-2">
-                <div class="space-y-1">
-                    <h2 class="text-2xl font-extrabold text-jti-primary tracking-tight">Pesanan Anda</h2>
+        <div class="space-y-6">
+            {{-- Header --}}
+            <div class="px-2 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-semibold text-jti-primary tracking-tight">Pesanan Anda</h2>
+                    <p class="text-sm text-slate-500 font-medium">Kelola pembayaran untuk item yang telah Anda pesan</p>
                 </div>
-                <div class="flex items-center gap-2.5 bg-white p-1.5 pr-4 rounded-xl shadow-sm border border-slate-100">
-                    <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-1">Status
-                        </p>
-                        <p class="text-xs font-bold text-slate-700 leading-none">{{ $orders->count() }} Menunggu</p>
-                    </div>
+
+                {{-- Status Badge --}}
+                <div
+                    class="inline-flex items-center gap-2.5 bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+                    <p class="text-xs font-bold text-slate-700">{{ $orders->count() }} Menunggu Pembayaran</p>
                 </div>
             </div>
 
-            <div class="grid gap-5">
+            <div class="space-y-4">
                 @foreach ($orders as $order)
                     <div wire:key="order-{{ $order->id }}"
-                        class="group relative bg-white rounded-[2rem] transition-all duration-500 hover:shadow-xl hover:shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                        class="bg-white rrounded-4xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
 
-                        <div class="p-6 md:p-8">
-                            {{-- Section: Top Info --}}
-                            <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
-                                <div class="space-y-2">
-                                    <div class="inline-block px-3 py-1 bg-slate-50 rounded-lg border border-slate-100">
-                                        <p class="text-[11px] font-bold text-slate-500 font-mono tracking-tight">
-                                            {{ $order->invoice_number }}</p>
-                                    </div>
-                                    <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5">
-                                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                        <div class="p-6 sm:p-8">
+                            {{-- Order Meta --}}
+                            <div
+                                class="flex flex-col md:flex-row justify-between items-start gap-4 mb-6 pb-6 border-b border-slate-50">
+                                <div class="space-y-1">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nomor
+                                        Invoice</span>
+                                    <p class="text-sm font-mono font-bold text-jti-primary">{{ $order->invoice_number }}
+                                    </p>
+                                    <p class="text-xs text-slate-400 flex items-center gap-1">
+                                        <i data-lucide="calendar" class="w-3 h-3"></i>
                                         {{ $order->created_at->format('d M Y • H:i') }} WIB
                                     </p>
                                 </div>
-
                                 <div class="md:text-right">
-                                    <p class="text-[9px] font-bold text-slate-300 uppercase tracking-[0.15em] mb-1">
-                                        Total Amount</p>
-                                    <p class="text-2xl font-black text-jti-primary tracking-tight">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total
+                                        Tagihan</span>
+                                    <p class="text-2xl font-bold text-jti-primary">
                                         <span
-                                            class="text-xs font-bold text-slate-300 mr-0.5">Rp</span>{{ number_format($order->total_amount, 0, ',', '.') }}
+                                            class="text-sm font-semibold mr-0.5">Rp</span>{{ number_format($order->total_amount, 0, ',', '.') }}
                                     </p>
                                 </div>
                             </div>
 
-                            {{-- Section: Content & CTA --}}
-                            <div
-                                class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pt-6 border-t border-slate-50">
-                                {{-- Items List --}}
+                            {{-- Order Items --}}
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                                 <div class="lg:col-span-7 space-y-4">
                                     @foreach ($order->orderItems as $item)
-                                        <div class="flex items-center gap-4">
-                                            <div class="relative shrink-0">
-                                                <img src="{{ $item->course->thumbnail_url ?? $item->class->thumbnail_url }}"
-                                                    class="w-16 h-11 object-cover rounded-xl shadow-sm border border-slate-100"
-                                                    alt="">
+                                        <div class="flex items-center gap-4 group">
+                                            <div
+                                                class="relative w-20 h-14 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200/50">
+                                                <img src="{{ $item->course->thumbnail_url ?? ($item->class->thumbnail_url ?? 'https://via.placeholder.com/150') }}"
+                                                    class="w-full h-full object-cover">
                                             </div>
                                             <div class="min-w-0">
-                                                <h4
-                                                    class="text-sm font-bold text-slate-700 leading-snug line-clamp-1 group-hover:text-jti-primary transition-colors">
-                                                    {{ $item->item_name }}
-                                                </h4>
-                                                <p class="text-[11px] font-bold text-jti-yellow mt-0.5">
-                                                    Rp{{ number_format($item->price_at_purchase, 0, ',', '.') }}
-                                                </p>
+                                                <div class="flex gap-4">
+                                                    <h4
+                                                        class="text-sm font-semibold text-slate-800 leading-snug line-clamp-1 group-hover:text-jti-primary transition-colors">
+                                                        {{ $item->item_name }}
+                                                    </h4>
+                                                    @if ($item->course_id)
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-lg text-[8px] font-bold uppercase tracking-wider bg-jti-primary text-white whitespace-nowrap">
+                                                            Course
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="px-2 py-0.5 rounded-lg text-[8px] font-bold uppercase tracking-wider bg-jti-yellow text-jti-primary whitespace-nowrap">
+                                                            Kelas
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex items-center gap-2 mt-0.5">
+                                                    <p class="text-xs font-bold text-jti-yellow">
+                                                        Rp{{ number_format($item->price_at_purchase, 0, ',', '.') }}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
 
-                                {{-- Mini Action Card --}}
+                                {{-- Action Area: Menggunakan aksen kuning/biru yang soft --}}
                                 <div
-                                    class="lg:col-span-5 bg-slate-50/70 rounded-2xl p-4 flex items-center justify-between gap-4 border border-slate-100/50">
-                                    <div class="flex items-center gap-3">
+                                    class="lg:col-span-5 flex flex-col sm:flex-row items-center gap-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+                                    <div class="flex-1 flex items-center gap-3">
                                         <div
-                                            class="w-9 h-9 bg-white rounded-xl shadow-sm flex items-center justify-center border border-slate-100">
-                                            <i data-lucide="wallet" class="w-4 h-4 text-slate-400"></i>
+                                            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
+                                            <i data-lucide="wallet" class="w-5 h-5 text-slate-400"></i>
                                         </div>
-                                        <div class="min-w-0">
-                                            <p
-                                                class="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
-                                                Method</p>
-                                            <p class="text-[11px] font-extrabold text-slate-700 truncate uppercase">
-                                                {{ $order->payment_method ? str_replace('_', ' ', $order->payment_method) : '-' }}
+                                        <div>
+                                            <p class="text-[9px] font-bold text-slate-400 uppercase">Metode</p>
+                                            <p class="text-xs font-bold text-slate-700 uppercase">
+                                                {{ $order->payment_method ? str_replace('_', ' ', $order->payment_method) : 'N/A' }}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <button wire:click="viewVAInstructions({{ $order->id }})"
-                                        class="shrink-0 px-5 py-2.5 bg-jti-yellow text-jti-primary font-bold text-[11px] rounded-xl hover:shadow-md hover:bg-amber-400 transition-all duration-300 active:scale-95">
-                                        Lihat Instruksi
-                                    </button>
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        <button wire:click="viewVAInstructions({{ $order->id }})"
+                                            class="flex-1 sm:flex-none px-5 py-2.5 bg-jti-yellow text-jti-primary font-bold text-xs rounded-xl hover:bg-jti-yellow/90 transition-all active:scale-95 shadow-sm">
+                                            Instruksi
+                                        </button>
+                                        @if ($order->payment_proof)
+                                            <button wire:click="viewProof({{ $order->id }})"
+                                                class="flex-1 sm:flex-none px-5 py-2.5 bg-white text-emerald-600 border border-emerald-100 font-bold text-xs rounded-xl hover:bg-emerald-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2">
+                                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                                Bukti
+                                            </button>
+                                        @else
+                                            <button wire:click="openProofUpload({{ $order->id }})"
+                                                class="flex-1 sm:flex-none px-5 py-2.5 bg-white text-blue-600 border border-blue-100 font-bold text-xs rounded-xl hover:bg-blue-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2">
+                                                <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                                                Upload
+                                            </button>
+                                        @endif
+                                        <button wire:click="cancelOrder({{ $order->id }})"
+                                            onclick="return confirm('Apakah Anda yakin ingin membatalkan order ini?')"
+                                            class="flex-1 sm:flex-none px-5 py-2.5 bg-white text-rose-600 border border-rose-100 font-bold text-xs rounded-xl hover:bg-rose-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2">
+                                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                            Batalkan
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Modal: Upload Bukti Pembayaran --}}
+    <x-student.proof-upload-modal :show="$showProofUpload" :selectedOrder="$selectedOrder" :paymentProof="$paymentProof" />
+
+    {{-- Modal: VA Instructions --}}
+    <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$selectedOrder?->payment_method]['name'] ?? 'Transfer'" :instructions="$transferInstructions" />
+
+    {{-- Modal: Lihat Bukti Pembayaran --}}
+    @if ($showProofView && $selectedOrder)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                {{-- Header --}}
+                <div
+                    class="sticky top-0 bg-white border-b border-slate-100 px-6 sm:px-8 py-4 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-slate-900">Bukti Pembayaran</h3>
+                    <button wire:click="closeProofView()"
+                        class="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                {{-- Content --}}
+                <div class="p-6 sm:p-8 space-y-6">
+                    {{-- Invoice Info --}}
+                    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Invoice</p>
+                            <p class="text-sm font-mono font-bold text-jti-primary mt-1">
+                                {{ $selectedOrder->invoice_number }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold text-slate-400 uppercase">Total</p>
+                            <p class="text-sm font-bold text-jti-primary mt-1">Rp
+                                {{ number_format($selectedOrder->total_amount, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Image Preview --}}
+                    <div class="space-y-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Bukti Pembayaran</p>
+                        <div
+                            class="border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 p-4 flex items-center justify-center overflow-hidden">
+                            <img src="{{ asset('storage/' . $selectedOrder->payment_proof) }}" alt="Bukti Pembayaran"
+                                class="max-w-full max-h-[60vh] object-contain rounded-lg">
+                        </div>
+                    </div>
+
+                    {{-- Info Message --}}
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                        <p class="text-xs text-blue-700 font-medium">
+                            <i data-lucide="info" class="w-4 h-4 inline mr-2"></i>
+                            Bukti pembayaran Anda telah terupload. Admin akan memverifikasi dalam waktu 1x24 jam.
+                        </p>
+                    </div>
+
+                    {{-- Close Button --}}
+                    <button wire:click="closeProofView()"
+                        class="w-full px-6 py-3 bg-jti-primary text-white font-bold rounded-xl hover:shadow-lg hover:shadow-jti-primary/20 transition-all active:scale-95">
+                        Tutup
+                    </button>
+                </div>
             </div>
         </div>
     @endif
