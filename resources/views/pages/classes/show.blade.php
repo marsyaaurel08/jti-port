@@ -154,8 +154,6 @@
 
             </div>
         </div>
+        <x-classes.mobile-checkout-bar :class="$class" />
     </div>
-
-    {{-- Mobile Checkout Bar --}}
-    <x-classes.mobile-checkout-bar :class="$class" />
 </x-layouts.app>
