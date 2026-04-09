@@ -13,7 +13,6 @@ use App\Observers\UserCartObserver;
 use App\Observers\UserObserver;
 use App\Services\ClassStudentService;
 use App\Services\CourseStudentService;
-use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -32,10 +31,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-            $switch
-                ->locales(['en','id']);
-        });
         // Register Model Observers for cache invalidation
         Category::observe(CategoryObserver::class);
         UserCart::observe(UserCartObserver::class);

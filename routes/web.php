@@ -113,3 +113,10 @@ Route::prefix('api/payments')->name('payments.')->group(function () {
         ->middleware('auth')
         ->name('order.detail');
 });
+
+use Illuminate\Support\Facades\Redis;
+
+Route::get('/redis-test', function () {
+    Redis::set('test', 'hello redis');
+    return Redis::get('test');
+});
