@@ -70,7 +70,6 @@ class QuizAttempt extends Component
             $this->timeRemaining = max(0, $limit - $elapsed);
         } else {
             $this->timeRemaining = $this->quiz->time_limit_minutes * 60;
-
         }
     }
 
@@ -472,6 +471,20 @@ class QuizAttempt extends Component
         $secs = (int) ($seconds % 60);
 
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
+    }
+
+    public function getLessonUrl()
+    {
+        $lesson = $this->quiz->lesson;
+
+        if ($lesson && $lesson->chapter && $lesson->chapter->course) {
+            return route('student.lesson', [
+                'courseSlug' => $lesson->chapter->course->slug,
+                'lessonSlug' => $lesson->slug,
+            ]);
+        }
+
+        return route('home');
     }
 
     public function render()

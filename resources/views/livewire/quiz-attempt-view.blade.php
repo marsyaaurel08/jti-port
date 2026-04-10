@@ -7,7 +7,7 @@
     <!-- Fixed Header -->
     <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
         <div class="flex items-center gap-3">
-            <a href="#" class="flex items-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium">
+            <a href="{{ $this->getLessonUrl() }}" class="flex items-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
