@@ -66,16 +66,13 @@ class CourseForm
                             //     ->required()
                             //     ->numeric()
                             //     ->default(0),
-                            TextInput::make('total_lessons')
-                                ->label('Total Pelajaran')
-                                ->required()
-                                ->numeric()
+                            Hidden::make('total_lessons')
                                 ->default(0),
-                            TextInput::make('avg_rating')
-                                ->label('Rating Rata-rata')
-                                ->required()
-                                ->numeric()
-                                ->default(0.0),
+                            // TextInput::make('avg_rating')
+                            //     ->label('Rating Rata-rata')
+                            //     ->required()
+                            //     ->numeric()
+                            //     ->default(0.0),
                         ]),
                         Tab::make('Materi')->schema([
                             Repeater::make('chapters')

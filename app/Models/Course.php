@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Observers\CourseObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -16,6 +18,14 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Course extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia, LogsActivity;
+
+    /**
+     * Register the observer for the model.
+     */
+    protected static function booted(): void
+    {
+        static::observe(CourseObserver::class);
+    }
 
     protected $fillable = [
         'category_id',
@@ -42,7 +52,7 @@ class Course extends Model implements HasMedia
     /**
      * Get the thumbnail URL from media library or fall back to thumbnail_url field.
      */
-    
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -58,9 +68,9 @@ class Course extends Model implements HasMedia
         return $this->hasMany(Chapter::class);
     }
 
-    public function lessons(): HasMany
+    public function lessons(): HasManyThrough
     {
-        return $this->hasMany(Lesson::class);
+        return $this->hasManyThrough(Lesson::class, Chapter::class);
     }
 
     public function enrollments(): HasMany
