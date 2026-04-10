@@ -1,21 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialiteController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\ClassesController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\EnrollmentController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PaymentCallbackController;
-// use App\Http\Controllers\QuizAttemptController;
-use App\Http\Controllers\StudentController;
-use App\Livewire\StudentClassCheckout;
-use App\Livewire\StudentCourseCheckout;
-use App\Livewire\StudentLesson;
-use App\Livewire\StudentOrders;
-use App\Livewire\StudentCart;
-use App\Livewire\StudentProfile;
-use App\Livewire\StudentTransactions;
+use App\Http\Controllers\{CartController, ClassesController, CourseController, EnrollmentController, HomeController, PaymentCallbackController, StudentController};
+use App\Livewire\{StudentCart, StudentLesson, StudentOrders, StudentClassCheckout, StudentCourseCheckout, StudentProfile, StudentTransactions};
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -48,7 +35,7 @@ Route::middleware(['auth'])->prefix('/user')->name('user.')->group(function () {
 
 // --- User Dashboard Routes (Authenticated) ---
 // Menggunakan middleware 'auth' yang sekarang akan me-redirect ke filament.user.auth.login jika belum login
-Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->group(function () {
+Route::middleware(['auth', 'verified','non-admin'])->prefix('student')->name('student.')->group(function () {
     // Profil & Keamanan
     Route::get('/', function () {
         return redirect()->route('student.profile');
@@ -69,7 +56,7 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
     Route::delete('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 
     // Keranjang (Authenticated Only)
-    Route::post('/cart/add/{course}', [CartController::class, 'store'])->name('cart.add');
+    Route::post('/cart/add/{course}', [CartController::class, 'storeCourse'])->name('cart.add');
     Route::post('/cart/add-class/{courseClass}', [CartController::class, 'storeClass'])->name('cart.add-class');
 
     // Checkout - Terpisah untuk Course dan Class
@@ -112,11 +99,4 @@ Route::prefix('api/payments')->name('payments.')->group(function () {
     Route::get('/order/{order}', [PaymentCallbackController::class, 'getOrderPayment'])
         ->middleware('auth')
         ->name('order.detail');
-});
-
-use Illuminate\Support\Facades\Redis;
-
-Route::get('/redis-test', function () {
-    Redis::set('test', 'hello redis');
-    return Redis::get('test');
 });
