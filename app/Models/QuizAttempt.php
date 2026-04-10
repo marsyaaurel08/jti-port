@@ -61,4 +61,19 @@ class QuizAttempt extends Model
     {
         return $this->score >= $this->quiz->pass_score;
     }
+
+    public function getDurationAttribute(): ?string
+    {
+        if (!$this->started_at || !$this->finished_at) {
+            return null;
+        }
+
+        $duration = $this->finished_at->diff($this->started_at);
+
+        if ($duration->h > 0) {
+            return $duration->format('%H:%I:%S');
+        }
+
+        return $duration->format('%I:%S');
+    }
 }

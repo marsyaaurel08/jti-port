@@ -91,11 +91,11 @@
                 <p class="text-lg font-semibold text-gray-900">
                     @if ($timeTaken && is_object($timeTaken))
                         @if ($timeTaken->h > 0)
-                            {{ is_numeric($timeTaken->h) ? $timeTaken->h : 0 }}j {{ is_numeric($timeTaken->i) ? $timeTaken->i : 0 }}m {{ is_numeric($timeTaken->s) ? $timeTaken->s : 0 }}d
+                            {{ $timeTaken->h }}j {{ $timeTaken->i }}m {{ $timeTaken->s }}d
                         @elseif ($timeTaken->i > 0)
-                            {{ is_numeric($timeTaken->i) ? $timeTaken->i : 0 }}m {{ is_numeric($timeTaken->s) ? $timeTaken->s : 0 }}d
+                            {{ $timeTaken->i }}m {{ $timeTaken->s }}d
                         @else
-                            {{ is_numeric($timeTaken->s) ? $timeTaken->s : 0 }}d
+                            {{ $timeTaken->s }}d
                         @endif
                     @else
                         -
