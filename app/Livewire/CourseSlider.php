@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Livewire;
 
 use App\Models\Course;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\Attributes\Lazy;
 
@@ -25,18 +27,22 @@ class CourseSlider extends Component
 
     public function render()
     {
-        $courses = Course::with(['category'])
-            ->where('status', 'published')
-            ->latest()
-            ->take($this->perPage) // Ambil sesuai jumlah perPage saat ini
-            ->get();
+        $allCourses = Cache::remember('course_slider_all', 600, function () {
+            return Course::with('category')
+                ->where('status', 'published')
+                ->latest()
+                ->take(15)
+                ->get();
+        });
+
+        $courses = $allCourses->take($this->perPage);
 
         return view('livewire.course-slider', compact('courses'));
     }
 
-public function placeholder()
-{
-    return <<<'HTML'
+    public function placeholder()
+    {
+        return <<<'HTML'
         <div class="flex gap-4 overflow-hidden">
             @for($i=0; $i<6; $i++)
                 <div class="shrink-0 w-[240px] bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm animate-pulse">
@@ -80,5 +86,5 @@ public function placeholder()
             @endfor
         </div>
     HTML;
-}
+    }
 }

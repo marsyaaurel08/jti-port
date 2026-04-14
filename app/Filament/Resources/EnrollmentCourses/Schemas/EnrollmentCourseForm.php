@@ -2,11 +2,8 @@
 
 namespace App\Filament\Resources\EnrollmentCourses\Schemas;
 
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\{Hidden, Repeater, Select};
+use Filament\Schemas\Components\{Grid, Section};
 use Filament\Schemas\Schema;
 
 class EnrollmentCourseForm

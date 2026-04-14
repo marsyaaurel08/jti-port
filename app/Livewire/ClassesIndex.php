@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Category;
 use App\Models\CourseClass;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -67,63 +68,83 @@ class ClassesIndex extends Component
         $this->resetPage();
     }
 
+    private function getCacheKey(): string
+    {
+        return 'classes_' . md5(json_encode([
+            'categories' => $this->selectedCategories,
+            'levels' => $this->selectedLevels,
+            'isFree' => $this->isFree,
+            'isPaid' => $this->isPaid,
+            'sort' => $this->sort,
+            'search' => $this->search,
+            'page' => $this->getPage(),
+        ]));
+    }
+
+
     public function render()
     {
-        // Eager loading instructor dan course untuk optimasi N+1 query
-        $query = CourseClass::with(['instructor', 'course.category'])
-            ->where('is_active', '1');
+        $cacheKey = $this->getCacheKey();
 
-        // Filter berdasarkan search keyword
-        if (! empty($this->search)) {
-            $search = strtolower(trim($this->search));
-            $query->where(function ($q) use ($search) {
-                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"])
-                    ->orWhereHas('course', function ($q) use ($search) {
-                        $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
-                            ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
-                    })
-                    ->orWhereHas('instructor', function ($q) use ($search) {
-                        $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
-                    });
-            });
-        }
+        $classes = Cache::remember($cacheKey, 600, function () {
 
-        // Filter Berdasarkan Kategori Course
-        if (! empty($this->selectedCategories)) {
-            $query->whereHas('course', function ($q) {
-                $q->whereIn('category_id', $this->selectedCategories);
-            });
-        }
+            $query = CourseClass::with(['instructor', 'course.category'])
+                ->where('is_active', '1');
 
-        // Filter Berdasarkan Level
-        if (! empty($this->selectedLevels)) {
-            $query->whereIn('level', $this->selectedLevels);
-        }
+            if (! empty($this->search)) {
+                $search = strtolower(trim($this->search));
+                $query->where(function ($q) use ($search) {
+                    $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"])
+                        ->orWhereHas('course', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                                ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"]);
+                        })
+                        ->orWhereHas('instructor', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                        });
+                });
+            }
 
-        // Filter Berdasarkan Harga
-        if ($this->isFree && ! $this->isPaid) {
-            $query->where('price', 0);
-        } elseif ($this->isPaid && ! $this->isFree) {
-            $query->where('price', '>', 0);
-        }
+            if (! empty($this->selectedCategories)) {
+                $query->whereHas('course', function ($q) {
+                    $q->whereIn('category_id', $this->selectedCategories);
+                });
+            }
 
-        // Sorting
-        switch ($this->sort) {
-            case 'price_low':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_high':
-                $query->orderBy('price', 'desc');
-                break;
-            default:
-                $query->latest();
-                break;
-        }
+            if (! empty($this->selectedLevels)) {
+                $query->whereIn('level', $this->selectedLevels);
+            }
+
+            if ($this->isFree && ! $this->isPaid) {
+                $query->where('price', 0);
+            } elseif ($this->isPaid && ! $this->isFree) {
+                $query->where('price', '>', 0);
+            }
+
+            switch ($this->sort) {
+                case 'price_low':
+                    $query->orderBy('price', 'asc');
+                    break;
+                case 'price_high':
+                    $query->orderBy('price', 'desc');
+                    break;
+                default:
+                    $query->latest();
+                    break;
+            }
+
+            return $query->paginate(10);
+        });
+
+        // kategori juga bisa di-cache
+        $categories = Cache::remember('categories_all', 3600, function () {
+            return Category::orderBy('name')->get();
+        });
 
         return view('livewire.classes-index', [
-            'classes' => $query->paginate(10),
-            'categories' => Category::orderBy('name')->get(),
+            'classes' => $classes,
+            'categories' => $categories,
             'selectedCategories' => $this->selectedCategories,
             'selectedLevels' => $this->selectedLevels,
             'isFree' => $this->isFree,

@@ -22,7 +22,7 @@ class UserObserver
     public function deleted(User $user): void
     {
         Cache::forget("user_staff_{$user->id}");
-        Cache::forget("user_cart_{$user->id}");
+        Cache::forget("user_cart_count_{$user->id}");
     }
 
     /**
@@ -31,6 +31,6 @@ class UserObserver
     public function forceDeleted(User $user): void
     {
         Cache::forget("user_staff_{$user->id}");
-        Cache::forget("user_cart_{$user->id}");
+        Cache::forget("user_cart_count_{$user->id}");
     }
 }

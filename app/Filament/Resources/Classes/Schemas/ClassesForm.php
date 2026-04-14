@@ -3,14 +3,8 @@
 namespace App\Filament\Resources\Classes\Schemas;
 
 use App\Models\CourseClass;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\{DateTimePicker, FileUpload, Select, TextInput, Toggle, RichEditor};
+use Filament\Schemas\Components\{Grid, Section};
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
