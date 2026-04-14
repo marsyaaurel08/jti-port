@@ -1,21 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialiteController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\ClassesController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\EnrollmentController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PaymentCallbackController;
-// use App\Http\Controllers\QuizAttemptController;
-use App\Http\Controllers\StudentController;
-use App\Livewire\StudentClassCheckout;
-use App\Livewire\StudentCourseCheckout;
-use App\Livewire\StudentLesson;
-use App\Livewire\StudentOrders;
-use App\Livewire\UserCart;
-use App\Livewire\UserProfile;
-use App\Livewire\UserTransactions;
+use App\Http\Controllers\{CartController, ClassesController, CourseController, EnrollmentController, HomeController, PaymentCallbackController, StudentController};
+use App\Livewire\{StudentCart, StudentLesson, StudentOrders, StudentClassCheckout, StudentCourseCheckout, StudentProfile, StudentTransactions};
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -48,12 +35,12 @@ Route::middleware(['auth'])->prefix('/user')->name('user.')->group(function () {
 
 // --- User Dashboard Routes (Authenticated) ---
 // Menggunakan middleware 'auth' yang sekarang akan me-redirect ke filament.user.auth.login jika belum login
-Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->group(function () {
+Route::middleware(['auth', 'verified','non-admin'])->prefix('student')->name('student.')->group(function () {
     // Profil & Keamanan
     Route::get('/', function () {
         return redirect()->route('student.profile');
     })->name('index');
-    Route::get('/profile', UserProfile::class)->name('profile');
+    Route::get('/profile', StudentProfile::class)->name('profile');
 
     // Enrollment & Belajar
     Route::get('/enrolled', [EnrollmentController::class, 'index'])->name('enrolled');
@@ -65,11 +52,11 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
     Route::get('/classes/{classSlug}/lessons/{lessonSlug}', [StudentController::class, 'lesson'])->name('classLesson');
 
     // Keranjang & Checkout
-    Route::get('/cart', UserCart::class)->name('cart');
+    Route::get('/cart', StudentCart::class)->name('cart');
     Route::delete('/cart/remove/{id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 
     // Keranjang (Authenticated Only)
-    Route::post('/cart/add/{course}', [CartController::class, 'store'])->name('cart.add');
+    Route::post('/cart/add/{course}', [CartController::class, 'storeCourse'])->name('cart.add');
     Route::post('/cart/add-class/{courseClass}', [CartController::class, 'storeClass'])->name('cart.add-class');
 
     // Checkout - Terpisah untuk Course dan Class
@@ -80,7 +67,7 @@ Route::middleware(['auth', 'verified'])->prefix('student')->name('student.')->gr
     Route::get('/orders', StudentOrders::class)->name('orders');
 
     // Transaksi
-    Route::get('/transactions', UserTransactions::class)->name('transactions');
+    Route::get('/transactions', StudentTransactions::class)->name('transactions');
 
     //Quiz Attempt
     Route::get('/quiz/attempt/{id}', function ($id) {

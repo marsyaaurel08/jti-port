@@ -3,15 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{Model, SoftDeletes};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\MediaLibrary\{HasMedia, InteractsWithMedia};
 
 class Course extends Model implements HasMedia
 {
@@ -42,7 +38,7 @@ class Course extends Model implements HasMedia
     /**
      * Get the thumbnail URL from media library or fall back to thumbnail_url field.
      */
-    
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

@@ -2,13 +2,9 @@
 
 namespace App\Filament\Resources\EnrollmentClasses\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\{DateTimePicker, Repeater, Select, TextInput};
+use Filament\Schemas\Components\{Section, View};
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 
 class EnrollmentClassForm

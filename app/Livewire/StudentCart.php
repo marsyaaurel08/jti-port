@@ -8,10 +8,11 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Illuminate\Support\Facades\Cache;
 
 #[Layout('layouts.app')]
 
-class UserCart extends Component
+class StudentCart extends Component
 {
     public $cartItems = [];
 
@@ -35,13 +36,15 @@ class UserCart extends Component
     {
         $userId = Auth::id();
 
-        $cartItems = UserCartModel::where('user_id', $userId)
-            ->with([
-                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
-                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
-                'course.category:id,name',
-            ])
-            ->get();
+        $cartItems = Cache::remember("user_cart_items_{$userId}", 3600, function () use ($userId) {
+            return UserCartModel::where('user_id', $userId)
+                ->with([
+                    'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
+                    'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
+                    'course.category:id,name',
+                ])
+                ->get();
+        });
 
         $this->cartItems = $cartItems->map(fn($item) => [
             'id' => $item->id,
@@ -139,6 +142,6 @@ class UserCart extends Component
 
     public function render()
     {
-        return view('livewire.user-cart');
+        return view('livewire.student-cart');
     }
 }

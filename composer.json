@@ -11,7 +11,6 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
-        "bezhansalleh/filament-language-switch": "^4.1",
         "bezhansalleh/filament-shield": "^4.0",
         "bni-api/bni-php": "^2.3",
         "diogogpinto/filament-auth-ui-enhancer": "^2.0",
@@ -25,6 +24,7 @@
         "laravel/tinker": "^2.10.1",
         "openplain/filament-shadcn-theme": "^1.1",
         "owenvoke/blade-fontawesome": "^2.9",
+        "predis/predis": "^3.4",
         "propaganistas/laravel-phone": "^6.0",
         "spatie/laravel-activitylog": "^4.0",
         "spatie/laravel-medialibrary": "^11.0",

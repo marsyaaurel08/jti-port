@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\CourseClass;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
@@ -27,11 +28,15 @@ class ClassesSlider extends Component
 
     public function render()
     {
-        $classes = CourseClass::with(['instructor'])
-            ->where('is_active', '1')
-            ->latest()
-            ->take($this->perPage) // Ambil sesuai jumlah perPage saat ini
-            ->get();
+        $allClasses = Cache::remember('classes_slider_all', 600, function () {
+            return CourseClass::with(['course.category'])
+                ->where('is_active', true)
+                ->latest()
+                ->take(15)
+                ->get();
+        });
+
+        $classes = $allClasses->take($this->perPage);
 
         return view('livewire.classes-slider', compact('classes'));
     }

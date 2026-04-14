@@ -13,7 +13,7 @@
     {{-- Header Sidebar (Optional: untuk Reset All) --}}
     <div class="flex items-center justify-between px-1 mb-6">
         <h2 class="text-lg font-bold text-slate-800">Filter</h2>
-            <x-course.sort-dropdown :sort="$sort" />
+        <x-course.sort-dropdown :sort="$sort" />
     </div>
 
     {{-- 1. Group Tipe Akses (Paling Atas) --}}
@@ -58,7 +58,8 @@
         <div class="space-y-3">
             @for ($i = 4; $i >= 1; $i--)
                 <label wire:key="rating-{{ $i }}" class="flex items-center group cursor-pointer">
-                    <input type="radio" wire:model.live="selectedRatings" value="{{ $i }}"
+                    <input type="radio" name="selectedRatings" {{-- ← TAMBAHKAN INI --}} wire:model.live="selectedRatings"
+                        value="{{ $i }}"
                         class="w-4.5 h-4.5 rounded-full border-slate-300 text-jti-primary focus:ring-jti-primary/20 transition-all cursor-pointer">
                     <div class="ml-3 flex items-center gap-2">
                         <x-course.stars :rating="$i" />
