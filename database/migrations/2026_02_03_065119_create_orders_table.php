@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('payment_method')->nullable();
             $table->string('payment_proof')->nullable();
             $table->dateTime('paid_at')->nullable();
+            $table->dateTime('last_inquiry_at')->nullable();
+            $table->integer('inquiry_count')->default(0);
             $table->timestamps();
         });
     }
