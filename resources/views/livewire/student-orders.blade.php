@@ -208,7 +208,7 @@
     <x-student.proof-upload-modal :show="$showProofUpload" :selectedOrder="$selectedOrder" :paymentProof="$paymentProof" />
 
     {{-- Modal: VA Instructions --}}
-    <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$selectedOrder?->payment_method]['name'] ?? 'Transfer'" :instructions="$transferInstructions" />
+    <x-order.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$selectedOrder?->payment_method] ?? 'Transfer'" :instructions="$transferInstructions[$selectedOrder?->payment_method] ?? []" />
 
     {{-- Modal: Lihat Bukti Pembayaran --}}
     @if ($showProofView && $selectedOrder)

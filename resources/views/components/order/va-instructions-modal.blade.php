@@ -88,7 +88,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center gap-2 px-1">
                         <i data-lucide="info" class="w-4 h-4 text-jti-yellow"></i>
-                        <p class="text-xs font-bold text-slate-500 tracking-wide">METODE: {{ $transferMethodName }}</p>
+                        <p class="text-xs font-bold text-slate-500 tracking-wide">METODE: {{ $transferMethodName['name'] ?? 'Transfer' }}</p>
                     </div>
 
                     <div class="bg-slate-50 rounded-2xl border border-slate-100 p-6 shadow-inner">
@@ -96,7 +96,7 @@
                             @forelse ($instructions as $index => $step)
                                 <li class="flex gap-4">
                                     <span
-                                        class="flex-shrink-0 w-6 h-6 bg-white border border-slate-200 text-jti-primary text-[11px] font-bold flex items-center justify-center rounded-lg shadow-sm">
+                                        class="shrink-0 w-6 h-6 bg-white border border-slate-200 text-jti-primary text-[11px] font-bold flex items-center justify-center rounded-lg shadow-sm">
                                         {{ $index + 1 }}
                                     </span>
                                     <p class="text-sm text-slate-600 leading-relaxed">{{ $step }}</p>
