@@ -95,8 +95,6 @@
                     <div class="bg-slate-50 rounded-2xl border border-slate-100 p-6 shadow-inner">
                         <ul class="space-y-5">
                             @forelse ($instructions as $index => $step)
-                            @dd($index, $step)
-
                                 <li class="flex gap-4">
                                     <span
                                         class="shrink-0 w-6 h-6 bg-white border border-slate-200 text-jti-primary text-[11px] font-bold flex items-center justify-center rounded-lg shadow-sm">
