@@ -26,7 +26,7 @@ class ViewOrdersHistory extends ViewRecord
             ->label('Verifikasi Pembayaran')
             ->icon('heroicon-m-check-badge')
             ->color('success')
-            ->visible(fn () => $this->record->status === 'pending' && $this->record->payment_proof)
+            ->visible(fn() => $this->record->status === 'pending' && $this->record->payment_proof)
             ->requiresConfirmation()
             ->modalHeading('Verifikasi Pembayaran Manual')
             ->modalDescription('Anda akan memperbarui status pesanan menjadi "Dibayar". Tindakan ini tidak dapat diurungkan.')
@@ -41,15 +41,14 @@ class ViewOrdersHistory extends ViewRecord
                     // Register student to enrollments and create course progress
                     $orderItems = $this->record->orderItems;
 
+
                     foreach ($orderItems as $item) {
-                        $enrollment = Enrollment::updateOrCreate(
+                        $enrollment = Enrollment::create(
                             [
                                 'user_id' => $this->record->user_id,
                                 'course_id' => $item->course_id,
                                 'class_id' => $item->class_id,
                                 'order_id' => $this->record->id,
-                            ],
-                            [
                                 'enrolled_at' => now(),
                                 'completed_lesson_count' => 0,
                             ]
@@ -58,14 +57,12 @@ class ViewOrdersHistory extends ViewRecord
                         // Create CourseProgress records for all lessons in the course
                         $course = $item->course;
                         if ($course) {
-                            $lessons = $course->lessons()->get();
+                            $lessons = $course->chapters()->first()->lessons()->get();
                             foreach ($lessons as $lesson) {
-                                CourseProgress::firstOrCreate(
+                                CourseProgress::create(
                                     [
                                         'enrollment_id' => $enrollment->id,
                                         'lesson_id' => $lesson->id,
-                                    ],
-                                    [
                                         'is_completed' => false,
                                     ]
                                 );
@@ -84,7 +81,7 @@ class ViewOrdersHistory extends ViewRecord
                     Notification::make()
                         ->danger()
                         ->title('Gagal Memverifikasi')
-                        ->body('Terjadi kesalahan: '.$e->getMessage())
+                        ->body('Terjadi kesalahan: ' . $e->getMessage())
                         ->send();
                 }
             });
