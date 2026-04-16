@@ -41,58 +41,9 @@ class StudentCourseCheckout extends Component
     // Transfer Method (Cara Transfer ke BNI VA)
     public string $transferMethod = 'bni_mobile';
 
-    public array $transferMethods = [
-        'bni_mobile' => [
-            'name' => 'BNI Mobile Banking',
-            'bank' => 'BNI',
-            'description' => 'Transfer via aplikasi BNI Mobile Banking',
-        ],
-        'bni_atm' => [
-            'name' => 'BNI ATM',
-            'bank' => 'BNI',
-            'description' => 'Transfer via mesin ATM BNI',
-        ],
-        'bni_internet' => [
-            'name' => 'BNI Internet Banking',
-            'bank' => 'BNI',
-            'description' => 'Transfer via website BNI',
-        ],
-        'bca_mobile' => [
-            'name' => 'BCA Mobile Banking',
-            'bank' => 'BCA',
-            'description' => 'Transfer dari bank BCA - mBanking',
-        ],
-        'bca_atm' => [
-            'name' => 'BCA ATM',
-            'bank' => 'BCA',
-            'description' => 'Transfer via mesin ATM BCA',
-        ],
-        'bca_internet' => [
-            'name' => 'BCA Internet Banking',
-            'bank' => 'BCA',
-            'description' => 'Transfer via website BCA',
-        ],
-        'mandiri_mobile' => [
-            'name' => 'Mandiri Mobile Banking',
-            'bank' => 'Mandiri',
-            'description' => 'Transfer via aplikasi Livin\' Mandiri',
-        ],
-        'mandiri_atm' => [
-            'name' => 'Mandiri ATM',
-            'bank' => 'Mandiri',
-            'description' => 'Transfer via mesin ATM Mandiri',
-        ],
-        'bri_mobile' => [
-            'name' => 'BRI Mobile Banking',
-            'bank' => 'BRI',
-            'description' => 'Transfer via aplikasi BRImo',
-        ],
-        'bri_atm' => [
-            'name' => 'BRI ATM',
-            'bank' => 'BRI',
-            'description' => 'Transfer via mesin ATM BRI',
-        ],
-    ];
+    public array $transferMethods;
+    
+    public array $transferInstructions;
 
     // Payment Process
     public bool $isProcessing = false;
@@ -102,6 +53,12 @@ class StudentCourseCheckout extends Component
     public array $vaData = [];
 
     public string $redirectRoute = 'student.orders';
+
+    public function __construct()
+    {
+        $this->transferMethods = config('constants.transfer_methods');
+        $this->transferInstructions = config('constants.instructions');
+    }
 
     public function mount(string $slug): void
     {
@@ -136,7 +93,7 @@ class StudentCourseCheckout extends Component
 
         // Mock: Apply 10% discount
         $this->discountAmount = $this->getProductPrice() * 0.10;
-        $this->promoMessage = 'Kode promo berhasil diterapkan! Diskon: Rp'.number_format($this->discountAmount, 0, ',', '.');
+        $this->promoMessage = 'Kode promo berhasil diterapkan! Diskon: Rp' . number_format($this->discountAmount, 0, ',', '.');
         $this->promoApplied = true;
     }
 
@@ -315,7 +272,7 @@ class StudentCourseCheckout extends Component
             session()->flash('success', 'Nomor Virtual Account berhasil dibuat. Silakan lakukan transfer sesuai instruksi.');
         } catch (\Exception $e) {
             $this->isProcessing = false;
-            session()->flash('error', 'Gagal membuat Virtual Account: '.$e->getMessage());
+            session()->flash('error', 'Gagal membuat Virtual Account: ' . $e->getMessage());
         }
 
         $this->isProcessing = false;
@@ -323,7 +280,7 @@ class StudentCourseCheckout extends Component
 
     public function generateInvoiceNumber(): string
     {
-        return 'INV-'.date('YmdHis').'-'.Auth::id();
+        return 'INV-' . date('YmdHis') . '-' . Auth::id();
     }
 
     public function closeModal(): void

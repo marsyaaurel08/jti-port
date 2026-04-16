@@ -63,7 +63,6 @@
                         class="w-4.5 h-4.5 rounded-full border-slate-300 text-jti-primary focus:ring-jti-primary/20 transition-all cursor-pointer">
                     <div class="ml-3 flex items-center gap-2">
                         <x-course.stars :rating="$i" />
-                        <span class="text-xs font-bold text-slate-500">{{ $i }}.0</span>
                     </div>
                 </label>
             @endfor

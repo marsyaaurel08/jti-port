@@ -59,7 +59,7 @@
                     <div class="sticky top-24">
                         {{-- Soft shadow untuk efek kedalaman --}}
                         <div class="absolute -inset-4 bg-gray-200/20 blur-2xl rounded-[32px] -z-10"></div>
-                        <x-course.purchase-card :course="$course" />
+                        <x-course.purchase-card :course="$course" :is_user_enrolled="$is_user_enrolled" />
                     </div>
                 </div>
 

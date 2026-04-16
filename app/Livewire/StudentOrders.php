@@ -57,12 +57,10 @@ class StudentOrders extends Component
         $userId = Auth::id();
         $cacheKey = "user:{$userId}:unpaid_orders";
 
-        return Cache::remember($cacheKey, now()->addMinutes(self::CACHE_TTL_MINUTES), function () use ($userId) {
-            return Order::where('user_id', $userId)
-                ->where('status', 'pending')
-                ->orderBy('created_at', 'desc')
-                ->get();
-        });
+        return Order::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function getTransferInstructions(?string $transferMethod = null): array

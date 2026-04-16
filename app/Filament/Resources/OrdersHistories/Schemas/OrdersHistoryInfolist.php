@@ -38,13 +38,13 @@ class OrdersHistoryInfolist
 
                                             TextEntry::make('status')
                                                 ->badge()
-                                                ->icon(fn (string $state): string => match ($state) {
+                                                ->icon(fn(string $state): string => match ($state) {
                                                     'paid' => 'heroicon-m-check-circle',
                                                     'pending' => 'heroicon-m-clock',
                                                     'cancelled' => 'heroicon-m-x-circle',
                                                     default => 'heroicon-m-minus-circle',
                                                 })
-                                                ->color(fn (string $state): string => match ($state) {
+                                                ->color(fn(string $state): string => match ($state) {
                                                     'paid' => 'success',
                                                     'pending' => 'warning',
                                                     'cancelled' => 'danger',
@@ -59,30 +59,27 @@ class OrdersHistoryInfolist
                                             TextEntry::make('payment_method')
                                                 ->label('Metode Pembayaran')
                                                 ->icon('heroicon-m-credit-card')
-                                                ->formatStateUsing(fn ($state) => strtoupper($state ?? 'N/A')),
+                                                ->formatStateUsing(fn($state) => strtoupper($state ?? 'N/A')),
 
                                             TextEntry::make('paid_at')
                                                 ->label('Tanggal Pembayaran')
                                                 ->icon('heroicon-m-calendar-days')
                                                 ->dateTime('d M Y, H:i')
-                                                ->placeholder(fn ($record) => $record->status === 'paid' ? $record->paid_at : '-')
+                                                ->placeholder(fn($record) => $record->status === 'paid' ? $record->paid_at : '-')
                                                 ->color('gray'),
+                                                // lihat bukti pembayaran
+                                            TextEntry::make('payment_proof')
+                                                ->label('Bukti Pembayaran')
+                                                ->icon('heroicon-m-document-text')
+                                                ->formatStateUsing(fn($state) => $state ? ' Lihat Bukti' : 'Belum Ada Bukti')
+                                                ->color(fn($state) => $state ? 'primary' : 'gray')
+                                                ->url(fn($state, $record) => $state ? asset('storage/' . $record->payment_proof) : null)
+                                                ->openUrlInNewTab()
+                                                ->hidden(fn($record) => empty($record->payment_proof)),
                                         ]),
                                 ])->columnSpanFull(),
                             ]),
                     ]),
-
-                // SECTION: BUKTI PEMBAYARAN (jika ada)
-                Section::make('Bukti Pembayaran Backup')
-                    ->description('Bukti pembayaran manual yang diunggah oleh pelanggan')
-                    ->icon('heroicon-o-document-text')
-                    ->visible(fn ($record) => $record->payment_proof !== null)
-                    ->schema([
-                        ImageEntry::make('payment_proof')
-                            ->label('Bukti Transfer')
-                            ->hidden(fn ($record) => empty($record->payment_proof)),
-                    ]),
-
                 // SECTION 2: DAFTAR ITEM (TABLE STYLE)
                 Section::make('Rincian Pembelian')
                     ->icon('heroicon-o-list-bullet')
@@ -98,14 +95,10 @@ class OrdersHistoryInfolist
                                             ->weight(FontWeight::Bold)
                                             ->color('primary')
                                             ->icon('heroicon-m-play-circle')
-                                            ->url(fn ($record) => $record->course_id ? "/admin/courses/{$record->course_id}" : null)
-                                            ->suffix(fn ($record) => $record->class ? " ({$record->class->name})" : ''),
-
-                                        TextEntry::make('class.name')
-                                            ->label('Tipe')
-                                            ->badge()
-                                            ->color('gray')
-                                            ->placeholder('General Access'),
+                                            ->url(fn($record) => $record->class_id ? "/classes/{$record->course->slug}" : "/courses/{$record->slug}")
+                                            ->suffix(fn($record) => $record->class_id ? " (Kelas)" : " (Kursus)")
+                                            ->openUrlInNewTab()
+                                            ->columnSpanFull(2),
 
                                         TextEntry::make('price_at_purchase')
                                             ->label('Harga Satuan')
@@ -114,10 +107,10 @@ class OrdersHistoryInfolist
 
                                         TextEntry::make('id')
                                             ->label('Akses')
-                                            ->formatStateUsing(fn () => 'Buka Materi')
+                                            ->formatStateUsing(fn() => 'Buka Materi')
                                             ->icon('heroicon-m-arrow-top-right-on-square')
                                             ->color('success')
-                                            ->url(fn ($record) => $record->course_id ? "/admin/courses/{$record->course_id}" : null),
+                                            ->url(fn($record) => $record->class_id ? "/classes/{$record->course->slug}" : "/courses/{$record->slug}"),
                                     ]),
                             ]),
                     ]),

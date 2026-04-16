@@ -24,10 +24,18 @@ class ListOrdersHistories extends ListRecords
     {
         return [
             'all' => Tab::make('Semua')
-                ->icon('heroicon-o-list-bullet'),
+                ->icon('heroicon-o-list-bullet')
+                ->modifyQueryUsing(
+                    fn(Builder $query) => $query
+                        ->orderByRaw('payment_proof IS NOT NULL DESC')
+                ),
             'pending' => Tab::make('Menunggu Pembayaran')
                 ->icon('heroicon-o-clock')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('status', 'pending')),
+                ->modifyQueryUsing(
+                    fn(Builder $query) => $query
+                        ->where('status', 'pending')
+                        ->orderByRaw('payment_proof IS NOT NULL DESC, created_at DESC')
+                ),
             'paid' => Tab::make('Berhasil Dibayar')
                 ->icon('heroicon-o-check-circle')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('status', 'paid')),
