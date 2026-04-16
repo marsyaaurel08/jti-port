@@ -331,7 +331,16 @@ class QuestionsRelationManager extends RelationManager
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->after(function () {
+                            // Update the quiz's total_score_weight after bulk deletion
+                            $quiz = $this->getOwnerRecord();
+                            if ($quiz) {
+                                $totalScoreWeight = $quiz->questions()->sum('score_weight');
+                                $quiz->total_score_weight = $totalScoreWeight;
+                                $quiz->saveQuietly();
+                            }
+                        }),
                 ]),
             ]);
     }

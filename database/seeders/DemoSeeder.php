@@ -31,6 +31,7 @@ class DemoSeeder extends Seeder
                 [
                     'name' => "User {$i}",
                     'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
                 ]
             );
         }
@@ -92,7 +93,7 @@ class DemoSeeder extends Seeder
                         'title' => "Lesson {$lessonCounter}: Introduction",
                         'type' => 'video',
                         'slug' => strtolower(str_replace(' ', '-', $title))."-lesson-{$lessonCounter}",
-                        'content_url' => 'https://example.com/video.mp4',
+                        'content_url' => 'https://youtu.be/dSq0Z5XpoLc?si=JEzcvVg0EO8e1jYr',
                         'content_text' => 'Lesson content goes here...',
                         'duration_seconds' => 600, // 10 minutes
                         'is_free_preview' => false,

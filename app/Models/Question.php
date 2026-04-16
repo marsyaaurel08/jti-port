@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\QuestionObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Question extends Model
 {
     use HasFactory;
+
+    /**
+     * Register the observer for the model.
+     */
+    protected static function booted(): void
+    {
+        static::observe(QuestionObserver::class);
+    }
 
     protected $fillable = [
         'quiz_id',
