@@ -93,7 +93,6 @@ class CourseMaterialsInfolist
                                                 Action::make('manage_quiz')
                                                     ->label('Kelola Quiz')
                                                     ->icon('heroicon-o-academic-cap')
-                                                    ->color('warning')
                                                     ->visible(fn($record): bool => $record->type === 'quiz')
                                                     ->url(function ($record) {
                                                         // Get or create quiz for this lesson

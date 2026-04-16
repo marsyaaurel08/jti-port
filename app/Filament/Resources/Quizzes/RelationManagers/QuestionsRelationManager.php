@@ -136,10 +136,10 @@ class QuestionsRelationManager extends RelationManager
                         ->schema([
                             TextInput::make('id')->disabled()->dehydrated(true),
                             TextInput::make('text')->required(),
-                            TextInput::make('points')
-                                ->numeric()
-                                ->default(1)
-                                ->required(),
+                            // TextInput::make('points')
+                            //     ->numeric()
+                            //     ->default(1)
+                            //     ->required(),
                         ])
                         ->columns(3),
 

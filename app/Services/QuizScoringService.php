@@ -141,6 +141,11 @@ class QuizScoringService
             return false;
         }
 
+        // Extract correct_matches if it exists (for matching/drag_drop questions)
+        if (isset($answerKey['correct_matches'])) {
+            $answerKey = $answerKey['correct_matches'];
+        }
+
         ksort($userAnswer);
         ksort($answerKey);
 

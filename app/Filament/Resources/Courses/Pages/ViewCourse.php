@@ -23,7 +23,6 @@ class ViewCourse extends ViewRecord
             Action::make('progress')
                 ->label('Lihat Progress')
                 ->icon('heroicon-m-chart-pie')
-                ->color('info')
                 ->url(fn(): string => route('filament.admin.resources.courses.progress', $this->record)),
             EditAction::make(),
         ];

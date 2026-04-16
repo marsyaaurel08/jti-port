@@ -1,5 +1,6 @@
-@if (!empty($this->quizAttempts))
-    <div class="mt-6 border-t border-gray-200 pt-6">
+<div>
+    @if (!empty($this->quizAttempts))
+        <div class="mt-6 border-t border-gray-200 pt-6">
         <h3 class="text-lg font-bold text-gray-900 mb-4">Riwayat Pengerjaan</h3>
 
         <p class="text-sm text-gray-600 mb-6">
@@ -63,5 +64,10 @@
                 </tbody>
             </table>
         </div>
-    </div>
-@endif
+        </div>
+    @else
+        <div class="mt-6 border-t border-gray-200 pt-6">
+            <p class="text-sm text-gray-600">Belum ada riwayat pengerjaan kuis.</p>
+        </div>
+    @endif
+</div>
