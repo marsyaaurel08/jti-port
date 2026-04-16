@@ -1,5 +1,4 @@
 @props(['show', 'vaData', 'transferMethodName', 'instructions', 'redirectRoute' => null])
-
 @if ($show && !empty($vaData))
     <div class="fixed inset-0 bg-slate-900/60 z-9999 flex items-center justify-center p-4 backdrop-blur-md"
         x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-300"

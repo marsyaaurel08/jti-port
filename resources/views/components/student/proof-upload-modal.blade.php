@@ -35,8 +35,9 @@
                         <i data-lucide="info" class="w-4 h-4 text-white"></i>
                     </div>
                     <div class="text-sm text-blue-900 space-y-1">
-                        <p class="font-semibold">Verifikasi Manual</p>
-                        <p>Upload bukti transfer Anda. Admin akan memverifikasi dalam waktu 1x24 jam kerja.</p>
+                        <p class="font-semibold">Bukti Pembayaran (Optional)</p>
+                        <p>Upload bukti transfer Anda, untuk berjaga-jaga jika terjadi kendala dalam proses verifikasi
+                            pembayaran.</p>
                     </div>
                 </div>
 
@@ -125,7 +126,12 @@
                         <span class="text-sm text-slate-600">Status</span>
                         <span
                             class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">
-                            <i data-lucide="clock" class="w-3 h-3"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-clock-icon lucide-clock">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 6v6l4 2" />
+                            </svg>
                             Menunggu Verifikasi
                         </span>
                     </div>

@@ -255,14 +255,6 @@
                         </div>
                     </div>
 
-                    {{-- Info Message --}}
-                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                        <p class="text-xs text-blue-700 font-medium">
-                            <i data-lucide="info" class="w-4 h-4 inline mr-2"></i>
-                            Bukti pembayaran Anda telah terupload. Admin akan memverifikasi dalam waktu 1x24 jam.
-                        </p>
-                    </div>
-
                     {{-- Close Button --}}
                     <button wire:click="closeProofView()"
                         class="w-full px-6 py-3 bg-jti-primary text-white font-bold rounded-xl hover:shadow-lg hover:shadow-jti-primary/20 transition-all active:scale-95">
