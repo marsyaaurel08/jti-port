@@ -17,14 +17,17 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class EnrollmentCourseResource extends Resource
 {
     protected static ?string $model = Enrollment::class;
 
-    protected static ?string $navigationLabel = 'Course Enrollments';
-    protected static ?string $pluralLabel = 'Course Enrollments';
-    protected static ?string $modelLabel = 'Course Enrollments';
+    protected static ?string $navigationLabel = 'Pendaftaran Course';
+    protected static ?string $pluralLabel = 'Pendaftaran Course';
+    protected static ?string $modelLabel = 'Pendaftaran Course';
+    protected static string|UnitEnum|null $navigationGroup = 'Courses';
+
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 

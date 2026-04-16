@@ -25,22 +25,6 @@
             {{-- Badge Group --}}
             <div class="flex flex-wrap items-center gap-5 md:gap-8" data-aos="fade-up" data-aos-delay="200">
 
-                {{-- Rating - Glassmorphism style --}}
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/[0.08] rounded-full backdrop-blur-md">
-                        <svg class="w-3.5 h-3.5 text-jti-yellow fill-current" viewBox="0 0 20 20">
-                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                        </svg>
-                        <span class="text-sm font-bold text-gray-100">{{ number_format($course->avg_rating, 1) }}</span>
-                    </div>
-                    <span class="text-[11px] font-medium text-gray-500 uppercase tracking-widest">
-                        <span class="text-gray-300">2.1M+</span> Enrolled
-                    </span>
-                </div>
-
-                {{-- Separator --}}
-                <div class="hidden md:block w-px h-4 bg-white/10"></div>
-
                 {{-- Level Badge --}}
                 <div class="flex items-center gap-3">
                     @php
@@ -51,7 +35,7 @@
                             default => 'border-white/20 text-white/60 bg-white/5',
                         };
                     @endphp
-                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Difficulty</span>
+                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Level</span>
                     <span class="{{ $levelStyles }} px-4 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider">
                         {{ $course->level }}
                     </span>

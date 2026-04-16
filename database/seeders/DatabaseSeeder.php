@@ -18,11 +18,11 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             DemoSeeder::class,
-            CourseClassSeeder::class,
         ]);
         User::factory()->create([
             'name' => 'admin',
             'email' => 'admin@admin.com',
+            'role' => 'admin'
         ]);
     }
 }

@@ -10,7 +10,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-shield": "^4.0",
+        "bni-api/bni-php": "^2.3",
         "diogogpinto/filament-auth-ui-enhancer": "^2.0",
         "dutchcodingcompany/filament-socialite": "^3.0",
         "filament/filament": "^4.0",
@@ -22,6 +24,7 @@
         "laravel/tinker": "^2.10.1",
         "openplain/filament-shadcn-theme": "^1.1",
         "owenvoke/blade-fontawesome": "^2.9",
+        "predis/predis": "^3.4",
         "propaganistas/laravel-phone": "^6.0",
         "spatie/laravel-activitylog": "^4.0",
         "spatie/laravel-medialibrary": "^11.0",
@@ -70,7 +73,7 @@
         "dev": [
             "@php artisan optimize",
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" --names=server,queue,vite --kill-others"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"npm run dev\" --names=server,queue,vite --kill-others"
         ],
         "test": [
             "@php artisan config:clear --ansi",

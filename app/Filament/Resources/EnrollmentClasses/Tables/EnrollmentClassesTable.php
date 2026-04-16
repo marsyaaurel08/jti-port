@@ -4,11 +4,9 @@ namespace App\Filament\Resources\EnrollmentClasses\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
@@ -36,16 +34,6 @@ class EnrollmentClassesTable
                     ->color('info')
                     ->searchable(),
 
-                TextColumn::make('actual_completed_lesson_count')
-                    ->label('Materi Selesai')
-                    ->alignCenter()
-                    ->suffix(' Materi'),
-
-                IconColumn::make('is_completed')
-                    ->label('Lulus')
-                    ->boolean()
-                    ->alignCenter(),
-
                 TextColumn::make('enrolled_at')
                     ->label('Tgl Terdaftar')
                     ->dateTime('d M Y')
@@ -55,7 +43,7 @@ class EnrollmentClassesTable
                     ->label('Kedaluwarsa')
                     ->dateTime('d M Y')
                     ->placeholder('Lifetime')
-                    ->color(fn($state) => $state && $state->isPast() ? 'danger' : 'gray'),
+                    ->color(fn ($state) => $state && $state->isPast() ? 'danger' : 'gray'),
             ])
             ->filters([
                 // TrashedFilter::make(),
@@ -65,7 +53,6 @@ class EnrollmentClassesTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

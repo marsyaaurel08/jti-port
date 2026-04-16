@@ -24,39 +24,50 @@ class ListClassResults extends ListRecords
     }
     public function getTabs(): array
     {
+        $user = auth()->user();
+        $isAdmin = str_contains($user->email, '@admin.');
+        $instructorId = $user->id;
+
         return [
             'all' => Tab::make('Semua')
-                ->icon('heroicon-m-list-bullet'),
+                ->icon('heroicon-m-list-bullet')
+                ->modifyQueryUsing(function (Builder $query) use ($isAdmin, $instructorId) {
+                    return $query->when(!$isAdmin, fn($q) => $q->where('instructor_id', $instructorId));
+                }),
 
             'upcoming' => Tab::make('Belum Dimulai')
-                ->modifyQueryUsing(
-                    fn(Builder $query) =>
-                    $query->where('start_date', '>', now())
-                )
+                ->modifyQueryUsing(function (Builder $query) use ($isAdmin, $instructorId) {
+                    return $query->where('start_date', '>', now())
+                        ->when(!$isAdmin, fn($q) => $q->where('instructor_id', $instructorId));
+                })
                 ->icon('heroicon-m-calendar-days')
-                ->badge(fn() => $this->getModel()::where('start_date', '>', now())->count())
+                ->badge(fn() => $this->getModel()::where('start_date', '>', now())
+                    ->when(!$isAdmin, fn($q) => $q->where('instructor_id', $instructorId))
+                    ->count())
                 ->badgeColor('info'),
 
             'ongoing' => Tab::make('Sedang Berjalan')
-                ->modifyQueryUsing(
-                    fn(Builder $query) =>
-                    $query->where('start_date', '<=', now())
+                ->modifyQueryUsing(function (Builder $query) use ($isAdmin, $instructorId) {
+                    return $query->where('start_date', '<=', now())
                         ->where('end_date', '>=', now())
-                )
+                        ->when(!$isAdmin, fn($q) => $q->where('instructor_id', $instructorId));
+                })
                 ->icon('heroicon-m-play-circle')
-                ->badge(
-                    fn() => $this->getModel()::where('start_date', '<=', now())
-                        ->where('end_date', '>=', now())->count()
-                )
+                ->badge(fn() => $this->getModel()::where('start_date', '<=', now())
+                    ->where('end_date', '>=', now())
+                    ->when(!$isAdmin, fn($q) => $q->where('instructor_id', $instructorId))
+                    ->count())
                 ->badgeColor('success'),
 
             'finished' => Tab::make('Sudah Selesai')
-                ->modifyQueryUsing(
-                    fn(Builder $query) =>
-                    $query->where('end_date', '<', now())
-                )
+                ->modifyQueryUsing(function (Builder $query) use ($isAdmin, $instructorId) {
+                    return $query->where('end_date', '<', now())
+                        ->when(!$isAdmin, fn($q) => $q->where('instructor_id', $instructorId));
+                })
                 ->icon('heroicon-m-check-badge')
-                ->badge(fn() => $this->getModel()::where('end_date', '<', now())->count())
+                ->badge(fn() => $this->getModel()::where('end_date', '<', now())
+                    ->when(!$isAdmin, fn($q) => $q->where('instructor_id', $instructorId))
+                    ->count())
                 ->badgeColor('gray'),
         ];
     }

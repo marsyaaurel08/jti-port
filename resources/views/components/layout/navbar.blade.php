@@ -22,20 +22,20 @@
         <div class="hidden md:flex items-center gap-4 mx-4">
             <a href="{{ route('courses.index') }}"
                 class="text-[13px] font-semibold -[0.15em] text-jti-primary hover:text-jti-maroon transition-colors duration-300 relative group">
-                Courses
+                Course
                 <span
                     class="absolute -bottom-1 left-0 w-0 h-[2px] bg-jti-maroon transition-all duration-300 group-hover:w-full"></span>
             </a>
             <a href="{{ route('classes.index') }}"
                 class="text-[13px] font-semibold -[0.15em] text-jti-primary hover:text-jti-maroon transition-colors duration-300 relative group">
-                Classes
+                Kelas
                 <span
                     class="absolute -bottom-1 left-0 w-0 h-[2px] bg-jti-maroon transition-all duration-300 group-hover:w-full"></span>
             </a>
         </div>
 
         <div class="flex gap-4 grow justify-end">
-            <x-layout.nav.search-bar />
+            {{-- <x-layout.nav.search-bar /> --}}
             {{-- Right Side Actions --}}
             <div class="flex items-center gap-2 md:gap-5">
                 {{-- Logika Pembeda Auth --}}

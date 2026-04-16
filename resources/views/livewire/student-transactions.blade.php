@@ -8,10 +8,10 @@
                     <i data-lucide="receipt" class="w-10 h-10" style="stroke-width: 1.2px;"></i>
                 </div>
             </div>
-            <h3 class="text-xl font-semibold text-jti-primary mb-2">Belum ada riwayat transaksi</h3>
-            <p class="text-slate-500 max-w-xs mx-auto mb-8 text-sm leading-relaxed font-medium">
-                Semua catatan pembelian materi dan sertifikasi anda akan tercatat otomatis di sini.
-            </p>
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Riwayat Transaksi</h1>
+                <p class="text-gray-600 mt-2">Pantau status pembayaran dan riwayat transaksi Anda</p>
+            </div>
             <a href="{{ route('courses.index') }}"
                 class="inline-flex items-center gap-2 px-6 py-3 bg-jti-primary text-white text-sm font-medium rounded-xl hover:shadow-lg transition-all active:scale-95 group">
                 Mulai eksplorasi kursus
@@ -57,19 +57,29 @@
                         @endphp
 
                         <div wire:key="transaction-{{ $transaction->id }}"
-                             class="group flex flex-col md:flex-row md:items-center gap-6 p-6 sm:p-8 hover:bg-slate-50/50 transition-colors">
+                            class="group flex flex-col md:flex-row md:items-center gap-6 p-6 sm:p-8 hover:bg-slate-50/50 transition-colors">
 
                             {{-- Info Utama --}}
                             <div class="flex items-center gap-5 flex-1 min-w-0">
-                                <div class="w-12 h-12 shrink-0 bg-jti-light rounded-xl flex items-center justify-center text-jti-primary group-hover:bg-jti-yellow/20 transition-colors">
+                                <div
+                                    class="w-12 h-12 shrink-0 bg-jti-light rounded-xl flex items-center justify-center text-jti-primary group-hover:bg-jti-yellow/20 transition-colors">
                                     <i data-lucide="file-text" class="w-5 h-5" style="stroke-width: 1.5px;"></i>
                                 </div>
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2 mb-0.5">
-                                        <span class="text-sm font-semibold text-slate-900 truncate capitalize">inv-{{ $transaction->invoice_number }}</span>
-                                        <span class="text-[11px] font-medium text-slate-400 shrink-0">{{ $transaction->created_at->format('d M, Y') }}</span>
+                                        <span
+                                            class="text-sm font-semibold text-slate-900 truncate capitalize">inv-{{ $transaction->invoice_number }}</span>
+                                        <span
+                                            class="text-[11px] font-medium text-slate-400 shrink-0">{{ $transaction->created_at->format('d M, Y') }}</span>
                                     </div>
-                                    <p class="text-xs text-slate-500 font-medium">Pembayaran materi sertifikasi</p>
+                                    @php
+                                        $firstItem = $transaction->orderItems->first();
+                                        $typeLabel =
+                                            $firstItem && $firstItem->course_id
+                                                ? 'Pembayaran course'
+                                                : 'Pembayaran kelas';
+                                    @endphp
+                                    <p class="text-xs text-slate-500 font-medium">{{ $typeLabel }}</p>
                                 </div>
                             </div>
 
@@ -83,7 +93,8 @@
                                 </div>
 
                                 <div class="flex flex-col items-end gap-2 shrink-0 min-w-[100px]">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-[11px] font-semibold border capitalize {{ $statusStyle }}">
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-lg text-[11px] font-semibold border capitalize {{ $statusStyle }}">
                                         {{ strtolower($statusLabel) }}
                                     </span>
                                 </div>
@@ -96,7 +107,8 @@
                 <div class="px-8 py-6 bg-slate-50/30 border-t border-slate-50">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p class="text-[11px] font-medium text-slate-400">
-                            menampilkan halaman {{ $this->transactions->currentPage() }} dari {{ $this->transactions->lastPage() }}
+                            menampilkan halaman {{ $this->transactions->currentPage() }} dari
+                            {{ $this->transactions->lastPage() }}
                         </p>
                         <div class="pagination-minimalist">
                             {{ $this->transactions->links() }}

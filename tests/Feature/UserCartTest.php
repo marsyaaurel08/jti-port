@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\UserCart;
+use App\Livewire\StudentCart;
 use App\Models\Course;
 use App\Models\User;
 use App\Models\UserCart as UserCartModel;
@@ -25,7 +25,7 @@ it('loads cart items on mount', function () {
     ]);
 
     Livewire::actingAs($this->user)
-        ->test(UserCart::class)
+        ->test(StudentCart::class)
         ->assertSet('cartCount', 2)
         ->assertSet('cartItems', fn ($items) => count($items) === 2)
         ->assertSee($course1->title)
@@ -47,7 +47,7 @@ it('can remove first item from cart', function () {
     ]);
 
     Livewire::actingAs($this->user)
-        ->test(UserCart::class)
+        ->test(StudentCart::class)
         ->assertSet('cartCount', 2)
         ->call('removeItem', $item1->id)
         ->assertNotified()
@@ -79,7 +79,7 @@ it('can remove second item from cart after removing first', function () {
     ]);
 
     $component = Livewire::actingAs($this->user)
-        ->test(UserCart::class)
+        ->test(StudentCart::class)
         ->assertSet('cartCount', 3);
 
     // Remove first item
@@ -107,7 +107,7 @@ it('can remove item from cart', function () {
     ]);
 
     Livewire::actingAs($this->user)
-        ->test(UserCart::class)
+        ->test(StudentCart::class)
         ->call('removeItem', $item->id);
 
     $sessionCart = session('cart', []);
@@ -129,6 +129,6 @@ it('calculates correct total price', function () {
     ]);
 
     Livewire::actingAs($this->user)
-        ->test(UserCart::class)
+        ->test(StudentCart::class)
         ->assertSet('totalPrice', 300000);
 });

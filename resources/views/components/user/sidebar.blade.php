@@ -77,10 +77,10 @@
                         <span class="text-[13.5px] font-medium tracking-tight">{{ $menu['label'] }}</span>
                     </div>
 
-                    @if (isset($menu['count']) && $menu['count'] > 0)
-                        <span
+                    @if (isset($menu['count']))
+                        <span x-data="{ cartCount: {{ count(session('cart', [])) }} }" @cart-updated.window="cartCount = $event.detail.count"
                             class="{{ $isActive ? 'bg-jti-yellow' : 'bg-jti-yellow/20' }} text-jti-primary text-[10px] font-bold px-2 py-0.5 rounded-lg transition-colors">
-                            {{ $menu['count'] }}
+                            <span x-text="cartCount"></span>
                         </span>
                     @endif
                 </a>

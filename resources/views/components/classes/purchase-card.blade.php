@@ -72,7 +72,7 @@
             {{-- Checkout Link --}}
             <a href="{{ auth()->check() ? route('student.checkout.class', $class->slug) : route('filament.user.auth.login') }}"
                 class="w-full py-3.5 bg-jti-yellow text-jti-primary font-semibold rounded-xl hover:bg-amber-400 transition-all text-sm flex items-center justify-center active:scale-[0.98] shadow-sm">
-                daftar sekarang
+                Daftar Sekarang
             </a>
 
             @if (

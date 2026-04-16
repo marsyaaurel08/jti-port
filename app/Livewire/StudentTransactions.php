@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 
-class UserTransactions extends Component
+class StudentTransactions extends Component
 {
     use WithPagination;
 
@@ -50,7 +50,7 @@ class UserTransactions extends Component
         return match ($status) {
             'paid' => 'green',
             'pending' => 'yellow',
-            'failed' => 'red',
+            'cancelled' => 'red',
             default => 'gray',
         };
     }
@@ -60,13 +60,13 @@ class UserTransactions extends Component
         return match ($status) {
             'paid' => 'Lunas',
             'pending' => 'Menunggu',
-            'failed' => 'Gagal',
+            'cancelled' => 'Dibatalkan',
             default => ucfirst($status),
         };
     }
 
     public function render()
     {
-        return view('livewire.user-transactions');
+        return view('livewire.student-transactions');
     }
 }

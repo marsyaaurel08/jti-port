@@ -5,7 +5,7 @@
         {{-- Header Section: Diberi margin bottom yang lebih besar agar layout bernapas --}}
         <div class="mb-4">
             <x-classes.header-section :total="$classes->total()" :selectedLevels="$selectedLevels" :isFree="$isFree" :isPaid="$isPaid"
-                :selectedCategories="$selectedCategories" :sort="$sort" />
+                :selectedCategories="$selectedCategories" />
         </div>
 
         <div class="flex flex-col lg:flex-row gap-12 items-start">
@@ -13,7 +13,7 @@
             {{-- Sidebar Filter: Sticky agar tetap terlihat saat scroll --}}
             <aside class="w-full lg:w-[280px] shrink-0 lg:sticky lg:top-26">
                 <x-classes.filters :categories="$categories" :selectedCategories="$selectedCategories" :selectedLevels="$selectedLevels" :isFree="$isFree"
-                    :isPaid="$isPaid" />
+                    :isPaid="$isPaid" :sort="$sort" />
 
                 {{-- Info Tambahan di bawah filter (Khas JTI) --}}
                 <div
@@ -21,7 +21,8 @@
                     {{-- Konten Utama --}}
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-2">
-                            <p class="text-[11px] font-semibold text-jti-yellow/90 opacity-90 capitalize">butuh bantuan?</p>
+                            <p class="text-[11px] font-semibold text-jti-yellow/90 opacity-90 capitalize">butuh bantuan?
+                            </p>
                         </div>
                         <p class="text-sm font-medium leading-relaxed pr-8">
                             Konsultasikan jalur sertifikasi yang tepat untuk karier anda bersama tim ahli kami.
@@ -41,6 +42,10 @@
 
             {{-- Results List: Mengambil sisa space yang ada --}}
             <main class="grow min-w-0">
+                {{-- Search Component --}}
+                <x-classes.search :classes="$classes" :search="$search" />
+
+                {{-- Results List --}}
                 <x-classes.results-list :classes="$classes" />
             </main>
 

@@ -20,7 +20,8 @@
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                         </span>
                         <p class="text-xs text-slate-500 font-medium">
-                            Batas waktu: {{ $vaData['expired_at']->diffInHours(now()) }} jam ke depan
+                            Batas waktu: {{ \Carbon\Carbon::parse($vaData['expired_at'])->diffInHours(now()) }} jam ke
+                            depan
                         </p>
                     </div>
                 </div>
@@ -58,10 +59,10 @@
                             <button
                                 @click="navigator.clipboard.writeText('{{ $vaData['va_number'] }}'); $dispatch('notify', {message: 'Nomor VA berhasil disalin!'})"
                                 class="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all active:scale-90 group border border-white/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round"
-                                    class="lucide lucide-copy-icon lucide-copy">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-copy-icon lucide-copy">
                                     <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
                                     <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                                 </svg>
@@ -87,7 +88,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center gap-2 px-1">
                         <i data-lucide="info" class="w-4 h-4 text-jti-yellow"></i>
-                        <p class="text-xs font-bold text-slate-500 tracking-wide">METODE: {{ $transferMethodName }}</p>
+                        <p class="text-xs font-bold text-slate-500 tracking-wide">METODE: {{ $transferMethodName['name'] ?? 'Transfer' }}</p>
                     </div>
 
                     <div class="bg-slate-50 rounded-2xl border border-slate-100 p-6 shadow-inner">
@@ -95,7 +96,7 @@
                             @forelse ($instructions as $index => $step)
                                 <li class="flex gap-4">
                                     <span
-                                        class="flex-shrink-0 w-6 h-6 bg-white border border-slate-200 text-jti-primary text-[11px] font-bold flex items-center justify-center rounded-lg shadow-sm">
+                                        class="shrink-0 w-6 h-6 bg-white border border-slate-200 text-jti-primary text-[11px] font-bold flex items-center justify-center rounded-lg shadow-sm">
                                         {{ $index + 1 }}
                                     </span>
                                     <p class="text-sm text-slate-600 leading-relaxed">{{ $step }}</p>
@@ -114,7 +115,8 @@
                     </div>
                     <p class="text-sm text-amber-900 leading-relaxed">
                         Selesaikan pembayaran sebelum <span
-                            class="font-bold underline">{{ $vaData['expired_at']->format('d M Y, H:i') }} WIB</span>.
+                            class="font-bold underline">{{ \Carbon\Carbon::parse($vaData['expired_at'])->format('d M Y, H:i') }}
+                            WIB</span>.
                         Pesanan akan dibatalkan otomatis jika melewati batas waktu.
                     </p>
                 </div>

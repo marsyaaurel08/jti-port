@@ -11,7 +11,7 @@ use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 
-class UserProfile extends Component
+class StudentProfile extends Component
 {
     use WithFileUploads;
 
@@ -97,6 +97,6 @@ class UserProfile extends Component
 
     public function render()
     {
-        return view('livewire.user-profile');
+        return view('livewire.student-profile');
     }
 }

@@ -37,6 +37,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
         'password',
         'avatar_url',
         'bio',
+        'role',
         'phone_number',
     ];
 
@@ -136,22 +137,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             ->width(300)
             ->height(300);
     }
-
-    // /**
-    //  * Get all social accounts for the user.
-    //  */
-    // public function socialAccounts(): HasMany
-    // {
-    //     return $this->hasMany(SocialAccount::class);
-    // }
-
-    // /**
-    //  * Get social account for specific provider.
-    //  */
-    // public function getSocialAccount(string $provider): ?SocialAccount
-    // {
-    //     return $this->socialAccounts()->where('provider', $provider)->first();
-    // }
 
     /**
      * Check if user has linked social account.

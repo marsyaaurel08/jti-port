@@ -4,7 +4,7 @@
 
     <div class="bg-[#FAFBFC] min-h-screen">
         {{-- Padding disesuaikan agar simetris dengan header sebelumnya --}}
-        <div class="max-w-[1440px] mx-auto px-6 lg:px-48 py-16">
+        <div class="max-w-[1440px] mx-auto px-6 2xl:px-48 py-16">
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
 
                 {{-- Kolom Kiri: Konten Utama --}}
@@ -154,8 +154,6 @@
 
             </div>
         </div>
+        <x-classes.mobile-checkout-bar :class="$class" />
     </div>
-
-    {{-- Mobile Checkout Bar --}}
-    <x-classes.mobile-checkout-bar :class="$class" />
 </x-layouts.app>

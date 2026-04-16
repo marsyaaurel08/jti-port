@@ -2,11 +2,8 @@
 
 namespace App\Filament\Resources\EnrollmentCourses\Schemas;
 
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\{Hidden, Repeater, Select};
+use Filament\Schemas\Components\{Grid, Section};
 use Filament\Schemas\Schema;
 
 class EnrollmentCourseForm
@@ -21,32 +18,41 @@ class EnrollmentCourseForm
                         // Kita bungkus dalam Grid dengan 2 kolom
                         Grid::make(2)
                             ->schema([
+                                // KOLOM KIRI: Pilih Kursus
+                                Select::make('course_id')
+                                    ->relationship('course', 'title', fn($query) => $query->where('status', 'published'))
+                                    ->label('Pilih Kursus')
+                                    ->placeholder('Cari judul kursus...')
+                                    ->helperText('Hanya kursus berstatus "Published" yang muncul.')
+                                    ->prefixIcon('heroicon-m-book-open') // Ikon buku di dalam field
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->columnSpan(2),
 
-                                // KOLOM KIRI: Repeater Siswa
+                                // KOLOM KANAN: Repeater Siswa
                                 Repeater::make('students')
-                                    ->label('Pilih Siswa')
+                                    ->label('Daftar Siswa')
                                     ->minItems(1)
                                     ->schema([
                                         Select::make('user_id')
                                             ->relationship(
                                                 'user',
                                                 'name',
-                                                fn($query) => $query->whereHas('roles', fn($q) => $q->whereNotIn('name', ['admin', 'super_admin', 'pengajar']))
+                                                fn($query) => $query->where('role', 'user')
                                             )
                                             ->label('Nama Siswa')
+                                            ->placeholder('Pilih siswa...')
+                                            ->prefixIcon('heroicon-m-user') // Ikon user di dalam field
                                             ->searchable()
                                             ->required()
-                                            ->distinct(),
+                                            ->distinct()
+                                            ->disableOptionsWhenSelectedInSiblingRepeaterItems(), // Mencegah duplikasi visual
                                     ])
-                                    ->addActionLabel('Tambah Siswa'),
-
-                                // KOLOM KANAN: Pilih Kursus
-                                Select::make('course_id')
-                                    ->relationship('course', 'title', fn($query) => $query->where('status', 'published'))
-                                    ->label('Pilih Kursus (untuk semua siswa)')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required(),
+                                    ->itemLabel(fn(array $state): ?string => $state['user_id'] ?? 'Siswa Baru') // Label dinamis tiap baris
+                                    ->addActionLabel('Tambah Siswa Lagi')
+                                    ->collapsible() // Bisa di-collapse jika daftar sudah panjang
+                                    ->columnSpan(2),
                             ]),
 
                         // Hidden fields tetap di luar grid agar tidak merusak layout

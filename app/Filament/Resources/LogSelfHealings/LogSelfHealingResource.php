@@ -15,12 +15,15 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class LogSelfHealingResource extends Resource
 {
     protected static ?string $model = LogSelfHealing::class;
+    protected static ?string $pluralLabel = 'Log Self Healing';
+    protected static string|UnitEnum|null $navigationGroup = 'Transactions';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
 
     public static function form(Schema $schema): Schema
     {

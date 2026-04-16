@@ -5,7 +5,7 @@
         {{-- Header Section: Diberi margin bottom yang lebih besar agar layout bernapas --}}
         <div class="mb-4">
             <x-course.header-section :total="$courses->total()" :selectedRatings="$selectedRatings" :selectedLevels="$selectedLevels" :isFree="$isFree"
-                :isPaid="$isPaid" :selectedCategories="$selectedCategories" :sort="$sort" />
+                :isPaid="$isPaid" :selectedCategories="$selectedCategories" />
         </div>
 
         <div class="flex flex-col lg:flex-row gap-12 items-start">
@@ -13,7 +13,7 @@
             {{-- Sidebar Filter: Sticky agar tetap terlihat saat scroll --}}
             <aside class="w-full lg:w-[280px] shrink-0 lg:sticky lg:top-26">
                 <x-course.filters :categories="$categories" :selectedCategories="$selectedCategories" :selectedRatings="$selectedRatings" :selectedLevels="$selectedLevels"
-                    :isFree="$isFree" :isPaid="$isPaid" />
+                    :isFree="$isFree" :isPaid="$isPaid" :sort="$sort" />
 
                 {{-- Info Tambahan di bawah filter (Khas Academix) --}}
                 <div
@@ -21,7 +21,8 @@
                     {{-- Konten Utama --}}
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-2">
-                            <p class="text-[11px] font-semibold text-jti-yellow/90 opacity-90 capitalize">butuh bantuan?</p>
+                            <p class="text-[11px] font-semibold text-jti-yellow/90 opacity-90 capitalize">butuh bantuan?
+                            </p>
                         </div>
                         <p class="text-sm font-medium leading-relaxed pr-8">
                             Konsultasikan jalur sertifikasi yang tepat untuk karier anda bersama tim ahli kami.
@@ -41,6 +42,10 @@
 
             {{-- Results List: Mengambil sisa space yang ada --}}
             <main class="grow min-w-0">
+                {{-- Search Component --}}
+                <x-course.search :courses="$courses" :search="$search" />
+
+                {{-- Results List --}}
                 <x-course.results-list :courses="$courses" />
             </main>
 

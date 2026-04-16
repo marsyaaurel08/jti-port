@@ -84,7 +84,7 @@
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-slate-700">Nama lengkap <span
                                     class="text-red-500">*</span></label>
-                            <input type="text" wire:model="fullName" placeholder="Masukkan nama lengkap"
+                            <input type="text" wire:model="fullName" placeholder="Masukkan nama lengkap" disabled
                                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-jti-yellow focus:bg-white focus:border-transparent outline-none transition duration-200 placeholder:text-slate-400">
                             @error('fullName')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -95,7 +95,7 @@
                         <div class="space-y-2">
                             <label class="text-sm font-bold text-slate-700">Email <span
                                     class="text-red-500">*</span></label>
-                            <input type="email" wire:model="email" placeholder="contoh@email.com"
+                            <input type="email" wire:model="email" placeholder="contoh@email.com" disabled
                                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-jti-yellow focus:bg-white focus:border-transparent outline-none transition duration-200 placeholder:text-slate-400">
                             @error('email')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -293,26 +293,11 @@
 
                         <span wire:loading.remove wire:target="processPayment">Bayar sekarang</span>
                         <span wire:loading wire:target="processPayment" class="flex items-center gap-2">
-                            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10"
-                                    stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                </path>
-                            </svg>
                             Memproses...
                         </span>
                         <i data-lucide="arrow-right" class="w-5 h-5" wire:loading.remove
                             wire:target="processPayment"></i>
                     </button>
-
-                    <div class="flex flex-col items-center gap-4 mt-8 pt-6 border-t border-white/5">
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-                            <span class="text-[10px] font-medium text-slate-300 tracking-wider">SECURE
-                                CHECKOUT</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -337,6 +322,7 @@
     </style>
     {{-- VA Instructions Modal --}}
     @if ($showVAInstructions && !empty($vaData))
-        <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions" />
+        <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions"
+            :redirectRoute="$redirectRoute" />
     @endif
 </div>

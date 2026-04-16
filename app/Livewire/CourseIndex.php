@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Category;
 use App\Models\Course;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,7 +17,7 @@ class CourseIndex extends Component
     public $selectedCategories = [];
 
     #[Url(history: true)]
-    public $selectedRatings = [];
+    public $selectedRatings = '';
 
     #[Url(history: true)]
     public $selectedLevels = [];
@@ -29,6 +30,9 @@ class CourseIndex extends Component
 
     #[Url(history: true)]
     public $sort = 'latest';
+
+    #[Url(history: true)]
+    public $search = '';
 
     public function updatedSelectedCategories(): void
     {
@@ -60,65 +64,106 @@ class CourseIndex extends Component
         $this->resetPage();
     }
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
         $this->selectedCategories = [];
-        $this->selectedRatings = [];
+        $this->selectedRatings = '';
         $this->selectedLevels = [];
         $this->isFree = false;
         $this->isPaid = false;
         $this->sort = 'latest';
+        $this->search = '';
 
         $this->resetPage();
     }
 
+    private function getCacheKey(): string
+    {
+        return 'courses_' . md5(json_encode([
+            'categories' => $this->selectedCategories,
+            'ratings' => $this->selectedRatings,
+            'levels' => $this->selectedLevels,
+            'isFree' => $this->isFree,
+            'isPaid' => $this->isPaid,
+            'sort' => $this->sort,
+            'search' => $this->search,
+            'page' => $this->getPage(),
+        ]));
+    }
+
+
     public function render()
     {
-        $query = Course::query()->where('status', 'published');
+        $cacheKey = $this->getCacheKey();
 
-        if (! empty($this->selectedRatings)) {
-            $query->where(function ($q) {
-                foreach ($this->selectedRatings as $rating) {
-                    $q->orWhere('avg_rating', '>=', (float) $rating);
-                }
-            });
-        }
+        $courses = Cache::remember($cacheKey, 600, function () {
 
-        if (! empty($this->selectedCategories)) {
-            $query->whereIn('category_id', $this->selectedCategories);
-        }
+            $query = Course::query()->where('status', 'published');
 
-        if (! empty($this->selectedLevels)) {
-            $query->whereIn('level', $this->selectedLevels);
-        }
+            if (! empty($this->search)) {
+                $search = strtolower(trim($this->search));
+                $query->where(function ($q) use ($search) {
+                    $q->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"])
+                        ->orWhereHas('category', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                        });
+                });
+            }
 
-        if ($this->isFree && ! $this->isPaid) {
-            $query->where('price', 0);
-        } elseif ($this->isPaid && ! $this->isFree) {
-            $query->where('price', '>', 0);
-        }
+            if (! empty($this->selectedRatings)) {
+                $query->where('avg_rating', '>=', (float) $this->selectedRatings);
+            }
 
-        switch ($this->sort) {
-            case 'price_low':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_high':
-                $query->orderBy('price', 'desc');
-                break;
-            default:
-                $query->latest();
-                break;
-        }
+            if (! empty($this->selectedCategories)) {
+                $query->whereIn('category_id', $this->selectedCategories);
+            }
+
+            if (! empty($this->selectedLevels)) {
+                $query->whereIn('level', $this->selectedLevels);
+            }
+
+            if ($this->isFree && ! $this->isPaid) {
+                $query->where('price', 0);
+            } elseif ($this->isPaid && ! $this->isFree) {
+                $query->where('price', '>', 0);
+            }
+
+            switch ($this->sort) {
+                case 'price_low':
+                    $query->orderBy('price', 'asc');
+                    break;
+                case 'price_high':
+                    $query->orderBy('price', 'desc');
+                    break;
+                default:
+                    $query->latest();
+                    break;
+            }
+
+            return $query->paginate(10);
+        });
+
+        // Cache kategori (jarang berubah)
+        $categories = Cache::remember('categories_all', 3600, function () {
+            return Category::orderBy('name')->get();
+        });
 
         return view('livewire.course-index', [
-            'courses' => $query->paginate(10),
-            'categories' => Category::all(),
+            'courses' => $courses,
+            'categories' => $categories,
             'selectedCategories' => $this->selectedCategories,
             'selectedRatings' => $this->selectedRatings,
             'selectedLevels' => $this->selectedLevels,
             'isFree' => $this->isFree,
             'isPaid' => $this->isPaid,
             'sort' => $this->sort,
+            'search' => $this->search,
         ]);
     }
 }

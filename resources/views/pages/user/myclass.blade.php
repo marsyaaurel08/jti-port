@@ -1,11 +1,11 @@
 <x-student.layout.index :user="$user">
-    <div class="max-w-7xl mx-auto px-6">
+    <div class="px-6 md:px-48">
 
         {{-- Header: Perbaikan kontras dan spacing --}}
         <div class="mb-10">
-            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">My Classes</h1>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Kelas Saya</h1>
             <p class="mt-2 text-base text-slate-500 max-w-2xl">
-                Manage and track your certification progress at JTI PORT.
+                Kelola dan pantau perkembangan sertifikasi Anda di JTI PORT.
             </p>
         </div>
 
@@ -14,9 +14,9 @@
             @php
                 $activeFilter = request('filter', 'all');
                 $tabs = [
-                    'all' => 'All Classes',
-                    'in-progress' => 'In Progress',
-                    'completed' => 'Completed'
+                    'all' => 'Semua Kelas',
+                    'in-progress' => 'Sedang Berlangsung',
+                    'completed' => 'Selesai'
                 ];
             @endphp
 
@@ -34,7 +34,7 @@
 
         {{-- Grid: Spacing antar card diperluas sedikit --}}
         @if ($classes->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 @foreach ($classes as $class)
                 {{-- @dd($class) --}}
                     <x-student.course-card
