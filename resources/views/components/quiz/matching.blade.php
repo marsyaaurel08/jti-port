@@ -15,7 +15,7 @@
 
 <div
     x-data="matchingComponent({
-        items: @js($items),
+items: @js($items ?? []),
         matches: @js($matches),
         selected: @js($selectedAnswers),
         wireModel: @js($wireModel),
@@ -35,21 +35,22 @@
         <div class="space-y-3">
             <h3 class="text-sm font-semibold text-gray-700 mb-2">Items</h3>
             <div class="space-y-2">
-                <template x-for="item in availableItems" :key="item.id">
+                <template x-for="(item, index) in items" :key="item.id">
                     <div
                         class="p-3 md:p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-[#ffc107] hover:bg-yellow-50/30 cursor-grab active:cursor-grabbing transition-all shadow-sm hover:shadow-md"
                         draggable="true"
-                        @dragstart="dragStart($event, item.id)"
+                        :data-item-id="item?.id"
+                        @dragstart="dragStart($event)"
                         @dragend="dragEnd($event)"
-                        :class="{
-                            'opacity-50': draggedItemId === item.id
-                        }"
+                        :class="draggedItemId === item?.id ? 'opacity-50' : ''"
+                        x-show="!isItemMatched(item?.id)"
+                        x-transition
                     >
                         <div class="flex items-center">
                             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-semibold mr-3">
-                                <span x-text="getItemNumber(item.id)"></span>
+                                <span x-text="getItemNumber(item?.id)"></span>
                             </div>
-                            <span class="font-medium text-gray-700 text-sm md:text-base" x-text="item.text"></span>
+                            <span class="font-medium text-gray-700 text-sm md:text-base" x-text="item?.text"></span>
                         </div>
                     </div>
                 </template>
