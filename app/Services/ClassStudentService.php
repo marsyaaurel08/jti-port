@@ -34,6 +34,22 @@ class ClassStudentService implements ClassStudentContract
         $course = $class->course;
         $instructor = $class->instructor;
 
+        $firstLessonSlug = null;
+        $firstChapter = $course->chapters()->with('lessons')->orderBy('sort_order')->first();
+        if ($firstChapter && $firstChapter->lessons->isNotEmpty()) {
+            $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
+            $firstLessonSlug = $firstLesson->slug ?? null;
+        }
+
+        // Get last accessed lesson slug or fall back to first lesson
+        $lastAccessedLessonSlug = null;
+        if ($enrollment->last_accessed_lesson_id) {
+            $lastAccessedLesson = \App\Models\Lesson::find($enrollment->last_accessed_lesson_id);
+            $lastAccessedLessonSlug = $lastAccessedLesson->slug ?? $firstLessonSlug;
+        } else {
+            $lastAccessedLessonSlug = $firstLessonSlug;
+        }
+
         return [
             'id' => $class->id,
             'title' => $class->title,
@@ -42,6 +58,7 @@ class ClassStudentService implements ClassStudentContract
             'instructor_email' => $instructor->email,
             'thumbnail_url' => $class->thumbnail_url,
             'price' => (float) $class->price,
+            'slug' => $course->slug,
             'start_date' => $class->start_date?->format('Y-m-d H:i'),
             'end_date' => $class->end_date?->format('Y-m-d H:i'),
             'max_capacity' => $class->max_capacity,
@@ -50,11 +67,14 @@ class ClassStudentService implements ClassStudentContract
             'is_active' => $class->is_active,
             'status' => $this->getClassStatus($enrollment),
             'progress' => $this->calculateClassProgress($enrollment),
+            'first_lesson_slug' => $firstLessonSlug,
+            'last_accessed_lesson_slug' => $lastAccessedLessonSlug,
             'enrolled_at' => $enrollment->enrolled_at?->format('Y-m-d H:i'),
             'expires_at' => $enrollment->expires_at?->format('Y-m-d H:i'),
             'is_completed' => $enrollment->is_completed,
             'completed_at' => $enrollment->completed_at?->format('Y-m-d H:i'),
         ];
+        
     }
 
     public function calculateClassProgress(Enrollment $enrollment): int

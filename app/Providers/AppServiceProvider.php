@@ -8,7 +8,7 @@ use App\Models\{Category, Order, User, UserCart};
 use App\Observers\{CategoryObserver, OrderObserver, UserCartObserver, UserObserver};
 use App\Services\{ClassStudentService, CourseStudentService};
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
-use Illuminate\Support\Facades\{Auth, Blade, Cache, View};
+use Illuminate\Support\Facades\{Auth, Blade, Cache, URL, View};
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Jika APP_URL menggunakan https, paksa semua link jadi https
+        if (str_contains(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
         // Register Model Observers for cache invalidation
         Category::observe(CategoryObserver::class);
         UserCart::observe(UserCartObserver::class);
