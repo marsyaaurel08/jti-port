@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\{CartController, ClassesController, CourseController, EnrollmentController, HomeController, PaymentCallbackController, StudentController};
-use App\Livewire\{StudentCart, StudentLesson, StudentOrders, StudentClassCheckout, StudentCourseCheckout, StudentProfile, StudentTransactions};
+use App\Livewire\{StudentCart, StudentLesson, StudentOrders, StudentClassCheckout, StudentClassLesson, StudentCourseCheckout, StudentProfile, StudentTransactions};
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
@@ -49,7 +49,7 @@ Route::middleware(['auth', 'verified','non-admin'])->prefix('student')->name('st
 
     // Materi Kursus & Kelas
     Route::get('/courses/{courseSlug}/lessons/{lessonSlug}', StudentLesson::class)->name('lesson');
-    Route::get('/classes/{classSlug}/lessons/{lessonSlug}', [StudentController::class, 'lesson'])->name('classLesson');
+    Route::get('/classes/{classSlug}/lessons/{lessonSlug}', StudentClassLesson::class)->name('classLesson');
 
     // Keranjang & Checkout
     Route::get('/cart', StudentCart::class)->name('cart');
