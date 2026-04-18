@@ -1,59 +1,286 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# JTI Port - PPI Student Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> A comprehensive web-based platform for managing PPI (Perhimpunan Pelajar Indonesia) student data, housing information, graduate tracking, and communications.
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel)
+![Filament](https://img.shields.io/badge/Filament-4-09A4E4?style=flat-square&logo=filament)
+![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?style=flat-square&logo=tailwindcss)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Table of Contents
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Running the Application](#running-the-application)
+- [Development](#development)
+- [Testing](#testing)
+- [Project Structure](#project-structure)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✨ Features
 
-## Learning Laravel
+### Core Functionality
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- 👤 **Student Registration & Profiles** - Centralized student data management
+- 🏠 **Housing Database** - Apartment listings with peer reviews and ratings
+- 🎓 **Graduate Tracking** - Interactive global map of alumni locations
+- 📰 **News & Bulletins** - Email broadcasting system for announcements
+- 📊 **Analytics & Reporting** - Demographic insights and analytics
+- 💳 **Course Payment** - BNI Virtual Account integration for secure transactions
+- 🔐 **Role-Based Access Control** - Filament Shield integration for permissions
+- 📧 **Multi-Channel Communication** - Email broadcasting and notifications
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Admin Features
 
-## Laravel Sponsors
+- 📋 CRUD operations for all entities
+- 📊 Advanced filtering and searching
+- 📈 Dashboard widgets and analytics
+- 👥 User management and role assignment
+- 🔍 Activity logging and audit trails
+- 📤 Import/Export functionality
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠 Tech Stack
 
-### Premium Partners
+| Component        | Version                     | Purpose                    |
+| ---------------- | --------------------------- | -------------------------- |
+| **PHP**          | 8.3.24                      | Backend Language           |
+| **Laravel**      | 12                          | Framework                  |
+| **Filament**     | 4                           | Admin Panel & UI Framework |
+| **Livewire**     | 3                           | Real-time UI Components    |
+| **Tailwind CSS** | 4                           | Styling                    |
+| **Pest**         | 4                           | Testing Framework          |
+| **Database**     | SQLite (dev) / MySQL (prod) | Data Storage               |
+| **BNI API**      | Ecollection                 | Payment Gateway            |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 📦 Prerequisites
 
-## Contributing
+- **PHP** 8.3 or higher
+- **Composer** 2.0+
+- **Node.js** 18+ & **npm** 9+
+- **SQLite** or **MySQL** 8.0+
+- **Git**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Installation
 
-## Code of Conduct
+### 1. Clone the Repository
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+git clone https://github.com/yourusername/jti-port.git
+cd jti-port
+```
 
-## Security Vulnerabilities
+### 2. Install Dependencies
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer install
+npm install
+```
 
-## License
+### 3. Environment Setup
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+### 4. Database Setup
+
+```bash
+php artisan migrate --seed
+```
+
+### 5. Build Frontend Assets
+
+```bash
+npm run build
+```
+
+**Or use the quick setup command:**
+
+```bash
+composer setup
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Key configurations in `.env`:
+
+```env
+APP_NAME="JTI Port"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+# Database
+DB_CONNECTION=sqlite
+
+# BNI Payment Gateway
+BNI_CLIENT_ID=your_client_id
+BNI_CLIENT_SECRET=your_client_secret
+BNI_API_KEY=your_api_key
+BNI_API_URL=https://app.sandbox.midtrans.com
+
+# Mail Configuration
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+```
+
+### BNI Payment Gateway Setup
+
+1. Register at BNI Ecollection Dashboard
+2. Get credentials: `CLIENT_ID`, `CLIENT_SECRET`, `API_KEY`
+3. Add to `.env` file
+4. Test using sandbox environment first
+
+## ▶️ Running the Application
+
+### Development Server
+
+```bash
+composer run dev
+```
+
+This command starts:
+
+- Laravel development server (port 8000)
+- Vite dev server (port 5173)
+- Queue worker
+- Logs in real-time
+
+### Individual Services
+
+**Laravel Server:**
+
+```bash
+php artisan serve
+```
+
+**Vite Dev Server:**
+
+```bash
+npm run dev
+```
+
+**Queue Worker:**
+
+```bash
+php artisan queue:work
+```
+
+**View Logs:**
+
+```bash
+php artisan pail
+```
+
+## 🧪 Development
+
+### Code Formatting
+
+Format all code with Laravel Pint (required before commits):
+
+```bash
+vendor/bin/pint
+```
+
+### Running Tests
+
+```bash
+# All tests
+php artisan test
+
+# Specific test file
+php artisan test tests/Feature/ExampleTest.php
+
+# Filter by test name
+php artisan test --filter=testName
+```
+
+### Using Tinker (Interactive Shell)
+
+```bash
+php artisan tinker
+```
+
+### Database Debugging
+
+```bash
+php artisan tinker
+>>> User::all();
+>>> Order::with('course')->get();
+```
+
+## 📁 Project Structure
+
+```
+app/
+├── Filament/              # Admin panel resources
+│   ├── Resources/         # CRUD resources
+│   ├── Exports/          # Export classes
+│   ├── Imports/          # Import classes
+│   └── Widgets/          # Dashboard widgets
+├── Models/                # Eloquent models
+├── Http/
+│   ├── Controllers/       # API controllers
+│   └── Requests/          # Form requests & validation
+├── Services/              # Business logic
+│   └── BNIService.php    # Payment gateway service
+├── Listeners/             # Event listeners
+├── Observers/             # Model observers
+└── Policies/              # Authorization policies
+
+database/
+├── migrations/            # Schema migrations
+├── factories/             # Model factories for testing
+└── seeders/              # Database seeders
+
+resources/
+├── views/                 # Blade templates
+├── css/                   # Tailwind stylesheets
+└── js/                    # Alpine.js & Vite scripts
+
+routes/
+├── web.php               # Web routes
+└── console.php           # Console commands
+
+tests/
+├── Feature/              # Feature tests
+├── Unit/                 # Unit tests
+└── Browser/              # Browser tests (Pest v4)
+```
+
+## 📚 Documentation
+
+- **[PRD.md](PRD.md)** - Product Requirements Document
+- **[CLAUDE.md](CLAUDE.md)** - Development Guide & Conventions
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - BNI Integration Details
+- **[docs/filament-convention.md](docs/filament-convention.md)** - Filament Code Conventions
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. Create a feature branch: `git checkout -b feature/amazing-feature`
+2. Commit changes: `git commit -m 'Add amazing feature'`
+3. Push to branch: `git push origin feature/amazing-feature`
+4. Open a Pull Request
+
+### Code Standards
+
+- Follow PSR-12 (enforced by Laravel Pint)
+- Use type hints and explicit return types
+- Always use curly braces for control structures
+- Write tests for new features
+- Update documentation as needed
+
+## 📝 License
+
+This project is open-sourced software licensed under the [MIT license](LICENSE).

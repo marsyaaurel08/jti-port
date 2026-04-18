@@ -37,7 +37,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 @foreach ($classes as $class)
                 {{-- @dd($class) --}}
-                    <x-student.course-card
+                    <x-student.class-card
                         :image="$class['thumbnail_url']"
                         :title="$class['title']"
                         :description="$class['title']"

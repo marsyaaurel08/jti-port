@@ -1,0 +1,63 @@
+name: CI/CD JTIport
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build -t username/jtiport:latest -f docker/php/Dockerfile .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker push username/jtiport:latest
+          # Optional: Tambahkan tag dengan commit SHA untuk versi spesifik
+          docker tag username/jtiport:latest username/jtiport:${{ github.sha }}
+          docker push username/jtiport:${{ github.sha }}
+
+      # Optional: Scan image security
+      - name: Scan Docker Image for Vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: username/jtiport:latest
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  deploy:
+    needs: build-and-test
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Pull Latest Image
+        run: |
+          docker pull username/jtiport:latest
+
+      - name: Run Deploy Script
+        env:
+          # Kita cukup mempassing key ini ke shell environment
+          # agar script deploy.sh bisa menangkapnya
+          LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
+        run: |
+          chmod +x deploy.sh
+          ./deploy.sh
+
+      - name: Cleanup Old Images
+        run: docker image prune -f

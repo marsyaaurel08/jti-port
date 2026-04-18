@@ -30,7 +30,6 @@ class StudentController extends Controller
         try {
             $user = Auth::user();
             $filter = $request->get('filter', 'all');
-            // For demonstration, using a fixed user ID of 3
             $courses = $this->courseStudentService->getStudentCourses($user->id, $filter);
 
             return view('pages.user.mycourse', compact('courses'));
@@ -46,8 +45,7 @@ class StudentController extends Controller
         try {
             $user = Auth::user();
             $filter = $request->get('filter', 'all');
-            // For demonstration, using a fixed user ID of 3
-            $classes = $this->classStudentService->getStudentClasses(3, $filter);
+            $classes = $this->classStudentService->getStudentClasses($user->id, $filter);
 
             return view('pages.user.myclass', compact('classes'));
         } catch (\Exception $e) {
