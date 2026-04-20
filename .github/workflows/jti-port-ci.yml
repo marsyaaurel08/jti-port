@@ -3,7 +3,7 @@ name: CI/CD JTIport
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch: # Manual trigger
 
 jobs:
   build-and-test:
@@ -35,10 +35,10 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
-          format: 'table'
-          exit-code: '1'
+          format: "table"
+          exit-code: "1"
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
 
   deploy-staging:
     needs: build-and-test
@@ -55,7 +55,7 @@ jobs:
           echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Pull Latest Image
-        run: docker pull ${{}}/jtiport:latest
+        run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
 
       - name: Make scripts executable
         run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
