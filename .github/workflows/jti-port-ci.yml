@@ -17,7 +17,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker Image
-        run: docker build -t username/jtiport:latest -f docker/php/Dockerfile .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest -f docker/php/Dockerfile .
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -27,14 +27,14 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker push username/jtiport:latest
-          docker tag username/jtiport:latest username/jtiport:${{ github.sha }}
-          docker push username/jtiport:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
+          docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:${{ github.sha }}
 
       - name: Scan for vulnerabilities
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: username/jtiport:latest
+          image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
@@ -55,7 +55,7 @@ jobs:
           echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Pull Latest Image
-        run: docker pull username/jtiport:latest
+        run: docker pull ${{}}/jtiport:latest
 
       - name: Make scripts executable
         run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
@@ -81,7 +81,7 @@ jobs:
           echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Pull Latest Image
-        run: docker pull username/jtiport:latest
+        run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
 
       - name: Make scripts executable
         run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
