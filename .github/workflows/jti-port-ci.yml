@@ -40,31 +40,31 @@ jobs:
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
 
-  deploy-staging:
-    needs: build-and-test
-    runs-on: self-hosted
-    if: github.ref == 'refs/heads/main'
-    environment: staging
+  # deploy-staging:
+  #   needs: build-and-test
+  #   runs-on: self-hosted
+  #   if: github.ref == 'refs/heads/main'
+  #   environment: staging
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+  #     - name: Login to Docker Hub
+  #       run: |
+  #         echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-      - name: Pull Latest Image
-        run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
+  #     - name: Pull Latest Image
+  #       run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
 
-      - name: Make scripts executable
-        run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
+  #     - name: Make scripts executable
+  #       run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
 
-      - name: Deploy to Staging (Auto)
-        env:
-          LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
-          APP_ENV: staging
-        run: ./deploy.sh
+  #     - name: Deploy to Staging (Auto)
+  #       env:
+  #         LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
+  #         APP_ENV: staging
+  #       run: ./deploy.sh
 
   deploy-production:
     needs: deploy-staging
