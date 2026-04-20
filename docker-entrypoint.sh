@@ -21,6 +21,7 @@ if [ "$APP_ENV" = "production" ]; then
     php artisan config:cache
     php artisan route:cache
     php artisan view:cache
+    php artisan storage:link
     echo -e "${GREEN}✓ Cache created${NC}"
 fi
 
