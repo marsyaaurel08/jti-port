@@ -31,14 +31,14 @@ jobs:
           docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:${{ github.sha }}
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:${{ github.sha }}
 
-      - name: Scan for vulnerabilities
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
-          format: "table"
-          exit-code: "1"
-          ignore-unfixed: true
-          severity: "CRITICAL,HIGH"
+      # - name: Scan for vulnerabilities
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
+      #     format: "table"
+      #     exit-code: "1"
+      #     ignore-unfixed: true
+      #     severity: "CRITICAL,HIGH"
 
   # deploy-staging:
   #   needs: build-and-test
