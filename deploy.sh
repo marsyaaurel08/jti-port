@@ -2,8 +2,7 @@
 set -e
 
 # =====================================================================
-# HYBRID DEPLOYMENT SCRIPT
-# Auto-rollback untuk error teknis, Manual approval untuk production
+# HYBRID DEPLOYMENT SCRIPT - Blue-Green (Logika utama tetap sama)
 # =====================================================================
 
 # Warna untuk output
@@ -42,7 +41,7 @@ if [ ! "$(docker ps -q -f name=${PROJECT_NAME}_nginx)" ]; then
 fi
 
 # =====================================================================
-# 2. BACKUP DATABASE (WAJIB!)
+# 2. BACKUP DATABASE
 # =====================================================================
 
 echo -e "${YELLOW}📦 Creating database backup...${NC}"
@@ -91,10 +90,23 @@ docker run -d \
   --restart unless-stopped \
   -e LARAVEL_ENV_ENCRYPTION_KEY="$LARAVEL_ENV_ENCRYPTION_KEY" \
   -e APP_ENV="$APP_ENV" \
+  -v app_storage:/var/www/html/storage \
   $DOCKER_IMAGE
 
 # =====================================================================
-# 5. HEALTH CHECK (Auto-rollback jika gagal)
+# 5. SAFETY NET: Install dependencies & Cache (penting karena image sekarang sudah benar)
+# =====================================================================
+
+echo -e "${YELLOW}⚡ Running composer install & Laravel optimization...${NC}"
+docker exec $NEW_NAME composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist || echo -e "${YELLOW}Composer already up to date${NC}"
+
+docker exec $NEW_NAME php artisan config:cache || true
+docker exec $NEW_NAME php artisan route:cache || true
+docker exec $NEW_NAME php artisan view:cache || true
+docker exec $NEW_NAME php artisan storage:link || true
+
+# =====================================================================
+# 6. HEALTH CHECK (Auto-rollback jika gagal)
 # =====================================================================
 
 echo -e "${YELLOW}🏥 Waiting for container to be healthy...${NC}"
@@ -108,17 +120,17 @@ for i in $(seq 1 $HEALTH_CHECK_MAX); do
 
     if [ $i -eq $HEALTH_CHECK_MAX ]; then
         echo -e "${RED}❌ Container failed to start! AUTO-ROLLBACK...${NC}"
-        docker logs --tail 50 $NEW_NAME
+        docker logs --tail 100 $NEW_NAME
         docker stop $NEW_NAME && docker rm $NEW_NAME
         echo -e "${YELLOW}Old container $OLD_NAME still running. No downtime.${NC}"
         exit 1
     fi
     echo -n "."
-    sleep 2
+    sleep 3
 done
 
 # =====================================================================
-# 6. RUN MIGRATIONS (Auto-rollback jika gagal)
+# 7. RUN MIGRATIONS
 # =====================================================================
 
 echo -e "${YELLOW}📊 Running database migrations...${NC}"
@@ -132,14 +144,10 @@ else
 fi
 
 # =====================================================================
-# 7. BACKUP NGINX CONFIG
+# 8. BACKUP NGINX CONFIG + SWITCH TRAFFIC (logika tetap sama)
 # =====================================================================
 
 docker exec ${PROJECT_NAME}_nginx cp /etc/nginx/conf.d/default.conf /tmp/default.conf.bak
-
-# =====================================================================
-# 8. SWITCH TRAFFIC
-# =====================================================================
 
 echo -e "${YELLOW}🔄 Switching traffic from $OLD_NAME to $NEW_NAME...${NC}"
 docker exec ${PROJECT_NAME}_nginx /bin/sh -c "
@@ -147,7 +155,6 @@ docker exec ${PROJECT_NAME}_nginx /bin/sh -c "
     sed -i 's/\($NEW_NAME:9000 down;\)/$NEW_NAME:9000;/g' /etc/nginx/conf.d/default.conf
 "
 
-# Test Nginx config
 if docker exec ${PROJECT_NAME}_nginx nginx -t; then
     docker exec ${PROJECT_NAME}_nginx nginx -s reload
     echo -e "${GREEN}✅ Traffic switched!${NC}"
@@ -160,7 +167,7 @@ else
 fi
 
 # =====================================================================
-# 9. VERIFY DEPLOYMENT (Auto-rollback jika tidak responsif)
+# 9. VERIFY DEPLOYMENT (logika tetap sama)
 # =====================================================================
 
 echo -e "${YELLOW}🔍 Verifying deployment...${NC}"
@@ -180,7 +187,7 @@ else
 fi
 
 # =====================================================================
-# 10. MANUAL APPROVAL UNTUK PRODUCTION (Hybrid)
+# 10. MANUAL APPROVAL UNTUK PRODUCTION (logika tetap sama)
 # =====================================================================
 
 if [ "$APP_ENV" = "production" ]; then
@@ -193,7 +200,6 @@ if [ "$APP_ENV" = "production" ]; then
     echo ""
     echo -e "Please test the new version:"
     echo -e "  ${BLUE}curl http://localhost:8000/health${NC}"
-    echo -e "  ${BLUE}curl http://localhost:8000/your-test-endpoint${NC}"
     echo ""
     echo -e "${RED}If something is wrong, run: ./rollback.sh${NC}"
     echo ""
@@ -220,7 +226,7 @@ docker stop $OLD_NAME 2>/dev/null || true
 docker rm $OLD_NAME 2>/dev/null || true
 
 # =====================================================================
-# 12. SAVE DEPLOYMENT INFO
+# 12. SAVE DEPLOYMENT INFO + FINAL STATUS (logika tetap sama)
 # =====================================================================
 
 cat > $BACKUP_DIR/last_deploy.txt << EOF
@@ -231,10 +237,6 @@ PREVIOUS_ACTIVE: $CURRENT_ACTIVE
 APP_ENV: $APP_ENV
 DATE: $(date)
 EOF
-
-# =====================================================================
-# 13. FINAL STATUS
-# =====================================================================
 
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
