@@ -45,7 +45,7 @@
 - 🔍 Activity logging and audit trails
 - 📤 Import/Export functionality
 
-## 🛠 Tech Stackss
+## 🛠 Tech Stackssdd
 
 | Component        | Version                     | Purpose                    |
 | ---------------- | --------------------------- | -------------------------- |
