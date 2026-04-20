@@ -1,5 +1,6 @@
+version: '3.8'
+
 services:
-  # Polisi lalu lintas
   nginx:
     image: nginx:alpine
     container_name: jtiport_nginx
@@ -7,30 +8,112 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - "./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf"
-      - ".:/var/www/html"
+      - "./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
+      - ".:/var/www/html:ro"
     networks:
       - jtiport_network
 
-  # Database
+  app_blue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_blue
+    restart: unless-stopped
+    volumes:
+      - "./storage:/var/www/html/storage"
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    networks:
+      - jtiport_network
+    depends_on:
+      - db
+      - redis
+
+  app_green:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_green
+    restart: unless-stopped
+    volumes:
+      - "./storage:/var/www/html/storage"
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    networks:
+      - jtiport_network
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_worker
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --timeout=90
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    volumes:
+      - "./storage/logs:/var/www/html/storage/logs"
+    networks:
+      - jtiport_network
+    depends_on:
+      - db
+      - redis
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_scheduler
+    restart: unless-stopped
+    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    volumes:
+      - "./storage/logs:/var/www/html/storage/logs"
+    networks:
+      - jtiport_network
+    depends_on:
+      - db
+      - redis
+
   db:
     image: mysql:8.0
     container_name: jtiport_mysql
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: jtiport
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-jtiport}
+      MYSQL_USER: ${DB_USERNAME:-jtiport_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-jtiport_pass}
     volumes:
       - jtiport_dbdata:/var/lib/mysql
     networks:
       - jtiport_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Cache
   redis:
     image: redis:alpine
     container_name: jtiport_redis
+    restart: unless-stopped
     networks:
       - jtiport_network
-  
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 networks:
   jtiport_network:
     driver: bridge
