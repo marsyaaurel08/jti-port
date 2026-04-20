@@ -67,7 +67,7 @@ jobs:
   #       run: ./deploy.sh
 
   deploy-production:
-    needs: deploy-staging
+    needs: build-and-test
     runs-on: self-hosted
     if: github.ref == 'refs/heads/main'
     environment: production
