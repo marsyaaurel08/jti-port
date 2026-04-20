@@ -15,6 +15,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        if ($this->app->environment('local', 'staging')) {  // atau hanya 'local'
+            $this->app->register(\App\Providers\TelescopeServiceProvider::class);
+        }
         $this->app->bind(ContractsLogoutResponse::class, LogoutResponse::class);
         $this->app->bind(CourseStudentContract::class, CourseStudentService::class);
         $this->app->bind(ClassStudentContract::class, ClassStudentService::class);
