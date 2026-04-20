@@ -14,10 +14,10 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Konfigurasi
-DOCKER_IMAGE="username/jtiport:latest"
+DOCKER_IMAGE="${ secrets.DOCKER_HUB_USERNAME }/jtiport:latest"
 NETWORK_NAME="jtiport_network"
 PROJECT_NAME="jtiport"
-BACKUP_DIR="/backups/jtiport"
+BACKUP_DIR="/home/dika/backups/jtiport"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 APP_ENV="${APP_ENV:-production}"
 

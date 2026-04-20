@@ -89,6 +89,8 @@ jobs:
       - name: Deploy to Production (with Manual Approval)
         env:
           LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
           APP_ENV: production
         run: ./deploy.sh
 
