@@ -12,6 +12,11 @@ class EditCourse extends EditRecord
 {
     protected static string $resource = CourseResource::class;
 
+    protected function getFormActions(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
