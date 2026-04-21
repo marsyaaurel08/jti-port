@@ -111,6 +111,8 @@
                             wireModel="matchingAnswers"
                             :questionId="$currentQuestion['id']"
                         />
+                    @elseif($currentQuestion['type'] === 'boolean')
+                        <x-quiz.boolean :options="$options" :selected="$answers[$currentQuestion['id']] ?? null" wireModel="answers.{{ $currentQuestion['id'] }}" :questionId="$currentQuestion['id']" :questionType="'boolean'" />       
                     {{-- @elseif($currentQuestion['type'] === 'coding')
                         <livewire:coding-question-attempt :questionId="$currentQuestion['id']" :key="'coding-question-' . $currentQuestion['id']" /> --}}
                     @endif

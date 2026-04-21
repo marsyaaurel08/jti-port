@@ -13,7 +13,7 @@
         @endphp
 
         <label class="relative flex items-center p-3 md:p-4 rounded-lg border-2 transition-all cursor-pointer group
-            {{ $isSelected ? 'border-[#ffc107] bg-yellow-50/30' : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50' }}">
+            {{ $isSelected ? 'border-jti-yellow bg-yellow-50/30' : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50' }}">
 
             <div class="relative flex items-center justify-center">
                 {{-- Hidden Native Checkbox untuk Livewire --}}
@@ -24,7 +24,7 @@
 
                 {{-- Custom Styled Checkbox Box --}}
                 <div class="w-4 h-4 md:w-5 md:h-5 rounded border-2 transition-colors flex items-center justify-center
-                    {{ $isSelected ? 'bg-[#ffc107] border-[#ffc107]' : 'bg-white border-gray-300 group-hover:border-[#ffc107]' }}">
+                    {{ $isSelected ? 'bg-jti-yellow border-jti-yellow' : 'bg-white border-gray-300 group-hover:border-jti-yellow' }}">
 
                     {{-- Checkmark Icon (Hanya muncul jika dipilih) --}}
                     @if($isSelected)

@@ -31,7 +31,6 @@
                 @dragover.prevent
                 @drop="drop(index)"
             >
-                <div class="text-xs text-gray-400 mb-1">#<span x-text="index + 1"></span></div>
                 <div x-text="item.text"></div>
             </div>
         </template>
