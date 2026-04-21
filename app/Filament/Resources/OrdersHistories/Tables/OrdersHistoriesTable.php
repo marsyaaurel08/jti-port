@@ -35,7 +35,7 @@ class OrdersHistoriesTable
                 TextColumn::make('status')
                     ->badge()
                     ->label('Status')
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pending' => 'gray',
                         'paid' => 'success',
                         default => 'gray',
@@ -49,7 +49,7 @@ class OrdersHistoriesTable
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('danger')
-                    ->tooltip(fn ($record) => $record->payment_proof ? 'Ada bukti pembayaran' : 'Belum ada bukti'),
+                    ->tooltip(fn($record) => $record->payment_proof ? 'Ada bukti pembayaran' : 'Belum ada bukti'),
 
                 TextColumn::make('payment_method')
                     ->label('Method')
@@ -77,7 +77,7 @@ class OrdersHistoriesTable
                     ->label('Verifikasi')
                     ->icon('heroicon-m-check-badge')
                     ->color('success')
-                    ->visible(fn ($record) => $record->status === 'pending' && $record->payment_proof)
+                    ->visible(fn($record) => $record->status === 'pending' && $record->payment_proof)
                     ->modalHeading('Verifikasi Pembayaran')
                     ->modalIcon('heroicon-m-check-badge')
                     ->modalSubheading('Periksa bukti pembayaran sebelum verifikasi')
@@ -85,7 +85,7 @@ class OrdersHistoriesTable
                     ->form([
                         // This will be replaced with custom modal content
                     ])
-                    ->modalContent(fn ($record) => view('filament.components.verify-payment-modal', [
+                    ->modalContent(fn($record) => view('filament.components.verify-payment-modal', [
                         'record' => $record,
                     ]))
                     ->action(function ($record) {
@@ -99,30 +99,24 @@ class OrdersHistoriesTable
                             $orderItems = $record->orderItems;
 
                             foreach ($orderItems as $item) {
-                                $enrollment = Enrollment::updateOrCreate(
-                                    [
-                                        'user_id' => $record->user_id,
-                                        'course_id' => $item->course_id,
-                                        'class_id' => $item->class_id,
-                                        'order_id' => $record->id,
-                                    ],
-                                    [
-                                        'enrolled_at' => now(),
-                                        'completed_lesson_count' => 0,
-                                    ]
-                                );
+                                $enrollment = Enrollment::create([
+                                    'user_id' => $record->user_id,
+                                    'course_id' => $item->course_id,
+                                    'class_id' => $item->class_id,
+                                    'order_id' => $record->id,
+                                    'enrolled_at' => now(),
+                                    'completed_lesson_count' => 0,
+                                ]);
 
                                 // Create CourseProgress records for all lessons in the course
                                 $course = $item->course;
                                 if ($course) {
-                                    $lessons = $course->lessons()->get();
+                                    $lessons = $course->chapters()->first()->lessons()->get();
                                     foreach ($lessons as $lesson) {
-                                        CourseProgress::firstOrCreate(
+                                        CourseProgress::create(
                                             [
                                                 'enrollment_id' => $enrollment->id,
                                                 'lesson_id' => $lesson->id,
-                                            ],
-                                            [
                                                 'is_completed' => false,
                                             ]
                                         );
@@ -140,7 +134,7 @@ class OrdersHistoriesTable
                             Notification::make()
                                 ->danger()
                                 ->title('Gagal Memverifikasi')
-                                ->body('Terjadi kesalahan: '.$e->getMessage())
+                                ->body('Terjadi kesalahan: ' . $e->getMessage())
                                 ->send();
                         }
                     })

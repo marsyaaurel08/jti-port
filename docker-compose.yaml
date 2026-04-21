@@ -1,92 +1,122 @@
 version: '3.8'
 
 services:
-
-  # ==================== SERVICE PHP (Laravel App) ====================
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-
-    container_name: jtiport_app
-    restart: unless-stopped
-    working_dir: /var/www/html
-
-    # Mount kode project agar perubahan langsung terlihat
-    volumes:
-      - .:/var/www/html
-
-    networks:
-      - jtiport_network
-
-    depends_on:
-      - db
-      - redis
-
-
-  # ==================== SERVICE NGINX (Web Server) ====================
   nginx:
     image: nginx:alpine
     container_name: jtiport_nginx
     restart: unless-stopped
-
-    # Akses aplikasi di browser: http://localhost:8000
     ports:
       - "8000:80"
-
     volumes:
-      - .:/var/www/html
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-
+      - "./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
     networks:
       - jtiport_network
 
+  app_blue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_blue
+    restart: unless-stopped
+    volumes:
+      - "app_storage:/var/www/html/storage"   # Named volume lebih aman
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    networks:
+      - jtiport_network
     depends_on:
-      - app
+      - db
+      - redis
 
+  app_green:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_green
+    restart: unless-stopped
+    volumes:
+      - "app_storage:/var/www/html/storage"
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    networks:
+      - jtiport_network
+    depends_on:
+      - db
+      - redis
 
-  # ==================== SERVICE DATABASE (MySQL) ====================
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_worker
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --timeout=90
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    volumes:
+      - "app_storage:/var/www/html/storage"
+    networks:
+      - jtiport_network
+    depends_on:
+      - db
+      - redis
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: jtiport_scheduler
+    restart: unless-stopped
+    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
+    volumes:
+      - "app_storage:/var/www/html/storage"
+    networks:
+      - jtiport_network
+    depends_on:
+      - db
+      - redis
+
   db:
     image: mysql:8.0
     container_name: jtiport_mysql
     restart: unless-stopped
-
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: jtiport          # Nama database sesuai project
-      MYSQL_USER: jtiport
-      MYSQL_PASSWORD: password
-
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-jtiport}
+      MYSQL_USER: ${DB_USERNAME:-jtiport_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-jtiport_pass}
     volumes:
-      - jtiport_dbdata:/var/lib/mysql   # Volume khusus untuk project ini
-
-    # Port MySQL (bisa diakses dari host jika perlu)
-    ports:
-      - "3307:3306"
-
+      - jtiport_dbdata:/var/lib/mysql
     networks:
       - jtiport_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-
-  # ==================== SERVICE REDIS ====================
   redis:
     image: redis:alpine
     container_name: jtiport_redis
     restart: unless-stopped
-
-    ports:
-      - "6379:6379"
-
     networks:
       - jtiport_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-
-# ==================== NETWORK ====================
 networks:
   jtiport_network:
     driver: bridge
 
-
-# ==================== VOLUME ====================
 volumes:
-  jtiport_dbdata:     # Volume database khusus untuk project jtiport
+  jtiport_dbdata:
+  app_storage:

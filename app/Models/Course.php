@@ -63,10 +63,12 @@ class Course extends Model implements HasMedia
         return $this->hasMany(Chapter::class);
     }
 
+
     public function lessons(): HasManyThrough
     {
         return $this->hasManyThrough(Lesson::class, Chapter::class);
     }
+
 
     public function enrollments(): HasMany
     {

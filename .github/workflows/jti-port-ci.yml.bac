@@ -1,0 +1,109 @@
+name: CI/CD JTIport
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest -f docker/php/Dockerfile .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
+          docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:${{ github.sha }}
+
+      # - name: Scan for vulnerabilities
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
+      #     format: "table"
+      #     exit-code: "1"
+      #     ignore-unfixed: true
+      #     severity: "CRITICAL,HIGH"
+
+  # deploy-staging:
+  #   needs: build-and-test
+  #   runs-on: self-hosted
+  #   if: github.ref == 'refs/heads/main'
+  #   environment: staging
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Login to Docker Hub
+  #       run: |
+  #         echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+  #     - name: Pull Latest Image
+  #       run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
+
+  #     - name: Make scripts executable
+  #       run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
+
+  #     - name: Deploy to Staging (Auto)
+  #       env:
+  #         LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
+  #         APP_ENV: staging
+  #       run: ./deploy.sh
+
+  deploy-production:
+    needs: build-and-test
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Pull Latest Image
+        run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:latest
+
+      - name: Make scripts executable
+        run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
+
+      - name: Deploy to Production (with Manual Approval)
+        env:
+          LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          APP_ENV: production
+        run: ./deploy.sh
+
+      - name: Notify Success
+        if: success()
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"text":"✅ Production deployment successful!"}' \
+            ${{ secrets.SLACK_WEBHOOK_URL }} || true
+
+      - name: Notify Failure
+        if: failure()
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"text":"❌ Production deployment failed! Check logs."}' \
+            ${{ secrets.SLACK_WEBHOOK_URL }} || true

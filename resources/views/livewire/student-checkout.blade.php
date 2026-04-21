@@ -199,10 +199,6 @@
                                     <div class="flex-1">
                                         <div class="flex items-center gap-3">
                                             <p class="font-bold text-slate-900">{{ $method['name'] }}</p>
-                                            <span
-                                                class="px-2 py-0.5 text-[9px] font-extrabold bg-blue-100 text-blue-700 rounded-md tracking-wider">
-                                                {{ $method['bank'] }}
-                                            </span>
                                         </div>
                                         <p class="text-xs text-slate-500 mt-1 leading-snug">
                                             {{ $method['description'] }}</p>
@@ -215,7 +211,7 @@
                                             <p class="text-[10px] font-bold text-slate-400 tracking-widest mb-4">
                                                 INSTRUKSI PEMBAYARAN:</p>
                                             <ul class="space-y-4">
-                                                @forelse ($transferInstructions as $index => $step)
+                                                @forelse ($transferInstructions[$key] as $index => $step)
                                                     <li class="flex gap-4">
                                                         <span
                                                             class="flex-shrink-0 w-6 h-6 bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center rounded-lg border border-slate-200">
@@ -322,7 +318,7 @@
     </style>
     {{-- VA Instructions Modal --}}
     @if ($showVAInstructions && !empty($vaData))
-        <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions"
+        <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions[$transferMethod] ?? []"
             :redirectRoute="$redirectRoute" />
     @endif
 </div>

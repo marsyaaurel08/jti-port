@@ -13,6 +13,10 @@ class CourseController extends Controller
 
     public function show($slug)
     {
+        $user_id = auth()->id();
+        $is_user_enrolled = $user_id ? Course::where('slug', $slug)->whereHas('enrollments', function ($query) use ($user_id) {
+            $query->where('user_id', $user_id);
+        })->exists() : false;
         $course = Course::where('slug', $slug)
             ->with([
                 'category',
@@ -25,6 +29,6 @@ class CourseController extends Controller
             ->withCount('enrollments') // Hitung jumlah peserta
             ->firstOrFail();
 
-        return view('pages.courses.show', compact('course'));
+        return view('pages.courses.show', compact('course', 'is_user_enrolled'));
     }
 }

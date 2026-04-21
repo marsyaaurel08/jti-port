@@ -1,4 +1,5 @@
-@props(['course'])
+@props(['course', 'is_user_enrolled' => false])
+{{-- @dd($course) --}}
 
 {{-- Container Card: Menggunakan gaya panel gelap yang solid --}}
 <div class="overflow-hidden rounded-sm border bg-[#0a0f1d] shadow-2xl backdrop-blur-md">
@@ -50,12 +51,46 @@
 
         {{-- Action Buttons --}}
         <div class="flex flex-col gap-3 mb-8 capitalize" x-data="{ isLoading: false }">
-            {{-- Checkout Link --}}
-            <a href="{{ auth()->check() ? route('student.checkout.course', $course->slug) : route('filament.user.auth.login') }}"
-                class="w-full py-3.5 bg-jti-yellow text-jti-primary font-semibold rounded-xl hover:bg-amber-400 transition-all text-sm flex items-center justify-center active:scale-[0.98] shadow-sm">
-                checkout sekarang
-            </a>
+            @php
+                // Menyiapkan URL agar logika di dalam atribut href tidak terlalu panjang
+                $targetUrl = auth()->check()
+                    ? ($is_user_enrolled
+                        ? route('student.lesson', [
+                            'courseSlug' => $course->slug,
+                            'lessonSlug' => $course->chapters->first()->lessons->first()->slug ?? 'first-lesson',
+                        ])
+                        : route('student.checkout.course', $course->slug))
+                    : route('filament.user.auth.login');
+            @endphp
 
+            <div class="w-full">
+                @if ($is_user_enrolled)
+                    {{-- Tombol Lanjutkan Belajar (Green Theme) --}}
+                    <a href="{{ $targetUrl }}"
+                        class="group relative flex w-full items-center justify-center gap-2 overflow-hidden border border-white/10 rounded-xl bg-green-600 px-6 py-4 text-sm font-bold text-white shadow-md transition-all duration-200 hover:bg-green-700 hover:shadow-lg active:scale-[0.98]">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Lanjutkan Belajar</span>
+                    </a>
+                @else
+                    {{-- Tombol Checkout (Yellow Theme) --}}
+                    <a href="{{ $targetUrl }}"
+                        class="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-jti-yellow px-6 py-4 text-sm font-semibold text-jti-primary shadow-sm transition-all duration-200 hover:bg-amber-400 hover:shadow-md active:scale-[0.98]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span class="capitalize">Checkout Sekarang</span>
+                    </a>
+                @endif
+            </div>
             @if (
                 !auth()->check() ||
                     !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
