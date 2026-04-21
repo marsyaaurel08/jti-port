@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Wizard\Step;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class CourseForm
 {
@@ -34,9 +35,14 @@ class CourseForm
                                 ->required(),
                             TextInput::make('title')
                                 ->label('Judul Kursus')
-                                ->required(),
+                                ->required()
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function ($set, ?string $state) {
+                                    $set('slug', Str::slug($state));
+                                }),
                             TextInput::make('slug')
                                 ->label('Slug')
+                                ->helperText('Slug akan diisi otomatis dari judul. Anda dapat mengubahnya jika diperlukan untuk URL yang lebih pendek atau SEO.')
                                 ->required(),
                             Textarea::make('description')
                                 ->label('Deskripsi')
@@ -93,7 +99,11 @@ class CourseForm
                                         ->schema([
                                             TextInput::make('title')
                                                 ->label('Judul Pelajaran')
-                                                ->required(),
+                                                ->required()
+                                                ->live(onBlur: true)
+                                                ->afterStateUpdated(function ($set, ?string $state) {
+                                                    $set('slug', Str::slug($state));
+                                                }),
                                             Select::make('type')
                                                 ->label('Tipe Pelajaran')
                                                 ->options(['video' => 'Video', 'text' => 'Text', 'quiz' => 'Quiz'])
@@ -101,6 +111,7 @@ class CourseForm
                                                 ->live(),
                                             TextInput::make('slug')
                                                 ->label('Slug')
+                                                ->helperText('Slug akan diisi otomatis dari judul. Anda dapat mengubahnya jika diperlukan untuk URL yang lebih pendek atau SEO.')
                                                 ->required(),
                                             TextInput::make('content_url')
                                                 ->label('Content URL')
@@ -138,7 +149,7 @@ class CourseForm
                                 ]), // closes chapters repeater schema and chapters repeater
                         ])
                 ])
-                ->submitAction(new HtmlString(Blade::render(<<<BLADE
+                    ->submitAction(new HtmlString(Blade::render(<<<BLADE
                         <x-filament::button
                             type="submit"
                             size="sm"
