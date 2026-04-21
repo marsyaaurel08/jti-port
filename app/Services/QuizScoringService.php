@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Question;
 use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
-use Illuminate\Support\Facades\Log;
 
 class QuizScoringService
 {
@@ -15,8 +14,6 @@ class QuizScoringService
      */
     public function gradeAttempt(QuizAttempt $attempt): void
     {
-        Log::info('Grading attempt', ['attempt_id' => $attempt->id]);
-
         $questions = $attempt->quiz->questions;
 
         foreach ($questions as $question) {
@@ -40,11 +37,6 @@ class QuizScoringService
             'score' => $finalScore,
             'total_score_obtained' => $totalObtained,
         ]);
-
-        Log::info('Attempt graded', [
-            'attempt_id' => $attempt->id,
-            'final_score' => $finalScore,
-        ]);
     }
 
 
@@ -55,6 +47,7 @@ class QuizScoringService
     {
         $isCorrect = $this->validateAnswer($answer->question, $answer->user_answer);
         $score = $this->calculateQuestionScore($answer->question, $answer->user_answer);
+
         $answer->update([
             'is_correct' => $isCorrect,
             'score_obtained' => $score,
