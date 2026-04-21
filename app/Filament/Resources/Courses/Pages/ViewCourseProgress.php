@@ -3,13 +3,12 @@
 namespace App\Filament\Resources\Courses\Pages;
 
 use App\Filament\Resources\Courses\CourseResource;
-use App\Models\Enrollment;
+use App\Filament\Resources\Courses\Schemas\CourseProgressInfolist;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
 class ViewCourseProgress extends Page implements HasTable
@@ -18,22 +17,25 @@ class ViewCourseProgress extends Page implements HasTable
 
     protected static string $resource = CourseResource::class;
 
-    public $record;
+    protected static ?string $maxWidth = 'full';
 
-    public function getView(): string
-    {
-        return 'filament.resources.courses.pages.view-course-progress';
-    }
+    public $record;
 
     public function mount($record): void
     {
         $this->record = CourseResource::getModel()::findOrFail($record);
     }
 
+    public function getView(): string
+    {
+        return 'filament.resources.courses.pages.view-course-progress';
+    }
+
     public function getTitle(): string
     {
         return 'Progress Peserta: ' . $this->record->title;
     }
+
 
     protected function getHeaderActions(): array
     {

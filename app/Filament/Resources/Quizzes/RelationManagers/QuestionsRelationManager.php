@@ -30,7 +30,7 @@ class QuestionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'questions';
 
-    protected static ?string $title = 'Questions';
+    protected static ?string $title = 'Pertanyaan';
 
     public function form(Schema $schema): Schema
     {
@@ -43,9 +43,11 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Question Details')
+                // ->label('Detail Pertanyaan')
                 ->schema([
 
                     Textarea::make('question_text')
+                        ->label('Teks Pertanyaan')
                         ->required()
                         ->columnSpanFull(),
 
@@ -62,11 +64,13 @@ class QuestionsRelationManager extends RelationManager
                         ->columnSpanFull(),
 
                     TextInput::make('score_weight')
+                        ->label('Bobot Skor')
                         ->numeric()
                         ->default(1)
                         ->minValue(1),
 
                     Textarea::make('explanation')
+                        ->label('Penjelasan Jawaban')
                         ->rows(2),
                 ])
                 ->columns(2),
@@ -132,19 +136,19 @@ class QuestionsRelationManager extends RelationManager
                         ->schema([
                             TextInput::make('id')->disabled()->dehydrated(true),
                             TextInput::make('text')->required(),
-                            TextInput::make('points')
-                                ->numeric()
-                                ->default(1)
-                                ->required(),
+                            // TextInput::make('points')
+                            //     ->numeric()
+                            //     ->default(1)
+                            //     ->required(),
                         ])
                         ->columns(3),
 
-                    TextInput::make('question_config.min_correct')
-                        ->numeric()
-                        ->default(1),
+                    // TextInput::make('question_config.min_correct')
+                    //     ->numeric()
+                    //     ->default(1),
 
-                    TextInput::make('question_config.max_correct')
-                        ->numeric(),
+                    // TextInput::make('question_config.max_correct')
+                    //     ->numeric(),
 
                     // Toggle::make('question_config.partial_scoring')
                     //     ->default(true),
@@ -168,13 +172,13 @@ class QuestionsRelationManager extends RelationManager
                         ->required()
                         ->label('Jawaban Benar (Pilih ID yang benar)'),
 
-                    Select::make('answer_key.scoring')
-                        ->options([
-                            'partial' => 'Partial',
-                            'full'    => 'Full Only',
-                        ])
-                        ->default('partial')
-                        ->required(),
+                    // Select::make('answer_key.scoring')
+                    //     ->options([
+                    //         'partial' => 'Partial',
+                    //         'full'    => 'Full Only',
+                    //     ])
+                    //     ->default('partial')
+                    //     ->required(),
                 ]),
 
             /*
@@ -327,7 +331,16 @@ class QuestionsRelationManager extends RelationManager
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->after(function () {
+                            // Update the quiz's total_score_weight after bulk deletion
+                            $quiz = $this->getOwnerRecord();
+                            if ($quiz) {
+                                $totalScoreWeight = $quiz->questions()->sum('score_weight');
+                                $quiz->total_score_weight = $totalScoreWeight;
+                                $quiz->saveQuietly();
+                            }
+                        }),
                 ]),
             ]);
     }

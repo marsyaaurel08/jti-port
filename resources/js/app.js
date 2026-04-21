@@ -12,21 +12,26 @@ import "./cart.js"; // ← Import cart functionality
 createIcons({ icons });
 
 // ── Quiz Alpine Components ────────────────────────────────────────────────
-window.dragDropComponent = function({ initialItems, wireModel, questionId }) {
+window.dragDropComponent = function ({ initialItems, wireModel, questionId }) {
     return {
         items: initialItems,
         dragIndex: null,
 
         init() {
-            document.addEventListener('restore-question', (e) => {
-                if (e.detail.questionId === this.questionId && e.detail.questionType === 'drag_drop_sorting') {
+            document.addEventListener("restore-question", (e) => {
+                if (
+                    e.detail.questionId === this.questionId &&
+                    e.detail.questionType === "drag_drop_sorting"
+                ) {
                     if (e.detail.answer && Array.isArray(e.detail.answer)) {
                         const orderedIds = e.detail.answer;
                         const itemsMap = {};
-                        initialItems.forEach(item => {
+                        initialItems.forEach((item) => {
                             itemsMap[item.id] = item;
                         });
-                        this.items = orderedIds.map(id => itemsMap[id]).filter(item => item);
+                        this.items = orderedIds
+                            .map((id) => itemsMap[id])
+                            .filter((item) => item);
                     }
                 }
             });
@@ -49,91 +54,112 @@ window.dragDropComponent = function({ initialItems, wireModel, questionId }) {
         },
 
         updateState() {
-            const orderedIds = this.items.map(i => parseInt(i.id));
-            const livewireEl = this.$root.closest('[wire\\:id]');
+            const orderedIds = this.items.map((i) => parseInt(i.id));
+            const livewireEl = this.$root.closest("[wire\\:id]");
             if (livewireEl && window.Livewire) {
-                const component = window.Livewire.find(livewireEl.getAttribute('wire:id'));
+                const component = window.Livewire.find(
+                    livewireEl.getAttribute("wire:id"),
+                );
                 if (component) {
                     component.set(`${wireModel}.${questionId}`, orderedIds);
                 }
             }
-            const event = new CustomEvent('quiz-answer-selected', {
+            const event = new CustomEvent("quiz-answer-selected", {
                 detail: {
                     questionId: this.questionId,
                     answer: orderedIds,
-                    questionType: 'drag_drop_sorting'
-                }
+                    questionType: "drag_drop_sorting",
+                },
             });
             document.dispatchEvent(event);
-        }
+        },
     };
 };
 
-window.matchingComponent = function({ items, matches, selected, wireModel, questionId }) {
+window.matchingComponent = function ({
+    items,
+    matches,
+    selected,
+    wireModel,
+    questionId,
+}) {
     return {
         items: items,
         matches: matches,
-        selected: Array.isArray(selected) ? {} : (selected || {}),
+        selected: Array.isArray(selected) ? {} : selected || {},
         wireModel: wireModel,
         questionId: questionId,
         draggedItemId: null,
         hoveredMatchId: null,
 
         init() {
-            document.addEventListener('restore-question', (e) => {
-                if (e.detail.questionId === this.questionId && e.detail.questionType === 'matching') {
+            document.addEventListener("restore-question", (e) => {
+                if (
+                    e.detail.questionId === this.questionId &&
+                    e.detail.questionType === "matching"
+                ) {
                     this.selected = e.detail.answer || {};
                 }
             });
         },
 
-        get availableItems() {
-            const matchedItemIds = Object.values(this.selected);
-            return this.items.filter(item => !matchedItemIds.includes(item.id));
+        isItemMatched(itemId) {
+            const matchedItemIds = Object.values(this.selected || {});
+            return matchedItemIds.includes(itemId);
         },
 
         getMatchedItem(matchId) {
-            const itemId = Object.keys(this.selected).find(key => this.selected[key] === matchId);
+            const itemId = Object.keys(this.selected).find(
+                (key) => this.selected[key] === matchId,
+            );
             if (!itemId) return null;
-            return this.items.find(item => item.id === itemId);
+            return (
+                this.items.find((item) => item && item.id === itemId) || null
+            );
         },
 
         getItemNumber(itemId) {
-            const index = this.items.findIndex(item => item.id === itemId);
-            return index + 1;
+            const index = this.items.findIndex(
+                (item) => item && item.id === itemId,
+            );
+            return index >= 0 ? index + 1 : "";
         },
 
         getMatchLetter(matchId) {
-            const index = this.matches.findIndex(match => match.id === matchId);
+            const index = this.matches.findIndex(
+                (match) => match.id === matchId,
+            );
             return String.fromCharCode(97 + index);
         },
 
         getMatchZoneClass(matchId) {
             const hasMatch = !!this.getMatchedItem(matchId);
             const isHovered = this.hoveredMatchId === matchId;
-            if (hasMatch) return 'border-[#ffc107] bg-yellow-50/30';
-            else if (isHovered) return 'border-[#ffc107] border-dashed bg-yellow-50/50';
-            else return 'border-gray-200 bg-white';
+            if (hasMatch) return "border-[#ffc107] bg-yellow-50/30";
+            else if (isHovered)
+                return "border-[#ffc107] border-dashed bg-yellow-50/50";
+            else return "border-gray-200 bg-white";
         },
 
-        dragStart(event, itemId) {
+        dragStart(event) {
+            const itemId = event.target.getAttribute("data-item-id");
             this.draggedItemId = itemId;
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', itemId);
-            event.target.classList.add('opacity-50');
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", itemId);
+            event.target.classList.add("opacity-50");
         },
 
         dragEnd(event) {
             this.draggedItemId = null;
             this.hoveredMatchId = null;
-            event.target.classList.remove('opacity-50');
+            event.target.classList.remove("opacity-50");
         },
 
         dragOver(event, matchId) {
             const matchedItem = this.getMatchedItem(matchId);
             if (!matchedItem) {
                 this.hoveredMatchId = matchId;
-                event.dataTransfer.dropEffect = 'move';
+                event.dataTransfer.dropEffect = "move";
             }
         },
 
@@ -144,16 +170,23 @@ window.matchingComponent = function({ items, matches, selected, wireModel, quest
         drop(event, matchId) {
             event.preventDefault();
             this.hoveredMatchId = null;
-            const itemId = event.dataTransfer.getData('text/plain');
-            if (!itemId || !this.draggedItemId) return;
+            const itemId = event.dataTransfer.getData("text/plain");
+
+            if (!itemId || !this.draggedItemId) {
+                return;
+            }
+
             const existingMatchId = this.selected[itemId];
             if (existingMatchId) delete this.selected[itemId];
             this.selected[itemId] = matchId;
+
             this.updateState();
         },
 
         removeMatch(matchId) {
-            const itemId = Object.keys(this.selected).find(key => this.selected[key] === matchId);
+            const itemId = Object.keys(this.selected).find(
+                (key) => this.selected[key] === matchId,
+            );
             if (itemId) {
                 delete this.selected[itemId];
                 this.updateState();
@@ -166,23 +199,298 @@ window.matchingComponent = function({ items, matches, selected, wireModel, quest
         },
 
         updateState() {
-            const livewireEl = this.$root.closest('[wire\\:id]');
+            const livewireEl = this.$root.closest("[wire\\:id]");
             if (livewireEl && window.Livewire) {
-                const component = window.Livewire.find(livewireEl.getAttribute('wire:id'));
+                const component = window.Livewire.find(
+                    livewireEl.getAttribute("wire:id"),
+                );
                 if (component) {
-                    component.set(`${this.wireModel}.${this.questionId}`, this.selected);
+                    component.set(
+                        `${this.wireModel}.${this.questionId}`,
+                        this.selected,
+                    );
                 }
             }
-            const event = new CustomEvent('quiz-answer-selected', {
+
+            const event = new CustomEvent("quiz-answer-selected", {
                 detail: {
                     questionId: this.questionId,
                     answer: this.selected,
-                    questionType: 'matching'
-                }
+                    questionType: "matching",
+                },
             });
             document.dispatchEvent(event);
-        }
+        },
     };
+};
+
+// ── Matching JS Component (Vanilla JS) ─────────────────────────────────────
+window.initMatchingComponent = function (
+    componentId,
+    items,
+    matches,
+    selected,
+    wireModel,
+    questionId,
+) {
+    const container = document.getElementById(componentId);
+    if (!container) return;
+
+    let draggedItemId = null;
+    let hoveredMatchId = null;
+
+    // Get available items
+    function getAvailableItems() {
+        const matchedItemIds = Object.values(selected);
+        return items.filter((item) => !matchedItemIds.includes(item.id));
+    }
+
+    // Get matched item
+    function getMatchedItem(matchId) {
+        const itemId = Object.keys(selected).find(
+            (key) => selected[key] === matchId,
+        );
+        if (!itemId) return null;
+        return items.find((item) => item.id === itemId) || null;
+    }
+
+    // Get item number
+    function getItemNumber(itemId) {
+        const index = items.findIndex((item) => item.id === itemId);
+        return index + 1;
+    }
+
+    // Get match letter
+    function getMatchLetter(matchId) {
+        const index = matches.findIndex((match) => match.id === matchId);
+        return String.fromCharCode(97 + index);
+    }
+
+    // Update state
+    function updateState() {
+        const livewireEl = container.closest("[wire\\:id]");
+        if (livewireEl && window.Livewire) {
+            const component = window.Livewire.find(
+                livewireEl.getAttribute("wire:id"),
+            );
+            if (component) {
+                component.set(`${wireModel}.${questionId}`, selected);
+            }
+        }
+        const event = new CustomEvent("quiz-answer-selected", {
+            detail: {
+                questionId: questionId,
+                answer: selected,
+                questionType: "matching",
+            },
+        });
+        document.dispatchEvent(event);
+    }
+
+    // Render items
+    function renderItems() {
+        const itemsContainer = document.getElementById(`${componentId}-items`);
+        if (!itemsContainer) return;
+
+        const availableItems = getAvailableItems();
+        itemsContainer.innerHTML = availableItems
+            .map(
+                (item) => `
+            <div
+                class="matching-item p-3 md:p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-[#ffc107] hover:bg-yellow-50/30 cursor-grab active:cursor-grabbing transition-all shadow-sm hover:shadow-md ${draggedItemId === item.id ? "opacity-50" : ""}"
+                draggable="true"
+                data-item-id="${item.id}"
+                data-item-text="${item.text}"
+            >
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-semibold mr-3">
+                        <span>${getItemNumber(item.id)}</span>
+                    </div>
+                    <span class="font-medium text-gray-700 text-sm md:text-base">${item.text}</span>
+                </div>
+            </div>
+        `,
+            )
+            .join("");
+
+        // Add event listeners to items
+        itemsContainer.querySelectorAll(".matching-item").forEach((item) => {
+            item.addEventListener("dragstart", handleDragStart);
+            item.addEventListener("dragend", handleDragEnd);
+        });
+    }
+
+    // Render matches
+    function renderMatches() {
+        const matchesContainer = document.getElementById(
+            `${componentId}-matches`,
+        );
+        if (!matchesContainer) return;
+
+        matchesContainer.innerHTML = matches
+            .map((match) => {
+                const matchedItem = getMatchedItem(match.id);
+                const matchLetter = getMatchLetter(match.id);
+                const hasMatch = !!matchedItem;
+                const isHovered = hoveredMatchId === match.id;
+
+                let borderClass = "border-gray-200 bg-white";
+                if (hasMatch) borderClass = "border-[#ffc107] bg-yellow-50/30";
+                else if (isHovered)
+                    borderClass =
+                        "border-[#ffc107] border-dashed bg-yellow-50/50";
+
+                return `
+                <div
+                    class="match-zone p-3 md:p-4 rounded-lg border-2 transition-all min-h-[60px] flex items-center ${borderClass}"
+                    data-match-id="${match.id}"
+                    data-match-text="${match.text}"
+                >
+                    <div class="w-full flex items-center">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm font-semibold mr-3">
+                            <span>${matchLetter}</span>
+                        </div>
+                        <div class="flex-1">
+                            ${
+                                matchedItem
+                                    ? `
+                                <div class="flex items-center justify-between bg-[#ffc107] text-white rounded-md px-3 py-2 matched-item" data-match-id="${match.id}">
+                                    <span class="font-medium text-sm">${matchedItem.text}</span>
+                                    <button
+                                        class="remove-match ml-2 hover:bg-white/20 rounded-full p-1 transition-colors"
+                                        title="Remove match"
+                                        data-match-id="${match.id}"
+                                    >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            `
+                                    : `
+                                <div class="text-gray-400 text-sm empty-state ${isHovered ? "text-[#ffc107]" : ""}" data-match-id="${match.id}">
+                                    <span>${isHovered ? "Drop here" : match.text}</span>
+                                </div>
+                            `
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+            })
+            .join("");
+
+        // Add event listeners to match zones
+        matchesContainer.querySelectorAll(".match-zone").forEach((zone) => {
+            zone.addEventListener("dragover", handleDragOver);
+            zone.addEventListener("dragleave", handleDragLeave);
+            zone.addEventListener("drop", handleDrop);
+        });
+
+        // Add event listeners to remove buttons
+        matchesContainer.querySelectorAll(".remove-match").forEach((button) => {
+            button.addEventListener("click", handleRemoveMatch);
+        });
+    }
+
+    // Drag start handler
+    function handleDragStart(e) {
+        draggedItemId = e.target.getAttribute("data-item-id");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", draggedItemId);
+        e.target.classList.add("opacity-50");
+    }
+
+    // Drag end handler
+    function handleDragEnd(e) {
+        draggedItemId = null;
+        hoveredMatchId = null;
+        e.target.classList.remove("opacity-50");
+        renderItems();
+        renderMatches();
+    }
+
+    // Drag over handler
+    function handleDragOver(e) {
+        e.preventDefault();
+        const matchId = e.currentTarget.getAttribute("data-match-id");
+        const matchedItem = getMatchedItem(matchId);
+        if (!matchedItem) {
+            hoveredMatchId = matchId;
+            e.dataTransfer.dropEffect = "move";
+            renderMatches();
+        }
+    }
+
+    // Drag leave handler
+    function handleDragLeave(e) {
+        hoveredMatchId = null;
+        renderMatches();
+    }
+
+    // Drop handler
+    function handleDrop(e) {
+        e.preventDefault();
+        hoveredMatchId = null;
+        const matchId = e.currentTarget.getAttribute("data-match-id");
+        const itemId = e.dataTransfer.getData("text/plain");
+
+        if (!itemId || !draggedItemId) return;
+
+        const existingMatchId = selected[itemId];
+        if (existingMatchId) delete selected[itemId];
+
+        selected[itemId] = matchId;
+        updateState();
+        renderItems();
+        renderMatches();
+    }
+
+    // Remove match handler
+    function handleRemoveMatch(e) {
+        e.stopPropagation();
+        const matchId = e.currentTarget.getAttribute("data-match-id");
+        const itemId = Object.keys(selected).find(
+            (key) => selected[key] === matchId,
+        );
+
+        if (itemId) {
+            delete selected[itemId];
+            updateState();
+            renderItems();
+            renderMatches();
+        }
+    }
+
+    // Reset all handler
+    function handleResetAll() {
+        selected = {};
+        updateState();
+        renderItems();
+        renderMatches();
+    }
+
+    // Listen for restore-question event
+    document.addEventListener("restore-question", (e) => {
+        if (
+            e.detail.questionId === questionId &&
+            e.detail.questionType === "matching"
+        ) {
+            selected = e.detail.answer || {};
+            renderItems();
+            renderMatches();
+        }
+    });
+
+    // Initialize
+    renderItems();
+    renderMatches();
+
+    // Add reset button listener
+    const resetButton = document.getElementById(`${componentId}-reset`);
+    if (resetButton) {
+        resetButton.addEventListener("click", handleResetAll);
+    }
 };
 
 // ── Alpine ───────────────────────────────────────────────────────────────────

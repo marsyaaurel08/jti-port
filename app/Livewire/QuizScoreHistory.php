@@ -28,17 +28,13 @@ class QuizScoreHistory extends Component
         $totalAttempts = $attempts->count();
 
         return $attempts->map(function ($attempt, $index) use ($totalAttempts) {
-            $timeTaken = $attempt->started_at && $attempt->finished_at
-                ? $attempt->started_at->diff($attempt->finished_at)
-                : null;
-
             return [
                 'id' => $attempt->id,
                 'attempt_number' => $totalAttempts - $index,
                 'score' => $attempt->score,
                 'started_at' => $attempt->started_at,
                 'finished_at' => $attempt->finished_at,
-                'time_taken' => $timeTaken,
+                'time_taken' => $attempt->duration, // Use the duration accessor
                 'is_passed' => $attempt->isPassed(),
                 'pass_score' => $attempt->quiz->pass_score,
             ];
@@ -76,13 +72,34 @@ class QuizScoreHistory extends Component
             return '-';
         }
 
-        $hours = $timeTaken->h;
-        $minutes = $timeTaken->i;
-        $seconds = $timeTaken->s;
-
-        if ($hours > 0) {
-            return sprintf('%dj %dm %ds', $hours, $minutes, $seconds);
+        // If it's already a formatted string (from the duration accessor), return it directly
+        if (is_string($timeTaken)) {
+            return $timeTaken;
         }
+
+        // Otherwise, parse the HH:MM:SS format
+        $parts = explode(':', $timeTaken);
+
+        if (count($parts) === 3) {
+            // HH:MM:SS format
+            $hours = (int) $parts[0];
+            $minutes = (int) $parts[1];
+            $seconds = (int) $parts[2];
+
+            if ($hours > 0) {
+                return sprintf('%dj %dm %ds', $hours, $minutes, $seconds);
+            }
+
+            if ($minutes > 0) {
+                return sprintf('%dm %ds', $minutes, $seconds);
+            }
+
+            return sprintf('%ds', $seconds);
+        }
+
+        // MM:SS format
+        $minutes = (int) $parts[0];
+        $seconds = (int) $parts[1];
 
         if ($minutes > 0) {
             return sprintf('%dm %ds', $minutes, $seconds);

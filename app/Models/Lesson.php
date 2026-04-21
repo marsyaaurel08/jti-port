@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\LessonObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,14 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Lesson extends Model
 {
     use HasFactory, LogsActivity;
+
+    /**
+     * Register the observer for the model.
+     */
+    protected static function booted(): void
+    {
+        static::observe(LessonObserver::class);
+    }
 
     protected $fillable = [
         'chapter_id',

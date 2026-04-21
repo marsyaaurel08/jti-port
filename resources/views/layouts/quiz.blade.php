@@ -16,5 +16,7 @@
     @yield('content')
     @livewireScripts
     <script src="{{ asset('js/quiz-local-storage-plain.js') }}"></script>
+    <script src="{{ asset('js/quiz-timer.js') }}"></script>
+    @stack('scripts')
 </body>
 </html>

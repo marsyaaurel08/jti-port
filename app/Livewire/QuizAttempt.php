@@ -44,9 +44,11 @@ class QuizAttempt extends Component
     {
         $this->quizId = $id;
 
-        $this->loadQuiz();
-
+        // Initialize attempt FIRST so that loadQuiz() can access started_at
         $this->initializeAttempt();
+
+        // Then load quiz and calculate time remaining based on started_at
+        $this->loadQuiz();
     }
 
     public function loadQuiz()
@@ -56,15 +58,17 @@ class QuizAttempt extends Component
 
         $this->questions = $this->quiz->questions->toArray();
 
+
         if ($this->attempt && $this->attempt->started_at) {
+            // Ensure both times are in the same timezone for accurate calculation
+            $now = now();
+            $startedAt = $this->attempt->started_at;
 
-            $elapsed = now()->diffInSeconds($this->attempt->started_at);
-
+            // Calculate elapsed time (now - started_at) for positive value
+            $elapsed = $startedAt->diffInSeconds($now);
             $limit = $this->quiz->time_limit_minutes * 60;
-
             $this->timeRemaining = max(0, $limit - $elapsed);
         } else {
-
             $this->timeRemaining = $this->quiz->time_limit_minutes * 60;
         }
     }
@@ -266,6 +270,17 @@ class QuizAttempt extends Component
         $this->showSubmitConfirmation = false;
     }
 
+    /**
+     * Handle timer warning from JavaScript
+     * This is called when the timer reaches specific warning thresholds
+     */
+    #[\Livewire\Attributes\On('showTimerWarning')]
+    public function showTimerWarning($message)
+    {
+        // Dispatch event to frontend to show notification
+        $this->dispatch('timer-warning', message: $message);
+    }
+
     public function submitQuiz()
     {
         Log::info('QuizAttempt::submitQuiz() called', [
@@ -453,9 +468,23 @@ class QuizAttempt extends Component
 
         $minutes = floor(($seconds % 3600) / 60);
 
-        $secs = $seconds % 60;
+        $secs = (int) ($seconds % 60);
 
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
+    }
+
+    public function getLessonUrl()
+    {
+        $lesson = $this->quiz->lesson;
+
+        if ($lesson && $lesson->chapter && $lesson->chapter->course) {
+            return route('student.lesson', [
+                'courseSlug' => $lesson->chapter->course->slug,
+                'lessonSlug' => $lesson->slug,
+            ]);
+        }
+
+        return route('home');
     }
 
     public function render()

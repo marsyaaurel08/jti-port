@@ -7,7 +7,7 @@
     <!-- Fixed Header -->
     <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
         <div class="flex items-center gap-3">
-            <a href="#" class="flex items-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium">
+            <a href="{{ $this->getLessonUrl() }}" class="flex items-center text-gray-700 hover:text-gray-900 transition-colors text-sm font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -24,7 +24,7 @@
 
         <div class="bg-yellow-50 border border-jti-yellow rounded-lg px-2 py-1.5 flex items-center shadow-sm">
             <svg class="w-3.5 h-3.5 text-jti-yellow mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
-            <span class="text-base sm:text-lg md:text-xl font-mono font-normal tracking-widest text-gray-700">{{ $this->formatTime($timeRemaining) }}</span>
+            <span data-quiz-timer class="text-base sm:text-lg md:text-xl font-mono font-normal tracking-widest text-yellow-600">{{ $this->formatTime($timeRemaining) }}</span>
         </div>
     </header>
 
@@ -110,7 +110,11 @@
                             :selected="$matchingAnswers[$currentQuestion['id']] ?? []"
                             wireModel="matchingAnswers"
                             :questionId="$currentQuestion['id']"
-                />
+                        />
+                    @elseif($currentQuestion['type'] === 'boolean')
+                        <x-quiz.boolean :options="$options" :selected="$answers[$currentQuestion['id']] ?? null" wireModel="answers.{{ $currentQuestion['id'] }}" :questionId="$currentQuestion['id']" :questionType="'boolean'" />       
+                    {{-- @elseif($currentQuestion['type'] === 'coding')
+                        <livewire:coding-question-attempt :questionId="$currentQuestion['id']" :key="'coding-question-' . $currentQuestion['id']" /> --}}
                     @endif
                 </div>
             @endif
@@ -194,3 +198,30 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('[QuizTimer] DOMContentLoaded fired');
+        console.log('[QuizTimer] timeRemaining:', {{ $timeRemaining }});
+        console.log('[QuizTimer] quizId:', {{ $quizId }});
+        console.log('[QuizTimer] window.QuizTimer available:', !!window.QuizTimer);
+
+        // Initialize QuizTimer when page loads
+        if (window.QuizTimer) {
+            console.log('[QuizTimer] Initializing timer...');
+            window.QuizTimer.init({{ $timeRemaining }}, {{ $quizId }});
+        } else {
+            console.error('[QuizTimer] QuizTimer not available! Module may not have loaded.');
+        }
+    });
+
+    // Clean up timer when leaving page
+    window.addEventListener('beforeunload', function() {
+        console.log('[QuizTimer] beforeunload event fired');
+        if (window.QuizTimer) {
+            window.QuizTimer.stopTimer();
+        }
+    });
+</script>
+@endpush

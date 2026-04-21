@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Observers\CourseObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\{Model, SoftDeletes};
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough};
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\{HasMedia, InteractsWithMedia};
@@ -12,6 +13,14 @@ use Spatie\MediaLibrary\{HasMedia, InteractsWithMedia};
 class Course extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia, LogsActivity;
+
+    /**
+     * Register the observer for the model.
+     */
+    protected static function booted(): void
+    {
+        static::observe(CourseObserver::class);
+    }
 
     protected $fillable = [
         'category_id',
@@ -52,6 +61,12 @@ class Course extends Model implements HasMedia
     public function chapters(): HasMany
     {
         return $this->hasMany(Chapter::class);
+    }
+
+
+    public function lessons(): HasManyThrough
+    {
+        return $this->hasManyThrough(Lesson::class, Chapter::class);
     }
 
 

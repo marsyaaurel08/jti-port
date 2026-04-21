@@ -55,11 +55,17 @@ class CourseMaterialsInfolist
                                                         'text' => 'success',
                                                         'quiz' => 'warning',
                                                     })
+                                                    ->icon(fn(string $state): string => match ($state) {
+                                                        'video' => 'heroicon-o-video-camera',
+                                                        'text' => 'heroicon-o-document-text',
+                                                        'quiz' => 'heroicon-o-question-mark-circle',
+                                                    })
                                                     ->formatStateUsing(fn(string $state): string => ucfirst($state)),
                                                 TextEntry::make('title')
                                                     ->label('Judul Materi')
                                                     ->weight('medium')
                                                     ->size('text-sm')
+                                                    ->icon('heroicon-o-document-text')
                                                     ->columnSpanFull(),
                                                 TextEntry::make('content_url')
                                                     ->label('URL Konten')
@@ -67,6 +73,7 @@ class CourseMaterialsInfolist
                                                     ->formatStateUsing(fn($state): string => $state ? str($state)->limit(80) : '-')
                                                     ->url(fn($state): string => $state)
                                                     ->openUrlInNewTab()
+                                                    ->icon('heroicon-o-link')
                                                     ->copyable(),
                                                 TextEntry::make('content_text')
                                                     ->label('Isi Konten')
@@ -84,9 +91,8 @@ class CourseMaterialsInfolist
                                                     ->color(fn(bool $state): string => $state ? 'success' : 'gray')
                                                     ->formatStateUsing(fn(bool $state): string => $state ? 'Ya' : 'Tidak'),
                                                 Action::make('manage_quiz')
-                                                    ->label('Manage Quiz')
+                                                    ->label('Kelola Quiz')
                                                     ->icon('heroicon-o-academic-cap')
-                                                    ->color('warning')
                                                     ->visible(fn($record): bool => $record->type === 'quiz')
                                                     ->url(function ($record) {
                                                         // Get or create quiz for this lesson
