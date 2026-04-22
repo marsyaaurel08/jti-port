@@ -11,8 +11,10 @@ services:
       - "./docker/nginx:/etc/nginx/conf.d"
     networks:
       - jtiport_network
+    depends_on:
+      - jtiport_blue # Minimal satu harus ada agar Nginx tidak crash saat startup awal
 
-  app_blue:
+  jtiport_blue:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_blue
     restart: unless-stopped
@@ -23,11 +25,8 @@ services:
       - APP_ENV=${APP_ENV:-production}
     networks:
       - jtiport_network
-    depends_on:
-      - db
-      - redis
 
-  app_green:
+  jtiport_green:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_green
     restart: unless-stopped
@@ -38,34 +37,14 @@ services:
       - APP_ENV=${APP_ENV:-production}
     networks:
       - jtiport_network
-    depends_on:
-      - db
-      - redis
 
   worker:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_worker
     restart: unless-stopped
-    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --timeout=90
+    command: php artisan queue:work --sleep=3 --tries=3
     environment:
       - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
-    volumes:
-      - "app_storage:/var/www/html/storage"
-    networks:
-      - jtiport_network
-    depends_on:
-      - db
-      - redis
-
-  scheduler:
-    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
-    container_name: jtiport_scheduler
-    restart: unless-stopped
-    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
     volumes:
       - "app_storage:/var/www/html/storage"
     networks:
@@ -81,41 +60,20 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_DATABASE:-jtiport}
-      MYSQL_USER: ${DB_USERNAME:-jtiport_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-jtiport_pass}
     volumes:
       - jtiport_dbdata:/var/lib/mysql
     networks:
       - jtiport_network
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-uroot",
-          "-p${DB_PASSWORD:-root}",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:alpine
     container_name: jtiport_redis
-    restart: unless-stopped
     networks:
       - jtiport_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 networks:
   jtiport_network:
+    name: jtiport_network # Mengunci nama agar tidak otomatis diberi prefix oleh docker-compose
     driver: bridge
 
 volumes:
