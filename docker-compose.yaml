@@ -11,8 +11,6 @@ services:
       - "./docker/nginx:/etc/nginx/conf.d"
     networks:
       - jtiport_network
-    depends_on:
-      - app_blue
 
   app_blue:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest

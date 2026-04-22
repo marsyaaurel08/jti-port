@@ -26,8 +26,19 @@ echo -e "${BLUE}     Environment: $APP_ENV${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
 # =====================================================================
-# 1. INISIALISASI INFRASTRUKTUR
+# 0. CLEANUP UNUSED IMAGES & PRUNE
 # =====================================================================
+
+echo -e "${YELLOW}🧹 Cleaning up old/unused images...${NC}"
+docker image prune -f --filters "dangling=true" 2>/dev/null || true
+
+# Remove old local build images
+docker rmi jti-port-app_blue:latest 2>/dev/null || true
+docker rmi jti-port-app_green:latest 2>/dev/null || true
+docker rmi jti-port-worker:latest 2>/dev/null || true
+docker rmi jti-port-scheduler:latest 2>/dev/null || true
+
+echo -e "${GREEN}✅ Image cleanup complete${NC}"
 
 if ! docker network inspect $NETWORK_NAME >/dev/null 2>&1; then
     echo -e "${YELLOW}Creating network: $NETWORK_NAME${NC}"
