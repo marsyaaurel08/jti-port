@@ -60,6 +60,12 @@ wait_app_ready() {
 
 mkdir -p $BACKUP_DIR
 
+# Tambahkan ini di deploy.sh setelah baris mkdir -p $BACKUP_DIR
+if ! docker network inspect $NETWORK_NAME >/dev/null 2>&1; then
+    echo -e "${YELLOW}🌐 Creating network: $NETWORK_NAME...${NC}"
+    docker network create $NETWORK_NAME
+fi
+
 # Load previous state
 if [ -f "$STATE_FILE" ]; then
     source "$STATE_FILE"
