@@ -15,13 +15,11 @@ services:
       - app_blue
 
   app_blue:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
+    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_blue
     restart: unless-stopped
     volumes:
-      - "app_storage:/var/www/html/storage" # Named volume lebih aman
+      - "app_storage:/var/www/html/storage"
     environment:
       - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
       - APP_ENV=${APP_ENV:-production}
@@ -32,9 +30,7 @@ services:
       - redis
 
   app_green:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
+    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_green
     restart: unless-stopped
     volumes:
@@ -49,9 +45,7 @@ services:
       - redis
 
   worker:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
+    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_worker
     restart: unless-stopped
     command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --timeout=90
@@ -67,9 +61,7 @@ services:
       - redis
 
   scheduler:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
+    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_scheduler
     restart: unless-stopped
     command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
