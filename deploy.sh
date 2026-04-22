@@ -36,8 +36,34 @@ fi
 
 if [ ! "$(docker ps -q -f name=${PROJECT_NAME}_nginx)" ]; then
     echo -e "${YELLOW}Starting infrastructure...${NC}"
-    docker-compose up -d nginx db redis
-    sleep 10
+    docker-compose up -d db redis
+    sleep 5
+
+    # Tentukan container app mana yang harus running
+    if docker ps -a | grep -q "${PROJECT_NAME}_blue"; then
+        INIT_APP="${PROJECT_NAME}_blue"
+    else
+        INIT_APP="${PROJECT_NAME}_blue"
+    fi
+
+    echo -e "${YELLOW}Starting app container: $INIT_APP${NC}"
+    if docker ps -a | grep -q "^${INIT_APP}$" 2>/dev/null; then
+        docker start $INIT_APP || true
+    else
+        docker run -d \
+          --name $INIT_APP \
+          --network $NETWORK_NAME \
+          --restart unless-stopped \
+          -e LARAVEL_ENV_ENCRYPTION_KEY="$LARAVEL_ENV_ENCRYPTION_KEY" \
+          -e APP_ENV="$APP_ENV" \
+          -v app_storage:/var/www/html/storage \
+          $DOCKER_IMAGE || true
+    fi
+    sleep 5
+
+    echo -e "${YELLOW}Starting Nginx...${NC}"
+    docker-compose up -d nginx
+    sleep 5
 fi
 
 # =====================================================================
@@ -60,13 +86,14 @@ fi
 # 3. DETEKSI CURRENT ACTIVE
 # =====================================================================
 
-if docker exec ${PROJECT_NAME}_nginx grep -q "app_blue:9000;" /etc/nginx/conf.d/default.conf 2>/dev/null; then
-    NEW_NAME="app_green"
-    OLD_NAME="app_blue"
+# Cek mana container yang aktif di nginx (bukan down)
+if docker exec ${PROJECT_NAME}_nginx grep "${PROJECT_NAME}_blue:9000" /etc/nginx/conf.d/default.conf 2>/dev/null | grep -v " down" > /dev/null; then
+    NEW_NAME="${PROJECT_NAME}_green"
+    OLD_NAME="${PROJECT_NAME}_blue"
     CURRENT_ACTIVE="blue"
 else
-    NEW_NAME="app_blue"
-    OLD_NAME="app_green"
+    NEW_NAME="${PROJECT_NAME}_blue"
+    OLD_NAME="${PROJECT_NAME}_green"
     CURRENT_ACTIVE="green"
 fi
 
