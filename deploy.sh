@@ -177,21 +177,33 @@ fi
 # 8. BACKUP NGINX CONFIG + SWITCH TRAFFIC (logika tetap sama)
 # =====================================================================
 
+echo -e "${YELLOW}⏳ Waiting for Nginx to be ready...${NC}"
+for i in {1..30}; do
+    if docker exec ${PROJECT_NAME}_nginx test -f /etc/nginx/conf.d/default.conf >/dev/null 2>&1; then
+        break
+    fi
+    echo -n "."
+    sleep 1
+done
+
 docker exec ${PROJECT_NAME}_nginx cp /etc/nginx/conf.d/default.conf /tmp/default.conf.bak
 
 echo -e "${YELLOW}🔄 Switching traffic from $OLD_NAME to $NEW_NAME...${NC}"
 docker exec ${PROJECT_NAME}_nginx /bin/sh -c "
-    sed -i 's/\($OLD_NAME:9000;\)/\1 down;/g' /etc/nginx/conf.d/default.conf
-    sed -i 's/\($NEW_NAME:9000 down;\)/$NEW_NAME:9000;/g' /etc/nginx/conf.d/default.conf
+    sed -i \"s/server ${OLD_NAME}:9000 /server ${OLD_NAME}:9000 down /g\" /etc/nginx/conf.d/default.conf
+    sed -i \"s/server ${NEW_NAME}:9000 down /server ${NEW_NAME}:9000 /g\" /etc/nginx/conf.d/default.conf
 "
 
-if docker exec ${PROJECT_NAME}_nginx nginx -t; then
+sleep 2
+
+if docker exec ${PROJECT_NAME}_nginx nginx -t >/dev/null 2>&1; then
     docker exec ${PROJECT_NAME}_nginx nginx -s reload
     echo -e "${GREEN}✅ Traffic switched!${NC}"
+    sleep 3
 else
     echo -e "${RED}❌ Nginx config invalid! AUTO-ROLLBACK...${NC}"
     docker exec ${PROJECT_NAME}_nginx cp /tmp/default.conf.bak /etc/nginx/conf.d/default.conf
-    docker exec ${PROJECT_NAME}_nginx nginx -s reload
+    docker exec ${PROJECT_NAME}_nginx nginx -s reload || true
     docker stop $NEW_NAME && docker rm $NEW_NAME
     exit 1
 fi
