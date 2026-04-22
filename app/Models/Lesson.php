@@ -29,6 +29,8 @@ class Lesson extends Model
         'slug',
         'content_url',
         'content_text',
+        'text_after_video',
+        'text_position',
         'duration_seconds',
         'is_free_preview',
         'sort_order',

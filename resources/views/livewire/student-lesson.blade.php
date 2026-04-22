@@ -16,10 +16,10 @@
 
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 px-2 py-10 max-w-screen-2xl mx-auto pb-20">
         <!-- Sidebar Chapters -->
-        <div class="lg:col-span-1">
-            <div class="">
-                <div class="sticky -top-40 bg-white rounded-lg shadow-md border border-gray-200 p-6 h-full overflow-y-auto pb-24">
-                    <!-- Progress Bar -->
+<div class="lg:col-span-1">
+    <div class="sticky top-4" style="height: calc(100vh - 2rem);">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 overflow-y-auto h-full pb-24">
+    <!-- Progress Bar -->
                     <div class="mb-6 pb-6 border-b border-gray-200">
                         <p class="text-xs text-gray-500 mb-2 uppercase tracking-wide">Progress Kursus</p>
                         <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
@@ -86,16 +86,39 @@
 
                 <!-- Video/Content Section -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                    @if ($lesson->type === 'video' && $this->videoEmbedUrl)
-                        <div class="relative w-full" style="padding-bottom: 56.25%;">
-                            <iframe src="{{ $this->videoEmbedUrl }}"
-                                class="absolute top-0 left-0 w-full h-full border-0"
-                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                    @if ($lesson->type === 'video')
+                        {{-- Text Before Video (using content_text) --}}
+                        @if (in_array($lesson->text_position, ['before', 'both']) && $lesson->content_text)
+                        <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                            <div class="prose prose-sm">
+                                {!! $lesson->content_text !!}
+                            </div>
                         </div>
+                        @endif
+
+                        {{-- Video Content --}}
+                        @if ($this->videoEmbedUrl)
+                            <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                <iframe src="{{ $this->videoEmbedUrl }}"
+                                    class="absolute top-0 left-0 w-full h-full border-0"
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                            </div>
+                        @endif
+
+                        {{-- Text After Video --}}
+                        @if (in_array($lesson->text_position, ['after', 'both']) && $lesson->text_after_video)
+                    <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                        <div class="prose prose-sm">
+                            {!! $lesson->content_text !!}
+                        </div>
+                    </div>
+                        @endif
                     @elseif ($lesson->type === 'text' && $lesson->content_text)
-                        <div class="p-8 prose prose-sm max-w-none">
-                            {!! nl2br(htmlspecialchars($lesson->content_text)) !!}
-                        </div>
+                            <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                                <div class="prose prose-sm">
+                                    {!! $lesson->content_text !!}
+                                </div>
+                            </div>
                     @elseif ($lesson->type === 'quiz' && $lesson->quiz)
                         <div class="p-8 text-center">
                             <div class="mb-6">

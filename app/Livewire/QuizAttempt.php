@@ -7,7 +7,6 @@ use App\Models\QuizAttempt as QuizAttemptModel;
 use App\Models\QuizAnswer;
 use App\Services\QuizScoringService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -168,10 +167,13 @@ class QuizAttempt extends Component
             $this->answers[$questionId] = $answer;
         } elseif ($questionType === 'multiple_choice') {
             $this->multipleChoiceAnswers[$questionId] = is_array($answer) ? $answer : [];
+        } elseif ($questionType === 'boolean') {
+            $this->answers[$questionId] = $answer;
         } elseif ($questionType === 'matching') {
             $this->matchingAnswers[$questionId] = is_array($answer) ? $answer : [];
         } elseif ($questionType === 'drag_drop_sorting') {
             $this->dragDropAnswers[$questionId] = is_array($answer) ? $answer : [];
+        } else {
         }
     }
 
@@ -199,19 +201,24 @@ class QuizAttempt extends Component
         if (!$data) return;
 
         if (isset($data['currentQuestionIndex'])) {
-
             $this->currentQuestionIndex = $data['currentQuestionIndex'];
         }
 
         if (isset($data['answers'])) {
-
             $this->answeredQuestionIds = array_keys($data['answers']);
+
+            // Dispatch restore-question event for each saved answer
+            foreach ($data['answers'] as $questionId => $answerData) {
+                $this->dispatch('restore-question', [
+                    'questionId' => $questionId,
+                    'questionType' => $answerData['questionType'],
+                    'answer' => $answerData['answer']
+                ]);
+            }
         }
 
         // Load the answer for the current question
         $this->loadCurrentQuestionAnswer();
-
-        $this->dispatch('restore-question');
     }
 
     #[\Livewire\Attributes\On('answerSavedToLocalStorage')]
@@ -221,6 +228,16 @@ class QuizAttempt extends Component
         if (!in_array($questionId, $this->answeredQuestionIds)) {
             $this->answeredQuestionIds[] = $questionId;
         }
+    }
+
+    #[\Livewire\Attributes\On('answerRemovedFromLocalStorage')]
+    public function answerRemovedFromLocalStorage($questionId)
+    {
+        // Remove question ID from answered list
+        $this->answeredQuestionIds = array_values(array_filter(
+            $this->answeredQuestionIds,
+            fn($id) => $id !== $questionId
+        ));
     }
 
     #[\Livewire\Attributes\On('submitFromLocalStorage')]
@@ -248,20 +265,8 @@ class QuizAttempt extends Component
 
     public function confirmSubmit()
     {
-        Log::info('QuizAttempt::confirmSubmit() called', [
-            'quiz_id' => $this->quizId,
-            'attempt_id' => $this->attempt->id,
-            'current_showSubmitConfirmation' => $this->showSubmitConfirmation,
-        ]);
-
         $this->showSubmitConfirmation = true;
 
-        Log::info('QuizAttempt::confirmSubmit() - showSubmitConfirmation set to true', [
-            'quiz_id' => $this->quizId,
-            'new_showSubmitConfirmation' => $this->showSubmitConfirmation,
-        ]);
-
-        // DIAGNOSTIC: Dispatch event to check if view receives the update
         $this->dispatch('diagnostic-showSubmitConfirmation-updated', value: $this->showSubmitConfirmation);
     }
 
@@ -283,24 +288,7 @@ class QuizAttempt extends Component
 
     public function submitQuiz()
     {
-        Log::info('QuizAttempt::submitQuiz() called', [
-            'quiz_id' => $this->quizId,
-            'attempt_id' => $this->attempt->id,
-            'answers' => $this->answers,
-            'multipleChoiceAnswers' => $this->multipleChoiceAnswers,
-            'matchingAnswers' => $this->matchingAnswers,
-            'dragDropAnswers' => $this->dragDropAnswers,
-            'showSubmitConfirmation' => $this->showSubmitConfirmation,
-        ]);
-
-        // DIAGNOSTIC: Check if confirmation was shown
-        if (!$this->showSubmitConfirmation) {
-            Log::warning('QuizAttempt::submitQuiz() - WARNING: Submit called without confirmation modal being shown!');
-        }
-
-        Log::info('QuizAttempt::submitQuiz() - About to set isSubmitting = true');
         $this->isSubmitting = true;
-        Log::info('QuizAttempt::submitQuiz() - isSubmitting set to: ' . ($this->isSubmitting ? 'true' : 'false'));
 
         // Process single choice answers from Livewire property
         foreach ($this->answers as $questionId => $answer) {
@@ -371,65 +359,33 @@ class QuizAttempt extends Component
         }
 
         // Also try to get answers from localStorage as backup
-        Log::info('QuizAttempt::submitQuiz() - About to dispatch requestLocalStorageData event');
         $this->dispatch('requestLocalStorageData');
-        Log::info('QuizAttempt::submitQuiz() - requestLocalStorageData event dispatched');
 
         // Finalize submission
-        Log::info('QuizAttempt::submitQuiz() - About to call finalizeSubmission() directly');
         $this->finalizeSubmission();
-        Log::info('QuizAttempt::submitQuiz() - finalizeSubmission() returned');
     }
 
     #[\Livewire\Attributes\On('finalizeSubmission')]
     public function finalizeSubmission()
     {
-        Log::info('QuizAttempt::finalizeSubmission() called', [
-            'quiz_id' => $this->quizId,
-            'attempt_id' => $this->attempt->id,
-            'isSubmitting' => $this->isSubmitting,
-        ]);
-
         // Grade the quiz attempt
-        Log::info('QuizAttempt::finalizeSubmission() - About to grade the attempt');
         $scoringService = new QuizScoringService();
         $scoringService->gradeAttempt($this->attempt);
-        Log::info('QuizAttempt::finalizeSubmission() - Attempt graded');
 
-        Log::info('QuizAttempt::finalizeSubmission() - About to update attempt with finished_at');
         $this->attempt->update([
             'finished_at' => now()
         ]);
-        Log::info('QuizAttempt::finalizeSubmission() - Attempt updated with finished_at');
 
-        Log::info('QuizAttempt::finalizeSubmission() - attempt finished, dispatching quiz-submitted', [
-            'quiz_id' => $this->quizId,
-            'attempt_id' => $this->attempt->id,
-        ]);
-
-        Log::info('QuizAttempt::finalizeSubmission() - About to dispatch quiz-submitted event');
         $this->dispatch('quiz-submitted');
-        Log::info('QuizAttempt::finalizeSubmission() - quiz-submitted event dispatched');
 
-        Log::info('QuizAttempt::finalizeSubmission() - About to get lesson from quiz');
         $lesson = $this->quiz->lesson;
-        Log::info('QuizAttempt::finalizeSubmission() - Lesson retrieved: ' . ($lesson ? 'exists' : 'null'));
 
         if ($lesson && $lesson->chapter && $lesson->chapter->course) {
-
-            Log::info('QuizAttempt::finalizeSubmission() - redirecting to lesson', [
-                'course_slug' => $lesson->chapter->course->slug,
-                'lesson_slug' => $lesson->slug,
-            ]);
-
             return redirect()->route('student.lesson', [
                 'courseSlug' => $lesson->chapter->course->slug,
                 'lessonSlug' => $lesson->slug,
             ]);
         }
-
-        Log::info('QuizAttempt::finalizeSubmission() - redirecting to home');
-
         return redirect()->route('home');
     }
 
