@@ -36,31 +36,27 @@ fi
 
 if [ ! "$(docker ps -q -f name=${PROJECT_NAME}_nginx)" ]; then
     echo -e "${YELLOW}Starting infrastructure...${NC}"
+
+    # CLEANUP old containers that might be stuck
+    echo -e "${YELLOW}🧹 Cleaning up old/stuck containers...${NC}"
+    docker stop ${PROJECT_NAME}_blue ${PROJECT_NAME}_green 2>/dev/null || true
+    docker rm -f ${PROJECT_NAME}_blue ${PROJECT_NAME}_green 2>/dev/null || true
+
     docker-compose up -d db redis
     sleep 5
 
     # Tentukan container app mana yang harus running
-    if docker ps -a | grep -q "${PROJECT_NAME}_blue"; then
-        INIT_APP="${PROJECT_NAME}_blue"
-    else
-        INIT_APP="${PROJECT_NAME}_blue"
-    fi
+    INIT_APP="${PROJECT_NAME}_blue"
 
     echo -e "${YELLOW}Starting app container: $INIT_APP${NC}"
-    if docker ps -a | grep -q "^${INIT_APP}$" 2>/dev/null; then
-        docker start $INIT_APP || true
-    else
-        docker run -d \
-          --name $INIT_APP \
-          --network $NETWORK_NAME \
-          --restart unless-stopped \
-          -e LARAVEL_ENV_ENCRYPTION_KEY="$LARAVEL_ENV_ENCRYPTION_KEY" \
-          -e APP_ENV="$APP_ENV" \
-          -v app_storage:/var/www/html/storage \
-          $DOCKER_IMAGE || true
-    fi
-
-    # WAIT untuk app container siap sebelum nginx start
+    docker run -d \
+      --name $INIT_APP \
+      --network $NETWORK_NAME \
+      --restart unless-stopped \
+      -e LARAVEL_ENV_ENCRYPTION_KEY="$LARAVEL_ENV_ENCRYPTION_KEY" \
+      -e APP_ENV="$APP_ENV" \
+      -v app_storage:/var/www/html/storage \
+      $DOCKER_IMAGE
     echo -e "${YELLOW}⏳ Waiting for app container to be ready...${NC}"
     for i in {1..60}; do
         if docker exec $INIT_APP php artisan --version >/dev/null 2>&1; then
@@ -137,8 +133,11 @@ echo -e "${BLUE}Deploying to: $NEW_NAME${NC}"
 echo -e "${YELLOW}📥 Pulling latest image...${NC}"
 docker pull $DOCKER_IMAGE
 
+echo -e "${YELLOW}🧹 Removing any existing $NEW_NAME container...${NC}"
 docker stop $NEW_NAME 2>/dev/null || true
-docker rm $NEW_NAME 2>/dev/null || true
+sleep 1
+docker rm -f $NEW_NAME 2>/dev/null || true
+sleep 1
 
 echo -e "${YELLOW}🚀 Starting new container: $NEW_NAME${NC}"
 docker run -d \
@@ -301,7 +300,8 @@ fi
 if [ "$IS_FIRST_DEPLOYMENT" = false ] && [ -n "$OLD_NAME" ]; then
     echo -e "${YELLOW}🧹 Cleaning up old container: $OLD_NAME${NC}"
     docker stop $OLD_NAME 2>/dev/null || true
-    docker rm $OLD_NAME 2>/dev/null || true
+    sleep 1
+    docker rm -f $OLD_NAME 2>/dev/null || true
 else
     echo -e "${YELLOW}✓ First deployment - no old container to cleanup${NC}"
 fi
