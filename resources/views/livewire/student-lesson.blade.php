@@ -16,10 +16,10 @@
 
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 px-2 py-10 max-w-screen-2xl mx-auto pb-20">
         <!-- Sidebar Chapters -->
-        <div class="lg:col-span-1">
-            <div class="">
-                <div class="sticky -top-40 bg-white rounded-lg shadow-md border border-gray-200 p-6 h-full overflow-y-auto pb-24">
-                    <!-- Progress Bar -->
+<div class="lg:col-span-1">
+    <div class="sticky top-4" style="height: calc(100vh - 2rem);">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 overflow-y-auto h-full pb-24">
+    <!-- Progress Bar -->
                     <div class="mb-6 pb-6 border-b border-gray-200">
                         <p class="text-xs text-gray-500 mb-2 uppercase tracking-wide">Progress Kursus</p>
                         <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
