@@ -12,11 +12,9 @@ services:
     networks:
       - jtiport_network
     depends_on:
-      - app_blue
-      - app_green
+      - jtiport_blue # Minimal satu harus ada agar Nginx tidak crash saat startup awal
 
-  # Kita tetap definisikan keduanya agar network Docker mengenali namanya
-  app_blue:
+  jtiport_blue:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_blue
     restart: unless-stopped
@@ -27,9 +25,8 @@ services:
       - APP_ENV=${APP_ENV:-production}
     networks:
       - jtiport_network
-    # Healthcheck dihapus karena sering false-positive pada PHP-FPM jika tanpa fcgi-tool
 
-  app_green:
+  jtiport_green:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_green
     restart: unless-stopped
@@ -41,14 +38,20 @@ services:
     networks:
       - jtiport_network
 
-  # Worker & Scheduler tetap menggunakan image yang sama
   worker:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_worker
     restart: unless-stopped
     command: php artisan queue:work --sleep=3 --tries=3
+    environment:
+      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+    volumes:
+      - "app_storage:/var/www/html/storage"
     networks:
       - jtiport_network
+    depends_on:
+      - db
+      - redis
 
   db:
     image: mysql:8.0
@@ -70,6 +73,7 @@ services:
 
 networks:
   jtiport_network:
+    name: jtiport_network # Mengunci nama agar tidak otomatis diberi prefix oleh docker-compose
     driver: bridge
 
 volumes:
