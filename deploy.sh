@@ -60,13 +60,13 @@ fi
 # 3. DETEKSI CURRENT ACTIVE
 # =====================================================================
 
-if docker exec ${PROJECT_NAME}_nginx grep -q "jtiport_blue:9000;" /etc/nginx/conf.d/default.conf 2>/dev/null; then
-    NEW_NAME="jtiport_green"
-    OLD_NAME="jtiport_blue"
+if docker exec ${PROJECT_NAME}_nginx grep -q "app_blue:9000;" /etc/nginx/conf.d/default.conf 2>/dev/null; then
+    NEW_NAME="app_green"
+    OLD_NAME="app_blue"
     CURRENT_ACTIVE="blue"
 else
-    NEW_NAME="jtiport_blue"
-    OLD_NAME="jtiport_green"
+    NEW_NAME="app_blue"
+    OLD_NAME="app_green"
     CURRENT_ACTIVE="green"
 fi
 
@@ -98,6 +98,9 @@ docker run -d \
 # =====================================================================
 
 echo -e "${YELLOW}⚡ Running composer install & Laravel optimization...${NC}"
+
+docker exec $NEW_NAME git config --global --add safe.directory /var/www/html
+
 docker exec $NEW_NAME composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist || echo -e "${YELLOW}Composer already up to date${NC}"
 
 docker exec $NEW_NAME php artisan config:cache || true
