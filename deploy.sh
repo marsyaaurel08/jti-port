@@ -59,7 +59,23 @@ if [ ! "$(docker ps -q -f name=${PROJECT_NAME}_nginx)" ]; then
           -v app_storage:/var/www/html/storage \
           $DOCKER_IMAGE || true
     fi
-    sleep 5
+
+    # WAIT untuk app container siap sebelum nginx start
+    echo -e "${YELLOW}⏳ Waiting for app container to be ready...${NC}"
+    for i in {1..60}; do
+        if docker exec $INIT_APP php artisan --version >/dev/null 2>&1; then
+            echo -e "${GREEN}✅ App container ready!${NC}"
+            break
+        fi
+        if [ $i -eq 60 ]; then
+            echo -e "${RED}❌ App container timeout!${NC}"
+            exit 1
+        fi
+        echo -n "."
+        sleep 2
+    done
+
+    sleep 3
 
     echo -e "${YELLOW}Starting Nginx...${NC}"
     docker-compose up -d nginx
@@ -83,18 +99,32 @@ else
 fi
 
 # =====================================================================
-# 3. DETEKSI CURRENT ACTIVE
+# 3. DETEKSI DEPLOYMENT PERTAMA vs UPDATE
 # =====================================================================
 
-# Cek mana container yang aktif di nginx (bukan down)
-if docker exec ${PROJECT_NAME}_nginx grep "${PROJECT_NAME}_blue:9000" /etc/nginx/conf.d/default.conf 2>/dev/null | grep -v " down" > /dev/null; then
-    NEW_NAME="${PROJECT_NAME}_green"
-    OLD_NAME="${PROJECT_NAME}_blue"
-    CURRENT_ACTIVE="blue"
-else
+BLUE_EXISTS=$(docker ps -a --filter name="${PROJECT_NAME}_blue" -q)
+GREEN_EXISTS=$(docker ps -a --filter name="${PROJECT_NAME}_green" -q)
+
+if [ -z "$BLUE_EXISTS" ] && [ -z "$GREEN_EXISTS" ]; then
+    echo -e "${YELLOW}🆕 FIRST-TIME DEPLOYMENT DETECTED${NC}"
+    IS_FIRST_DEPLOYMENT=true
     NEW_NAME="${PROJECT_NAME}_blue"
-    OLD_NAME="${PROJECT_NAME}_green"
-    CURRENT_ACTIVE="green"
+    OLD_NAME=""
+    CURRENT_ACTIVE="none"
+else
+    echo -e "${YELLOW}♻️  UPDATING EXISTING DEPLOYMENT${NC}"
+    IS_FIRST_DEPLOYMENT=false
+
+    # Cek mana container yang aktif di nginx (bukan down)
+    if docker exec ${PROJECT_NAME}_nginx grep "${PROJECT_NAME}_blue:9000" /etc/nginx/conf.d/default.conf 2>/dev/null | grep -v " down" > /dev/null; then
+        NEW_NAME="${PROJECT_NAME}_green"
+        OLD_NAME="${PROJECT_NAME}_blue"
+        CURRENT_ACTIVE="blue"
+    else
+        NEW_NAME="${PROJECT_NAME}_blue"
+        OLD_NAME="${PROJECT_NAME}_green"
+        CURRENT_ACTIVE="green"
+    fi
 fi
 
 echo -e "${GREEN}Current active: $CURRENT_ACTIVE${NC}"
@@ -174,36 +204,41 @@ else
 fi
 
 # =====================================================================
-# 8. BACKUP NGINX CONFIG + SWITCH TRAFFIC (logika tetap sama)
+# 8. BACKUP NGINX CONFIG + SWITCH TRAFFIC
 # =====================================================================
 
 echo -e "${YELLOW}⏳ Waiting for Nginx to be ready...${NC}"
 for i in {1..30}; do
-    if docker exec ${PROJECT_NAME}_nginx test -f /etc/nginx/conf.d/default.conf >/dev/null 2>&1; then
+    if docker ps | grep -q "${PROJECT_NAME}_nginx"; then
         break
     fi
     echo -n "."
     sleep 1
 done
 
-docker exec ${PROJECT_NAME}_nginx cp /etc/nginx/conf.d/default.conf /tmp/default.conf.bak
+sleep 2
 
-echo -e "${YELLOW}🔄 Switching traffic from $OLD_NAME to $NEW_NAME...${NC}"
-docker exec ${PROJECT_NAME}_nginx /bin/sh -c "
-    sed -i \"s/server ${OLD_NAME}:9000 /server ${OLD_NAME}:9000 down /g\" /etc/nginx/conf.d/default.conf
-    sed -i \"s/server ${NEW_NAME}:9000 down /server ${NEW_NAME}:9000 /g\" /etc/nginx/conf.d/default.conf
-"
+docker exec ${PROJECT_NAME}_nginx cp /etc/nginx/conf.d/default.conf /tmp/default.conf.bak 2>/dev/null || true
+
+if [ "$IS_FIRST_DEPLOYMENT" = true ]; then
+    echo -e "${YELLOW}🚀 First deployment - activating $NEW_NAME${NC}"
+    # No changes needed for first deployment - config already has blue active
+else
+    echo -e "${YELLOW}🔄 Switching traffic from $OLD_NAME to $NEW_NAME...${NC}"
+    docker exec ${PROJECT_NAME}_nginx sed -i "s/server ${OLD_NAME}:9000 /server ${OLD_NAME}:9000 down /g" /etc/nginx/conf.d/default.conf
+    docker exec ${PROJECT_NAME}_nginx sed -i "s/server ${NEW_NAME}:9000 down /server ${NEW_NAME}:9000 /g" /etc/nginx/conf.d/default.conf
+fi
 
 sleep 2
 
 if docker exec ${PROJECT_NAME}_nginx nginx -t >/dev/null 2>&1; then
     docker exec ${PROJECT_NAME}_nginx nginx -s reload
-    echo -e "${GREEN}✅ Traffic switched!${NC}"
+    echo -e "${GREEN}✅ Traffic configuration updated!${NC}"
     sleep 3
 else
     echo -e "${RED}❌ Nginx config invalid! AUTO-ROLLBACK...${NC}"
-    docker exec ${PROJECT_NAME}_nginx cp /tmp/default.conf.bak /etc/nginx/conf.d/default.conf
-    docker exec ${PROJECT_NAME}_nginx nginx -s reload || true
+    docker exec ${PROJECT_NAME}_nginx cp /tmp/default.conf.bak /etc/nginx/conf.d/default.conf 2>/dev/null || true
+    docker exec ${PROJECT_NAME}_nginx nginx -s reload 2>/dev/null || true
     docker stop $NEW_NAME && docker rm $NEW_NAME
     exit 1
 fi
@@ -229,10 +264,10 @@ else
 fi
 
 # =====================================================================
-# 10. MANUAL APPROVAL UNTUK PRODUCTION (logika tetap sama)
+# 9. MANUAL APPROVAL (skip untuk first deployment di dev/staging)
 # =====================================================================
 
-if [ "$APP_ENV" = "production" ]; then
+if [ "$APP_ENV" = "production" ] && [ "$IS_FIRST_DEPLOYMENT" = false ]; then
     echo ""
     echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
     echo -e "${YELLOW}⚠️  MANUAL APPROVAL REQUIRED FOR PRODUCTION ⚠️${NC}"
@@ -260,21 +295,26 @@ if [ "$APP_ENV" = "production" ]; then
 fi
 
 # =====================================================================
-# 11. CLEANUP OLD CONTAINER
+# 10. CLEANUP OLD CONTAINER (skip untuk first deployment)
 # =====================================================================
 
-echo -e "${YELLOW}🧹 Cleaning up old container: $OLD_NAME${NC}"
-docker stop $OLD_NAME 2>/dev/null || true
-docker rm $OLD_NAME 2>/dev/null || true
+if [ "$IS_FIRST_DEPLOYMENT" = false ] && [ -n "$OLD_NAME" ]; then
+    echo -e "${YELLOW}🧹 Cleaning up old container: $OLD_NAME${NC}"
+    docker stop $OLD_NAME 2>/dev/null || true
+    docker rm $OLD_NAME 2>/dev/null || true
+else
+    echo -e "${YELLOW}✓ First deployment - no old container to cleanup${NC}"
+fi
 
 # =====================================================================
-# 12. SAVE DEPLOYMENT INFO + FINAL STATUS (logika tetap sama)
+# 11. SAVE DEPLOYMENT INFO + FINAL STATUS
 # =====================================================================
 
 cat > $BACKUP_DIR/last_deploy.txt << EOF
 TIMESTAMP: $TIMESTAMP
+DEPLOYMENT_TYPE: $([ "$IS_FIRST_DEPLOYMENT" = true ] && echo "FIRST-TIME" || echo "UPDATE")
 NEW_CONTAINER: $NEW_NAME
-OLD_CONTAINER: $OLD_NAME
+OLD_CONTAINER: ${OLD_NAME:-none}
 PREVIOUS_ACTIVE: $CURRENT_ACTIVE
 APP_ENV: $APP_ENV
 DATE: $(date)
@@ -286,6 +326,7 @@ echo -e "${GREEN}✅✅✅ DEPLOYMENT SUCCESSFUL! ✅✅✅${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${BLUE}Active container: ${GREEN}$NEW_NAME${NC}"
 echo -e "${BLUE}Backup: ${GREEN}$BACKUP_DIR/backup_${TIMESTAMP}.sql.gz${NC}"
+echo -e "${BLUE}Deployment type: $([ "$IS_FIRST_DEPLOYMENT" = true ] && echo "🆕 FIRST-TIME" || echo "♻️  UPDATE")${NC}"
 echo ""
 
 docker ps --format "table {{.Names}}\t{{.Status}}" | grep jtiport
