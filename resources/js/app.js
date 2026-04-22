@@ -92,7 +92,56 @@ window.matchingComponent = function ({
         draggedItemId: null,
         hoveredMatchId: null,
 
+        /**
+         * Helper function to read quiz data from localStorage
+         * Similar to quiz-local-storage-plain.js implementation
+         */
+        getQuizDataFromLocalStorage(quizId) {
+            try {
+                const STORAGE_KEY_PREFIX = "quiz_attempt_";
+                const STORAGE_VERSION = "1.2";
+                const key = `${STORAGE_KEY_PREFIX}${quizId}`;
+                const data = localStorage.getItem(key);
+                if (!data) return null;
+
+                const parsed = JSON.parse(data);
+
+                // Validate version
+                if (parsed.version !== STORAGE_VERSION) {
+                    localStorage.removeItem(key);
+                    return null;
+                }
+
+                return parsed;
+            } catch (error) {
+                return null;
+            }
+        },
+
         init() {
+            // Get quizId from DOM element with data-quiz-id attribute
+            const quizElement = document.querySelector("[data-quiz-id]");
+            const quizId = quizElement ? quizElement.dataset.quizId : null;
+
+            // Check localStorage directly for saved data (proactive check)
+            if (quizId) {
+                const savedData = this.getQuizDataFromLocalStorage(quizId);
+                if (
+                    savedData &&
+                    savedData.answers &&
+                    savedData.answers[this.questionId]
+                ) {
+                    const answerData = savedData.answers[this.questionId];
+                    if (
+                        answerData.questionType === "matching" &&
+                        answerData.answer
+                    ) {
+                        this.selected = answerData.answer;
+                    }
+                }
+            }
+
+            // Keep the restore-question event listener as a fallback for other scenarios
             document.addEventListener("restore-question", (e) => {
                 if (
                     e.detail.questionId === this.questionId &&
@@ -104,8 +153,7 @@ window.matchingComponent = function ({
         },
 
         isItemMatched(itemId) {
-            const matchedItemIds = Object.values(this.selected || {});
-            return matchedItemIds.includes(itemId);
+            return this.selected && this.selected.hasOwnProperty(itemId);
         },
 
         getMatchedItem(matchId) {
@@ -138,7 +186,7 @@ window.matchingComponent = function ({
             if (hasMatch) return "border-[#ffc107] bg-yellow-50/30";
             else if (isHovered)
                 return "border-[#ffc107] border-dashed bg-yellow-50/50";
-            else return "border-gray-200 bg-white";
+            else return "border-gray-200 bg-jti-yellow/5";
         },
 
         dragStart(event) {

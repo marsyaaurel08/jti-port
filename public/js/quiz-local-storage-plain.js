@@ -91,6 +91,51 @@
             data.answers = {};
         }
 
+        // For matching questions, don't save empty objects
+        if (
+            questionType === "matching" &&
+            typeof answer === "object" &&
+            Object.keys(answer).length === 0
+        ) {
+            // Remove the question from answers if it exists
+            if (data.answers && data.answers[questionId]) {
+                delete data.answers[questionId];
+            }
+
+            // Update current question index when removing answer
+            const questionElements =
+                document.querySelectorAll("[data-question-id]");
+            questionElements.forEach((element, index) => {
+                if (element.dataset.questionId === questionId) {
+                    data.currentQuestionIndex = index;
+                }
+            });
+
+            const saved = saveQuizData(quizId, data);
+
+            // Notify Livewire that an answer was removed to update answeredQuestionIds
+            if (saved && window.Livewire) {
+                const quizElement = document.querySelector("[data-quiz-id]");
+                if (quizElement) {
+                    const livewireComponent =
+                        quizElement.closest("[wire\\:id]");
+                    if (livewireComponent) {
+                        const component = window.Livewire.find(
+                            livewireComponent.getAttribute("wire:id"),
+                        );
+                        if (component) {
+                            component.call(
+                                "answerRemovedFromLocalStorage",
+                                questionId,
+                            );
+                        }
+                    }
+                }
+            }
+
+            return saved;
+        }
+
         data.answers[questionId] = {
             answer: answer,
             questionType: questionType,
@@ -187,19 +232,15 @@
                         document.querySelectorAll("[data-question-id]");
 
                     questionElements.forEach((questionElement) => {
-                        const questionId =
-                            questionElement.dataset.questionId;
+                        const questionId = questionElement.dataset.questionId;
                         const questionType =
                             questionElement.dataset.questionType;
 
                         if (savedData.answers[questionId]) {
-                            const answerData =
-                                savedData.answers[questionId];
+                            const answerData = savedData.answers[questionId];
 
                             // Update UI directly
-                            if (
-                                questionType === "multiple_choice"
-                            ) {
+                            if (questionType === "multiple_choice") {
                                 const checkboxes =
                                     questionElement.querySelectorAll(
                                         'input[type="checkbox"]',
@@ -207,9 +248,7 @@
                                 checkboxes.forEach((checkbox) => {
                                     checkbox.checked =
                                         answerData.answer.includes(
-                                            parseInt(
-                                                checkbox.value,
-                                            ),
+                                            parseInt(checkbox.value),
                                         );
                                 });
                             } else if (questionType === "matching") {
@@ -219,19 +258,16 @@
                                         "select.quiz-input",
                                     );
                                 allSelects.forEach((select) => {
-                                    const itemId = select.name
-                                        .split("_")
-                                        .pop();
+                                    const itemId = select.name.split("_").pop();
                                     if (answerData.answer[itemId]) {
                                         select.value =
                                             answerData.answer[itemId];
                                     }
                                 });
                             } else {
-                                const radios =
-                                    questionElement.querySelectorAll(
-                                        'input[type="radio"]',
-                                    );
+                                const radios = questionElement.querySelectorAll(
+                                    'input[type="radio"]',
+                                );
                                 radios.forEach((radio) => {
                                     radio.checked =
                                         String(radio.value) ===
