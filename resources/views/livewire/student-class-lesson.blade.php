@@ -1,4 +1,5 @@
 <div class="flex flex-col min-h-screen">
+    <!-- Session Flash Messages -->
     @if (session('success'))
         <div class="fixed top-4 right-4 bg-green-50 border border-green-200 rounded-lg text-green-700 p-4 max-w-md z-50"
             x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
@@ -14,15 +15,18 @@
     @endif
 
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 px-2 py-10 max-w-screen-2xl mx-auto pb-20">
+        <!-- Sidebar Chapters -->
         <div class="lg:col-span-1">
             <div class="">
                 <div class="sticky -top-40 bg-white rounded-lg shadow-md border border-gray-200 p-6 h-full overflow-y-auto pb-24">
+                    <!-- Progress Bar -->
                     <div class="mb-6 pb-6 border-b border-gray-200">
                         <p class="text-xs text-gray-500 mb-2 uppercase tracking-wide">Progress Kursus</p>
                         <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
                             <div class="bg-jti-yellow h-2 rounded-full transition-all" style="width: {{ $progress }}%">
                             </div>
                         </div>
+                        {{-- <p class="text-sm font-bold text-gray-900">{{ $progress }}%</p> --}}
                         <p class="text-xs text-gray-500">{{ count($completedLessonIds) }}/{{ $course['total_lessons'] ?? 0 }} pelajaran</p>
                     </div>
 
@@ -42,7 +46,7 @@
                                                 $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
                                             @endphp
 
-                                            <a href="{{ route('student.classLesson', [$classSlug, $chapterLesson['slug']]) }}"
+                                            <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
                                                 class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                                                 <span class="inline-block mr-2">
                                                     @if ($isCompleted)
@@ -57,41 +61,18 @@
                                     </div>
                                 </div>
                             @endforeach
+
                         @endif
                     </div>
                 </div>
+
             </div>
         </div>
 
+        <!-- Main Content -->
         <div class="lg:col-span-3 h-full overflow-y-auto pb-24">
             @if (isset($lesson))
-                <div class="bg-white rounded-lg shadow-md p-4 mb-6 flex flex-wrap items-center justify-between gap-4 border-l-4 border-jti-yellow">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-gray-100 p-2 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase tracking-wider">Instruktur</p>
-                            <p class="text-sm font-bold text-gray-900">{{ $instructor->name ?? 'Nama Instruktur tidak tersedia' }}</p>
-                        </div>
-                    </div>
-
-                    @if(!empty($zoomLink))
-                        <a href="{{ $zoomLink }}" target="_blank" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                            Join Zoom Meeting
-                        </a>
-                    @else
-                        <div class="text-xs text-gray-400 italic">
-                            Sesi Live tidak tersedia saat ini
-                        </div>
-                    @endif
-                </div>
-
+                <!-- Lesson Header -->
                 <div class="bg-white rounded-lg shadow-md p-8 mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <h1 class="text-3xl font-bold text-gray-900">{{ $lesson->title }}</h1>
@@ -103,17 +84,41 @@
                     </p>
                 </div>
 
+                <!-- Video/Content Section -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                    @if ($lesson->type === 'video' && $this->videoEmbedUrl)
-                        <div class="relative w-full" style="padding-bottom: 56.25%;">
-                            <iframe src="{{ $this->videoEmbedUrl }}"
-                                class="absolute top-0 left-0 w-full h-full border-0"
-                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                    @if ($lesson->type === 'video')
+                        {{-- Text Before Video (using content_text) --}}
+                        @if (in_array($lesson->text_position, ['before', 'both']) && $lesson->content_text)
+                        <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                            <div class="prose prose-sm">
+                                {!! $lesson->content_text !!}
+                            </div>
                         </div>
+                        @endif
+
+                        {{-- Video Content --}}
+                        @if ($this->videoEmbedUrl)
+                            <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                <iframe src="{{ $this->videoEmbedUrl }}"
+                                    class="absolute top-0 left-0 w-full h-full border-0"
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                            </div>
+                        @endif
+
+                        {{-- Text After Video --}}
+                        @if (in_array($lesson->text_position, ['after', 'both']) && $lesson->text_after_video)
+                    <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                        <div class="prose prose-sm">
+                            {!! $lesson->content_text !!}
+                        </div>
+                    </div>
+                        @endif
                     @elseif ($lesson->type === 'text' && $lesson->content_text)
-                        <div class="p-8 prose prose-sm max-w-none">
-                            {!! nl2br(htmlspecialchars($lesson->content_text)) !!}
-                        </div>
+                            <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                                <div class="prose prose-sm">
+                                    {!! $lesson->content_text !!}
+                                </div>
+                            </div>
                     @elseif ($lesson->type === 'quiz' && $lesson->quiz)
                         <div class="p-8 text-center">
                             <div class="mb-6">
@@ -141,6 +146,7 @@
                             </a>
                         </div>
 
+                        <!-- Quiz Score History Component -->
                         @if ($lesson->quiz)
                             <livewire:quiz-score-history :quizId="$lesson->quiz->id" />
                         @endif
@@ -159,9 +165,10 @@
         </div>
     </div>
 
+    <!-- Fixed Footer -->
     <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-between items-center z-50">
         @if ($previousLesson)
-            <a href="{{ route('student.classLesson', [$classSlug, $previousLesson['slug']]) }}"
+            <a href="{{ route('student.lesson', [$courseSlug, $previousLesson['slug']]) }}"
                class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -206,3 +213,5 @@
         @endif
     </footer>
 </div>
+
+

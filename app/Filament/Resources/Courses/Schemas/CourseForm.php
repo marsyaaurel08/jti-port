@@ -119,7 +119,23 @@ class CourseForm
                                                 ->url(),
                                             RichEditor::make('content_text')
                                                 ->label('Content Text')
-                                                ->visible(fn($get) => $get('type') === 'text'),
+                                                ->visible(fn($get) => $get('type') === 'text' || $get('type') === 'video'),
+                                            // Text Position (visible for video type)
+                                            Select::make('text_position')
+                                                ->label('Posisi Teks')
+                                                ->options([
+                                                    'none' => 'Tanpa Teks',
+                                                    'before' => 'Teks Sebelum Video',
+                                                    'after' => 'Teks Setelah Video',
+                                                    'both' => 'Teks Sebelum dan Sesudah Video',
+                                                ])
+                                                ->default('none')
+                                                ->live()
+                                                ->visible(fn($get) => $get('type') === 'video'),
+                                            // Text After Video
+                                            RichEditor::make('text_after_video')
+                                                ->label('Teks Setelah Video')
+                                                ->visible(fn($get) => $get('type') === 'video' && in_array($get('text_position'), ['after', 'both'])),
                                             // TextInput::make('duration_seconds')
                                             //     ->label('Durasi (menit)')
                                             //     ->numeric()

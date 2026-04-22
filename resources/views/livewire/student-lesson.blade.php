@@ -86,16 +86,39 @@
 
                 <!-- Video/Content Section -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                    @if ($lesson->type === 'video' && $this->videoEmbedUrl)
-                        <div class="relative w-full" style="padding-bottom: 56.25%;">
-                            <iframe src="{{ $this->videoEmbedUrl }}"
-                                class="absolute top-0 left-0 w-full h-full border-0"
-                                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                    @if ($lesson->type === 'video')
+                        {{-- Text Before Video (using content_text) --}}
+                        @if (in_array($lesson->text_position, ['before', 'both']) && $lesson->content_text)
+                        <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                            <div class="prose prose-sm">
+                                {!! $lesson->content_text !!}
+                            </div>
                         </div>
+                        @endif
+
+                        {{-- Video Content --}}
+                        @if ($this->videoEmbedUrl)
+                            <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                <iframe src="{{ $this->videoEmbedUrl }}"
+                                    class="absolute top-0 left-0 w-full h-full border-0"
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                            </div>
+                        @endif
+
+                        {{-- Text After Video --}}
+                        @if (in_array($lesson->text_position, ['after', 'both']) && $lesson->text_after_video)
+                    <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                        <div class="prose prose-sm">
+                            {!! $lesson->content_text !!}
+                        </div>
+                    </div>
+                        @endif
                     @elseif ($lesson->type === 'text' && $lesson->content_text)
-                        <div class="p-8 prose prose-sm max-w-none">
-                            {!! nl2br(htmlspecialchars($lesson->content_text)) !!}
-                        </div>
+                            <div class="p-8 max-w-3xl mx-auto">  {{-- constrain width --}}
+                                <div class="prose prose-sm">
+                                    {!! $lesson->content_text !!}
+                                </div>
+                            </div>
                     @elseif ($lesson->type === 'quiz' && $lesson->quiz)
                         <div class="p-8 text-center">
                             <div class="mb-6">
