@@ -11,7 +11,11 @@ services:
       - "./docker/nginx:/etc/nginx/conf.d"
     networks:
       - jtiport_network
+    depends_on:
+      - app_blue
+      - app_green
 
+  # Kita tetap definisikan keduanya agar network Docker mengenali namanya
   app_blue:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_blue
@@ -23,9 +27,7 @@ services:
       - APP_ENV=${APP_ENV:-production}
     networks:
       - jtiport_network
-    depends_on:
-      - db
-      - redis
+    # Healthcheck dihapus karena sering false-positive pada PHP-FPM jika tanpa fcgi-tool
 
   app_green:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
@@ -38,41 +40,15 @@ services:
       - APP_ENV=${APP_ENV:-production}
     networks:
       - jtiport_network
-    depends_on:
-      - db
-      - redis
 
+  # Worker & Scheduler tetap menggunakan image yang sama
   worker:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_worker
     restart: unless-stopped
-    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600 --timeout=90
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
-    volumes:
-      - "app_storage:/var/www/html/storage"
+    command: php artisan queue:work --sleep=3 --tries=3
     networks:
       - jtiport_network
-    depends_on:
-      - db
-      - redis
-
-  scheduler:
-    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
-    container_name: jtiport_scheduler
-    restart: unless-stopped
-    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
-    volumes:
-      - "app_storage:/var/www/html/storage"
-    networks:
-      - jtiport_network
-    depends_on:
-      - db
-      - redis
 
   db:
     image: mysql:8.0
@@ -81,38 +57,16 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_DATABASE: ${DB_DATABASE:-jtiport}
-      MYSQL_USER: ${DB_USERNAME:-jtiport_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-jtiport_pass}
     volumes:
       - jtiport_dbdata:/var/lib/mysql
     networks:
       - jtiport_network
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-uroot",
-          "-p${DB_PASSWORD:-root}",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:alpine
     container_name: jtiport_redis
-    restart: unless-stopped
     networks:
       - jtiport_network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 networks:
   jtiport_network:
