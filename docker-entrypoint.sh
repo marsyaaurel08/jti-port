@@ -1,44 +1,69 @@
-#!/bin/bash
-set -e
+FROM php:8.3-fpm-alpine
 
-# Warna untuk output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+WORKDIR /var/www/html
 
-echo -e "${GREEN}🚀 Starting container: $HOSTNAME${NC}"
+# =========================
+# System dependencies
+# FIX: Tambah netcat-openbsd (nc) untuk health check DB di entrypoint.
+#      Tanpa ini, `nc -z db 3306` di entrypoint akan gagal.
+# =========================
+RUN apk add --no-cache \
+    git curl zip unzip \
+    libpng-dev libjpeg-turbo-dev freetype-dev \
+    icu-dev oniguruma-dev libzip-dev \
+    bash \
+    netcat-openbsd
 
-# Decrypt .env file (force overwrite setiap start)
-if [ -f .env.encrypted ]; then
-    echo -e "${YELLOW}🔐 Decrypting .env file...${NC}"
-    php artisan env:decrypt --env=production --key=$LARAVEL_ENV_ENCRYPTION_KEY --filename=.env --force
-    echo -e "${GREEN}✓ .env decrypted${NC}"
-fi
+# =========================
+# PHP extensions
+# =========================
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        pdo_mysql mbstring exif pcntl bcmath gd intl zip \
+    && docker-php-ext-enable opcache
 
-# Optimasi untuk production
-if [ "$APP_ENV" = "production" ]; then
-    echo -e "${YELLOW}⚡ Caching configuration...${NC}"
-    php artisan config:cache
-    php artisan route:cache
-    php artisan view:cache
-    php artisan storage:link
-    echo -e "${GREEN}✓ Cache created${NC}"
-fi
+# =========================
+# PHP-FPM & OPcache config
+# =========================
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
-# Run migrations jika diminta (opsional, biasanya via deploy.sh)
-if [ "$AUTO_MIGRATE" = "true" ]; then
-    echo -e "${YELLOW}📊 Running migrations...${NC}"
-    php artisan migrate --force
-    echo -e "${GREEN}✓ Migrations complete${NC}"
-fi
+# =========================
+# Composer
+# =========================
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Kirim notifikasi ke Slack jika di-set (opsional)
-if [ -n "$SLACK_WEBHOOK_URL" ]; then
-    curl -s -X POST -H "Content-Type: application/json" \
-        -d "{\"text\":\"✅ Container $HOSTNAME started on $(date)\"}" \
-        $SLACK_WEBHOOK_URL > /dev/null 2>&1 || true
-fi
+# =========================
+# Install dependencies dulu (cache layer optimization)
+# =========================
+COPY composer.json composer.lock ./
 
-# Jalankan perintah utama
-echo -e "${GREEN}▶️  Starting: $@${NC}"
-exec "$@"
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --prefer-dist \
+    --no-scripts
+
+# =========================
+# Copy seluruh project
+# =========================
+COPY . .
+
+# =========================
+# Permissions
+# =========================
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# =========================
+# Entrypoint
+# FIX: Copy dari path yang konsisten dengan lokasi di repo
+# =========================
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 9000
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["php-fpm"]

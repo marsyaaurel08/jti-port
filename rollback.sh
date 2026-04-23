@@ -1,9 +1,8 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # =====================================================================
-# MANUAL ROLLBACK SCRIPT
-# Jalankan ini jika Anda menemukan bug logika setelah deploy
+# ROLLBACK SCRIPT - Jtiport (Blue-Green) [FIXED]
 # =====================================================================
 
 RED='\033[0;31m'
@@ -12,120 +11,148 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-BACKUP_DIR="/backups/jtiport"
 PROJECT_NAME="jtiport"
+NETWORK_NAME="jtiport_network"
+BACKUP_DIR="/home/dika/backups/jtiport"
+STATE_FILE="$BACKUP_DIR/deployment.state"
+NGINX_CONF_DIR="./docker/nginx"
+DOCKER_IMAGE="${DOCKER_HUB_USERNAME}/jtiport"
+ROLLBACK_TAG=${1:-""}
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
-echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${YELLOW}     MANUAL ROLLBACK - $(date)${NC}"
-echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
+trap 'handle_error $? $LINENO' ERR
+handle_error() {
+    echo -e "${RED}❌ ROLLBACK ERROR at line $2 (exit code: $1)${NC}"
+    exit $1
+}
 
-# Load last deployment info
-if [ -f "$BACKUP_DIR/last_deploy.txt" ]; then
-    source $BACKUP_DIR/last_deploy.txt
-    echo -e "${GREEN}Last deployment: $TIMESTAMP${NC}"
-    echo -e "Rollback target: ${BLUE}$OLD_CONTAINER${NC}"
-    echo -e "Container to remove: ${RED}$NEW_CONTAINER${NC}"
-else
-    echo -e "${RED}No deployment info found!${NC}"
-    echo -e "Please specify container names manually:"
-    read -p "Container to keep (old): " OLD_CONTAINER
-    read -p "Container to remove (new): " NEW_CONTAINER
+echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
+echo -e "${BLUE}     Jtiport Rollback - $TIMESTAMP${NC}"
+echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
+
+# =====================================================================
+# 1. BACA STATE
+# =====================================================================
+
+if [ ! -f "$STATE_FILE" ]; then
+    echo -e "${RED}❌ State file tidak ditemukan: $STATE_FILE${NC}"
+    echo -e "${YELLOW}   Tidak ada informasi deployment sebelumnya.${NC}"
+    exit 1
 fi
 
-# Check if old container exists
-if ! docker ps -a | grep -q $OLD_CONTAINER; then
-    echo -e "${RED}Old container $OLD_CONTAINER not found!${NC}"
-    echo -e "Available containers:"
-    docker ps -a --format "table {{.Names}}\t{{.Status}}" | grep jtiport
+source "$STATE_FILE"
+echo -e "${YELLOW}📋 Active container: $LAST_ACTIVE_CONTAINER${NC}"
+
+# Tentukan target rollback
+if [ "$LAST_ACTIVE_CONTAINER" == "${PROJECT_NAME}_blue" ]; then
+    ROLLBACK_TARGET="${PROJECT_NAME}_green"
+    CURRENT="${PROJECT_NAME}_blue"
+elif [ "$LAST_ACTIVE_CONTAINER" == "${PROJECT_NAME}_green" ]; then
+    ROLLBACK_TARGET="${PROJECT_NAME}_blue"
+    CURRENT="${PROJECT_NAME}_green"
+else
+    echo -e "${RED}❌ State tidak dikenali: $LAST_ACTIVE_CONTAINER${NC}"
+    exit 1
+fi
+
+echo -e "${YELLOW}🔄 Rolling back from $CURRENT → $ROLLBACK_TARGET${NC}"
+
+# =====================================================================
+# 2. JALANKAN CONTAINER ROLLBACK
+# =====================================================================
+
+# Tentukan image tag
+if [ -n "$ROLLBACK_TAG" ]; then
+    IMAGE="${DOCKER_IMAGE}:${ROLLBACK_TAG}"
+    echo -e "${YELLOW}📥 Pulling rollback image: $IMAGE ...${NC}"
+    docker pull $IMAGE
+else
+    # Pakai image yang sudah ada di lokal (latest sebelumnya)
+    IMAGE="${DOCKER_IMAGE}:latest"
+    echo -e "${YELLOW}⚠️  No tag specified — using local image: $IMAGE${NC}"
+fi
+
+docker rm -f $ROLLBACK_TARGET 2>/dev/null || true
+
+echo -e "${YELLOW}⚙️ Starting rollback container: $ROLLBACK_TARGET...${NC}"
+docker run -d \
+  --name $ROLLBACK_TARGET \
+  --network $NETWORK_NAME \
+  --restart unless-stopped \
+  -e LARAVEL_ENV_ENCRYPTION_KEY="$LARAVEL_ENV_ENCRYPTION_KEY" \
+  -e APP_ENV="${APP_ENV:-production}" \
+  -v app_storage:/var/www/html/storage \
+  $IMAGE
+
+# Tunggu container ready
+echo -e "${YELLOW}⏳ Waiting for $ROLLBACK_TARGET...${NC}"
+for i in $(seq 1 15); do
+    if docker exec $ROLLBACK_TARGET php -r "echo 'ok';" >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ $ROLLBACK_TARGET ready (${i}s)${NC}"
+        break
+    fi
+    if [ $i -eq 15 ]; then
+        echo -e "${RED}❌ Rollback container gagal start${NC}"
+        exit 1
+    fi
+    sleep 2
+done
+
+# =====================================================================
+# 3. SWITCH NGINX KE ROLLBACK TARGET
+# =====================================================================
+
+echo -e "${YELLOW}🔄 Switching Nginx to $ROLLBACK_TARGET...${NC}"
+
+cat > "${NGINX_CONF_DIR}/default.conf" << EOF
+server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html/public;
+    index index.php index.html;
+
+    resolver 127.0.0.11 valid=5s ipv6=off;
+
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+    }
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \.php\$ {
+        set \$backend "${ROLLBACK_TARGET}:9000";
+        fastcgi_pass \$backend;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_read_timeout 300;
+        fastcgi_param HTTP_X_REAL_IP \$remote_addr;
+    }
+}
+EOF
+
+if docker exec ${PROJECT_NAME}_nginx nginx -t >/dev/null 2>&1; then
+    docker exec ${PROJECT_NAME}_nginx nginx -s reload
+    echo -e "${GREEN}✅ Nginx switched to $ROLLBACK_TARGET${NC}"
+else
+    echo -e "${RED}❌ Nginx config error saat rollback!${NC}"
     exit 1
 fi
 
 # =====================================================================
-# 1. BACKUP CURRENT NGINX CONFIG
+# 4. SAVE STATE & CLEANUP
 # =====================================================================
 
-echo -e "${YELLOW}💾 Backing up current Nginx config...${NC}"
-docker exec ${PROJECT_NAME}_nginx cp /etc/nginx/conf.d/default.conf /tmp/default.conf.rollback.bak
+echo "LAST_ACTIVE_CONTAINER=\"$ROLLBACK_TARGET\"" > "$STATE_FILE"
 
-# =====================================================================
-# 2. START OLD CONTAINER IF STOPPED
-# =====================================================================
+echo -e "${YELLOW}🧹 Stopping & removing $CURRENT...${NC}"
+docker stop $CURRENT 2>/dev/null || true
+docker rm   $CURRENT 2>/dev/null || true
 
-if ! docker ps | grep -q $OLD_CONTAINER; then
-    echo -e "${YELLOW}Starting old container: $OLD_CONTAINER${NC}"
-    docker start $OLD_CONTAINER
-    sleep 10
-fi
-
-# =====================================================================
-# 3. SWITCH TRAFFIC BACK TO OLD CONTAINER
-# =====================================================================
-
-echo -e "${YELLOW}🔄 Switching traffic back to $OLD_CONTAINER...${NC}"
-docker exec ${PROJECT_NAME}_nginx /bin/sh -c "
-    sed -i 's/\($NEW_CONTAINER:9000;\)/\1 down;/g' /etc/nginx/conf.d/default.conf
-    sed -i 's/\($OLD_CONTAINER:9000 down;\)/$OLD_CONTAINER:9000;/g' /etc/nginx/conf.d/default.conf
-"
-
-# Test and reload
-if docker exec ${PROJECT_NAME}_nginx nginx -t; then
-    docker exec ${PROJECT_NAME}_nginx nginx -s reload
-    echo -e "${GREEN}✅ Traffic switched back!${NC}"
-else
-    echo -e "${RED}❌ Nginx config error! Restoring backup...${NC}"
-    docker exec ${PROJECT_NAME}_nginx cp /tmp/default.conf.rollback.bak /etc/nginx/conf.d/default.conf
-    docker exec ${PROJECT_NAME}_nginx nginx -s reload
-    exit 1
-fi
-
-# =====================================================================
-# 4. VERIFY ROLLBACK
-# =====================================================================
-
-echo -e "${YELLOW}🔍 Verifying rollback...${NC}"
-sleep 5
-
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health 2>/dev/null || echo "000")
-
-if [ "$HTTP_CODE" = "200" ]; then
-    echo -e "${GREEN}✅ Application is healthy (HTTP 200)${NC}"
-else
-    echo -e "${RED}⚠️  Health check failed after rollback! Check manually.${NC}"
-fi
-
-# =====================================================================
-# 5. STOP & REMOVE NEW (BROKEN) CONTAINER
-# =====================================================================
-
-echo -e "${YELLOW}🧹 Removing broken container: $NEW_CONTAINER${NC}"
-docker stop $NEW_CONTAINER 2>/dev/null || true
-docker rm $NEW_CONTAINER 2>/dev/null || true
-
-# =====================================================================
-# 6. RESTORE DATABASE IF NEEDED (Opsional)
-# =====================================================================
-
-echo ""
-echo -e "${YELLOW}Do you want to restore database from backup?${NC}"
-echo -e "  ${BLUE}Backup available: $BACKUP_DIR/backup_${TIMESTAMP}.sql.gz${NC}"
-read -p "Restore database? (y/n) " -n 1 -r
-echo ""
-
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}📦 Restoring database...${NC}"
-    gunzip < $BACKUP_DIR/backup_${TIMESTAMP}.sql.gz | docker exec -i ${PROJECT_NAME}_mysql mysql -uroot -proot
-    echo -e "${GREEN}✅ Database restored${NC}"
-fi
-
-# =====================================================================
-# 7. FINAL STATUS
-# =====================================================================
-
-echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}✅✅✅ ROLLBACK COMPLETE! ✅✅✅${NC}"
+echo -e "${GREEN}✅ ROLLBACK SUCCESSFUL: $ROLLBACK_TARGET IS ACTIVE${NC}"
+echo -e "${GREEN}   Time : $TIMESTAMP${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}Active container: $OLD_CONTAINER${NC}"
-echo ""
-
-docker ps --format "table {{.Names}}\t{{.Status}}" | grep jtiport

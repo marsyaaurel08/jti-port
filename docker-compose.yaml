@@ -1,6 +1,29 @@
 version: "3.8"
 
+# =====================================================================
+# Docker Compose - Jtiport [FIXED]
+#
+# FIX UTAMA:
+#   - HAPUS service jtiport_${COLOR:-blue} karena Docker Compose
+#     tidak support variable substitution di service name.
+#     Container blue/green dikelola murni oleh deploy.sh via
+#     `docker run` — bukan lewat compose.
+#
+#   - Nginx tidak lagi depends_on app container karena container
+#     blue/green tidak didefinisikan di sini. Deploy.sh yang
+#     memastikan urutan start yang benar.
+#
+#   - Worker tetap di sini karena dia statis (selalu pakai image
+#     terbaru, tidak perlu blue-green).
+# =====================================================================
+
 services:
+
+  # ------------------------------------------------------------------
+  # NGINX — reverse proxy / web server
+  # Tidak ada depends_on ke app container karena blue/green
+  # dikelola oleh deploy.sh, bukan compose.
+  # ------------------------------------------------------------------
   nginx:
     image: nginx:alpine
     container_name: jtiport_nginx
@@ -9,42 +32,25 @@ services:
       - "8000:80"
     volumes:
       - "./docker/nginx:/etc/nginx/conf.d"
-    networks:
-      - jtiport_network
-    depends_on:
-      - jtiport_blue # Minimal satu harus ada agar Nginx tidak crash saat startup awal
-
-  jtiport_blue:
-    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
-    container_name: jtiport_blue
-    restart: unless-stopped
-    volumes:
-      - "app_storage:/var/www/html/storage"
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
+      # Mount public dir agar Nginx bisa serve static assets langsung
+      # tanpa lewat PHP-FPM
+      - "app_storage:/var/www/html/storage:ro"
     networks:
       - jtiport_network
 
-  jtiport_green:
-    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
-    container_name: jtiport_green
-    restart: unless-stopped
-    volumes:
-      - "app_storage:/var/www/html/storage"
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
-    networks:
-      - jtiport_network
-
+  # ------------------------------------------------------------------
+  # QUEUE WORKER — statis, tidak perlu blue-green
+  # Selalu pakai image terbaru. deploy.sh akan restart worker
+  # setelah deployment selesai.
+  # ------------------------------------------------------------------
   worker:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_worker
     restart: unless-stopped
-    command: php artisan queue:work --sleep=3 --tries=3
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
     environment:
       - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+      - APP_ENV=${APP_ENV:-production}
     volumes:
       - "app_storage:/var/www/html/storage"
     networks:
@@ -53,8 +59,11 @@ services:
       - db
       - redis
 
+  # ------------------------------------------------------------------
+  # DATABASE
+  # ------------------------------------------------------------------
   db:
-    image: mysql:8.0
+    image: mariadb:alpine
     container_name: jtiport_mysql
     restart: unless-stopped
     environment:
@@ -64,16 +73,32 @@ services:
       - jtiport_dbdata:/var/lib/mysql
     networks:
       - jtiport_network
+    # Health check agar service lain bisa depends_on dengan kondisi
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
+  # ------------------------------------------------------------------
+  # REDIS — cache & queue
+  # ------------------------------------------------------------------
   redis:
     image: redis:alpine
     container_name: jtiport_redis
+    restart: unless-stopped
     networks:
       - jtiport_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 networks:
   jtiport_network:
-    name: jtiport_network # Mengunci nama agar tidak otomatis diberi prefix oleh docker-compose
+    name: jtiport_network
     driver: bridge
 
 volumes:
