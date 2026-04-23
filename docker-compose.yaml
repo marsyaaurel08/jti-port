@@ -1,48 +1,19 @@
 version: "3.8"
 
-# =====================================================================
-# Docker Compose - Jtiport [FIXED]
-#
-# FIX UTAMA:
-#   - HAPUS service jtiport_${COLOR:-blue} karena Docker Compose
-#     tidak support variable substitution di service name.
-#     Container blue/green dikelola murni oleh deploy.sh via
-#     `docker run` — bukan lewat compose.
-#
-#   - Nginx tidak lagi depends_on app container karena container
-#     blue/green tidak didefinisikan di sini. Deploy.sh yang
-#     memastikan urutan start yang benar.
-#
-#   - Worker tetap di sini karena dia statis (selalu pakai image
-#     terbaru, tidak perlu blue-green).
-# =====================================================================
-
 services:
 
-  # ------------------------------------------------------------------
-  # NGINX — reverse proxy / web server
-  # Tidak ada depends_on ke app container karena blue/green
-  # dikelola oleh deploy.sh, bukan compose.
-  # ------------------------------------------------------------------
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: jtiport_nginx
     restart: unless-stopped
     ports:
       - "8000:80"
     volumes:
       - "./docker/nginx:/etc/nginx/conf.d"
-      # Mount public dir agar Nginx bisa serve static assets langsung
-      # tanpa lewat PHP-FPM
       - "app_storage:/var/www/html/storage:ro"
     networks:
       - jtiport_network
 
-  # ------------------------------------------------------------------
-  # QUEUE WORKER — statis, tidak perlu blue-green
-  # Selalu pakai image terbaru. deploy.sh akan restart worker
-  # setelah deployment selesai.
-  # ------------------------------------------------------------------
   worker:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_worker
@@ -56,14 +27,25 @@ services:
     networks:
       - jtiport_network
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # ------------------------------------------------------------------
   # DATABASE
+  # FIX 1: Pin ke mariadb:11.4 — bukan :alpine atau :latest.
+  #         mariadb:alpine mengikuti latest major version (sekarang 12.x)
+  #         dan format ib_logfile berubah antar major version.
+  #         Kalau Docker pull image baru tapi data volume dari versi lama,
+  #         InnoDB tidak bisa baca ib_logfile0 → container crash loop.
+  #
+  # FIX 2: Mount custom my.cnf untuk:
+  #         - Disable io_uring (EPERM di VM/container terbatas)
+  #         - Tuning buffer yang lebih aman untuk VPS kecil
   # ------------------------------------------------------------------
   db:
-    image: mariadb:latest
+    image: mariadb:11.4
     container_name: jtiport_mysql
     restart: unless-stopped
     environment:
@@ -71,21 +53,18 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE:-jtiport}
     volumes:
       - jtiport_dbdata:/var/lib/mysql
+      - "./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro"
     networks:
       - jtiport_network
-    # Health check agar service lain bisa depends_on dengan kondisi
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 60s
 
-  # ------------------------------------------------------------------
-  # REDIS — cache & queue
-  # ------------------------------------------------------------------
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: jtiport_redis
     restart: unless-stopped
     networks:
