@@ -98,8 +98,7 @@ services:
 
 networks:
   jtiport_network:
-    name: jtiport_network
-    driver: bridge
+    external: true
 
 volumes:
   jtiport_dbdata:
