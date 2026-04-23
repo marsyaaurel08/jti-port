@@ -65,6 +65,13 @@ jobs:
     environment: production
 
     steps:
+      - name: Repair workspace permissions (self-hosted)
+        run: |
+          if command -v sudo >/dev/null 2>&1; then
+            sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE" || true
+          fi
+          chmod -R u+rwX "$GITHUB_WORKSPACE" || true
+
       - name: Checkout
         uses: actions/checkout@v4
 
