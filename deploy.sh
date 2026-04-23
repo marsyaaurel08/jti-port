@@ -126,12 +126,10 @@ done
 # 3. LARAVEL OPTIMIZATION
 # =====================================================================
 
-echo -e "${YELLOW}⚡ Running Laravel commands on $NEW_NAME...${NC}"
-docker exec $NEW_NAME php artisan config:cache
-docker exec $NEW_NAME php artisan route:cache
-docker exec $NEW_NAME php artisan view:cache
+echo -e "${YELLOW}⚡ Running post-start Laravel commands on $NEW_NAME...${NC}"
+# Cache & migrate sudah ditangani oleh docker-entrypoint.sh saat boot container.
+# Hindari menjalankan command berat dua kali karena bisa memicu OOM (exit 137).
 docker exec $NEW_NAME php artisan storage:link --force || true
-docker exec $NEW_NAME php artisan migrate --force
 
 # =====================================================================
 # 4. NGINX CONFIG & TRAFFIC SWITCH
