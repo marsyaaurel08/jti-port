@@ -11,7 +11,7 @@ echo -e "${GREEN}🚀 Container starting: $HOSTNAME${NC}"
 # =====================================================================
 # 1. DECRYPT ENV
 # =====================================================================
-if [ -f .env.encrypted ]; then
+if [ -f .env.production.encrypted ]; then
     echo -e "${YELLOW}🔐 Decrypting .env...${NC}"
     php artisan env:decrypt \
         --env=production \
