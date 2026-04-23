@@ -81,4 +81,6 @@ networks:
 
 volumes:
   jtiport_dbdata:
+    name: jtiport_dbdata
   app_storage:
+    name: jtiport_app_storage
