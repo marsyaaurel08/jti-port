@@ -1,69 +1,99 @@
-FROM php:8.3-fpm-alpine
+#!/bin/bash
+set -e
 
-WORKDIR /var/www/html
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-# =========================
-# System dependencies
-# FIX: Tambah netcat-openbsd (nc) untuk health check DB di entrypoint.
-#      Tanpa ini, `nc -z db 3306` di entrypoint akan gagal.
-# =========================
-RUN apk add --no-cache \
-    git curl zip unzip \
-    libpng-dev libjpeg-turbo-dev freetype-dev \
-    icu-dev oniguruma-dev libzip-dev \
-    bash \
-    netcat-openbsd
+echo -e "${GREEN}🚀 Container starting: $HOSTNAME${NC}"
 
-# =========================
-# PHP extensions
-# =========================
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install \
-        pdo_mysql mbstring exif pcntl bcmath gd intl zip \
-    && docker-php-ext-enable opcache
+# =====================================================================
+# 1. DECRYPT ENV
+# =====================================================================
+if [ -f .env.encrypted ]; then
+    echo -e "${YELLOW}🔐 Decrypting .env...${NC}"
+    php artisan env:decrypt \
+        --env=production \
+        --key="$LARAVEL_ENV_ENCRYPTION_KEY" \
+        --filename=.env \
+        --force
+    echo -e "${GREEN}✓ .env decrypted${NC}"
+fi
 
-# =========================
-# PHP-FPM & OPcache config
-# =========================
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
-COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+# =====================================================================
+# 2. WAIT FOR DB
+# FIX: Gunakan loop dengan timeout yang jelas agar container tidak
+#      hang selamanya kalau DB bermasalah.
+# =====================================================================
+echo -e "${YELLOW}⏳ Waiting for DB (db:3306)...${NC}"
+MAX_TRIES=30
+TRIES=0
+until nc -z db 3306 2>/dev/null; do
+    TRIES=$((TRIES + 1))
+    if [ $TRIES -ge $MAX_TRIES ]; then
+        echo -e "${RED}❌ DB tidak ready setelah ${MAX_TRIES} percobaan. Abort.${NC}"
+        exit 1
+    fi
+    echo -e "${YELLOW}   Waiting... (${TRIES}/${MAX_TRIES})${NC}"
+    sleep 2
+done
+echo -e "${GREEN}✓ DB ready${NC}"
 
-# =========================
-# Composer
-# =========================
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# =====================================================================
+# 3. MIGRATE
+# Dijalankan di entrypoint sebagai fallback safety net.
+# Deploy.sh juga menjalankan migrate setelah container ready,
+# tapi ini memastikan container baru selalu dalam state yang benar.
+# =====================================================================
+echo -e "${YELLOW}🗄️ Running migrations...${NC}"
+php artisan migrate --force || {
+    echo -e "${RED}❌ Migration failed${NC}"
+    exit 1
+}
+echo -e "${GREEN}✓ Migrations done${NC}"
 
-# =========================
-# Install dependencies dulu (cache layer optimization)
-# =========================
-COPY composer.json composer.lock ./
+# =====================================================================
+# 4. LARAVEL CACHE
+# Hanya generate kalau belum ada (misalnya di-generate deploy.sh).
+# Cek config.php sebagai indikator cache sudah ada.
+# =====================================================================
+if [ ! -f bootstrap/cache/config.php ]; then
+    echo -e "${YELLOW}⚡ Generating Laravel cache...${NC}"
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+    echo -e "${GREEN}✓ Cache generated${NC}"
+else
+    echo -e "${GREEN}✓ Cache already exists, skipping${NC}"
+fi
 
-RUN composer install \
-    --no-dev \
-    --optimize-autoloader \
-    --no-interaction \
-    --prefer-dist \
-    --no-scripts
+# =====================================================================
+# 5. STORAGE LINK
+# =====================================================================
+php artisan storage:link --force 2>/dev/null || true
+echo -e "${GREEN}✓ Storage linked${NC}"
 
-# =========================
-# Copy seluruh project
-# =========================
-COPY . .
+# =====================================================================
+# 6. PERMISSIONS
+# Pastikan permissions benar walau volume di-mount dari luar
+# =====================================================================
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-# =========================
-# Permissions
-# =========================
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+# =====================================================================
+# 7. SLACK NOTIFY (optional)
+# =====================================================================
+if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+    curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -d "{\"text\":\"✅ Container \`$HOSTNAME\` started (env: ${APP_ENV:-production})\"}" \
+      "$SLACK_WEBHOOK_URL" > /dev/null || true
+fi
 
-# =========================
-# Entrypoint
-# FIX: Copy dari path yang konsisten dengan lokasi di repo
-# =========================
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+echo -e "${GREEN}▶ Starting: $@${NC}"
 
-EXPOSE 9000
-
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php-fpm"]
+# =====================================================================
+# 8. START MAIN PROCESS
+# =====================================================================
+exec "$@"
