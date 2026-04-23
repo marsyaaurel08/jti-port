@@ -68,8 +68,13 @@ jobs:
         run: |
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/jtiport:${{ github.sha }}
 
-      - name: Make scripts executable
-        run: chmod +x deploy.sh rollback.sh docker-entrypoint.sh
+      # FIX: Strip Windows line endings (CRLF -> LF) dari semua shell
+      # scripts. Tanpa ini, shebang terbaca sebagai "#!/bin/bash\r"
+      # dan kernel Linux menolaknya dengan "exec format error".
+      - name: Fix line endings & permissions
+        run: |
+          sed -i 's/\r//' deploy.sh rollback.sh docker-entrypoint.sh
+          chmod +x deploy.sh rollback.sh docker-entrypoint.sh
 
       - name: Deploy to Production
         env:
