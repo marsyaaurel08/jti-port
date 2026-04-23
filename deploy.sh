@@ -21,6 +21,11 @@ NGINX_CONF_DIR="./docker/nginx"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 APP_ENV="${APP_ENV:-production}"
 
+is_container_running() {
+    local container_name="$1"
+    [ "$(docker inspect -f '{{.State.Running}}' "$container_name" 2>/dev/null || true)" = "true" ]
+}
+
 # Error handling
 trap 'handle_error $? $LINENO' ERR
 handle_error() {
@@ -180,7 +185,7 @@ EOF
 
 # FIX: Start Nginx SETELAH container app ready (first deployment),
 #      atau reload saja kalau Nginx sudah berjalan.
-if docker ps | grep -q "${PROJECT_NAME}_nginx"; then
+if is_container_running "${PROJECT_NAME}_nginx"; then
     echo -e "${YELLOW}🔄 Nginx sudah running, test & reload config...${NC}"
     if docker exec ${PROJECT_NAME}_nginx nginx -t >/dev/null 2>&1; then
         docker exec ${PROJECT_NAME}_nginx nginx -s reload
@@ -194,13 +199,22 @@ else
     # FIX: Nginx baru start di sini setelah container app sudah ready,
     #      sehingga DNS untuk $NEW_NAME sudah bisa di-resolve.
     docker-compose up -d nginx
-    sleep 3
-    if docker ps | grep -q "${PROJECT_NAME}_nginx"; then
-        echo -e "${GREEN}✅ Nginx started. Traffic is on $NEW_NAME${NC}"
-    else
-        echo -e "${RED}❌ Nginx failed to start${NC}"
-        exit 1
-    fi
+
+    # Tunggu sampai state container benar-benar running untuk hindari false negative
+    for i in $(seq 1 15); do
+        if is_container_running "${PROJECT_NAME}_nginx"; then
+            echo -e "${GREEN}✅ Nginx started. Traffic is on $NEW_NAME${NC}"
+            break
+        fi
+
+        if [ $i -eq 15 ]; then
+            echo -e "${RED}❌ Nginx failed to start${NC}"
+            docker ps -a --filter "name=${PROJECT_NAME}_nginx"
+            exit 1
+        fi
+
+        sleep 1
+    done
 fi
 
 # =====================================================================
