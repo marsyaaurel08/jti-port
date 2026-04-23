@@ -1,9 +1,3 @@
-.git
-node_modules
-docker
-tests
-.env
-
 # =====================================================================
 # .dockerignore - Jtiport
 # FIX: Hapus exclusion untuk docker/php/php.ini dan docker/php/www.conf
