@@ -63,7 +63,7 @@ services:
   # DATABASE
   # ------------------------------------------------------------------
   db:
-    image: mariadb:alpine
+    image: mariadb:latest
     container_name: jtiport_mysql
     restart: unless-stopped
     environment:
