@@ -9,17 +9,9 @@ NC='\033[0m'
 echo -e "${GREEN}🚀 Container starting: $HOSTNAME${NC}"
 
 # =====================================================================
-# 1. DECRYPT ENV
+# 1. DECRYPT ENV (REMOVED)
+# Env vars are now passed via docker run --env-file
 # =====================================================================
-if [ -f .env.production.encrypted ]; then
-    echo -e "${YELLOW}🔐 Decrypting .env...${NC}"
-    php artisan env:decrypt \
-        --env=production \
-        --key="$LARAVEL_ENV_ENCRYPTION_KEY" \
-        --filename=.env \
-        --force
-    echo -e "${GREEN}✓ .env decrypted${NC}"
-fi
 
 # =====================================================================
 # 2. WAIT FOR DB

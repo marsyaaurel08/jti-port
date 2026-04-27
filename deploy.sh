@@ -95,16 +95,36 @@ echo -e "${BLUE}🚀 Target Container: $NEW_NAME${NC}"
 echo -e "${YELLOW}📥 Pulling image: $DOCKER_IMAGE ...${NC}"
 docker pull $DOCKER_IMAGE
 
+echo -e "${YELLOW}🔐 Decrypting environment variables on host...${NC}"
+if [ -f ".env.production.encrypted" ]; then
+    # Decode to host so we can pass it via --env-file
+    docker run --rm \
+      -u "$(id -u):$(id -g)" \
+      -v "$(pwd):/app" \
+      -w /app \
+      --entrypoint php \
+      $DOCKER_IMAGE \
+      artisan env:decrypt --env=production --key="$LARAVEL_ENV_ENCRYPTION_KEY" --filename=.env --force
+    echo -e "${GREEN}✓ .env decrypted on host${NC}"
+fi
+
 echo -e "${YELLOW}🧹 Removing old $NEW_NAME if exists...${NC}"
 docker rm -f $NEW_NAME 2>/dev/null || true
 
 echo -e "${YELLOW}⚙️ Starting $NEW_NAME...${NC}"
+# Default to .env file if it exists, otherwise pass minimal vars
+ENV_OPTS=""
+if [ -f ".env" ]; then
+    ENV_OPTS="--env-file .env"
+else
+    ENV_OPTS="-e LARAVEL_ENV_ENCRYPTION_KEY=$LARAVEL_ENV_ENCRYPTION_KEY -e APP_ENV=$APP_ENV"
+fi
+
 docker run -d \
   --name $NEW_NAME \
   --network $NETWORK_NAME \
   --restart unless-stopped \
-  -e LARAVEL_ENV_ENCRYPTION_KEY="$LARAVEL_ENV_ENCRYPTION_KEY" \
-  -e APP_ENV="$APP_ENV" \
+  $ENV_OPTS \
   -v app_storage:/var/www/html/storage \
   $DOCKER_IMAGE
 
@@ -229,11 +249,9 @@ if [ "$IS_FIRST_DEPLOYMENT" = false ]; then
     echo -e "${GREEN}✓ $OLD_NAME removed${NC}"
 fi
 
-# Start worker kalau belum jalan
-if ! docker ps | grep -q "${PROJECT_NAME}_worker"; then
-    echo -e "${YELLOW}⚙️ Starting queue worker...${NC}"
-    docker-compose up -d worker
-fi
+# Restart/Update worker
+echo -e "${YELLOW}⚙️ Starting/Updating queue worker...${NC}"
+docker-compose up -d worker
 
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL: $NEW_NAME IS ACTIVE${NC}"
