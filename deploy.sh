@@ -97,14 +97,21 @@ docker pull $DOCKER_IMAGE
 
 echo -e "${YELLOW}🔐 Decrypting environment variables on host...${NC}"
 if [ -f ".env.production.encrypted" ]; then
+    # Create a temporary directory for the output
+    mkdir -p tmp_env
     # Decode to host so we can pass it via --env-file
     docker run --rm \
       -u "$(id -u):$(id -g)" \
       -v "$(pwd)/.env.production.encrypted:/var/www/html/.env.production.encrypted:ro" \
-      -v "$(pwd):/tmp/host_env" \
+      -v "$(pwd)/tmp_env:/var/www/html/tmp_env" \
       --entrypoint php \
       $DOCKER_IMAGE \
-      artisan env:decrypt --env=production --key="$LARAVEL_ENV_ENCRYPTION_KEY" --filename=/tmp/host_env/.env --force
+      artisan env:decrypt --env=production --key="$LARAVEL_ENV_ENCRYPTION_KEY" --filename=tmp_env/.env --force
+    
+    # Move the decrypted file to the root directory
+    mv tmp_env/.env .env
+    rm -rf tmp_env
+    
     echo -e "${GREEN}✓ .env decrypted on host${NC}"
 fi
 
