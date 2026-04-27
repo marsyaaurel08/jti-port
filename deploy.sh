@@ -100,11 +100,11 @@ if [ -f ".env.production.encrypted" ]; then
     # Decode to host so we can pass it via --env-file
     docker run --rm \
       -u "$(id -u):$(id -g)" \
-      -v "$(pwd):/app" \
-      -w /app \
+      -v "$(pwd)/.env.production.encrypted:/var/www/html/.env.production.encrypted:ro" \
+      -v "$(pwd):/tmp/host_env" \
       --entrypoint php \
       $DOCKER_IMAGE \
-      artisan env:decrypt --env=production --key="$LARAVEL_ENV_ENCRYPTION_KEY" --filename=.env --force
+      artisan env:decrypt --env=production --key="$LARAVEL_ENV_ENCRYPTION_KEY" --filename=/tmp/host_env/.env --force
     echo -e "${GREEN}✓ .env decrypted on host${NC}"
 fi
 
