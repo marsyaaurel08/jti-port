@@ -272,6 +272,171 @@ window.matchingComponent = function ({
     };
 };
 
+// ── Drop Down Component (Alpine) ─────────────────────────────────────────
+window.dropDownComponent = function ({ template, blanksMap, selected, wireModel, questionId }) {
+    return {
+        template: template,
+        blanksMap: blanksMap,
+        selected: selected || {},
+        wireModel: wireModel,
+        questionId: questionId,
+        renderedTemplate: "",
+
+        getQuizDataFromLocalStorage(quizId) {
+            try {
+                const STORAGE_KEY_PREFIX = "quiz_attempt_";
+                const STORAGE_VERSION = "1.2";
+                const key = `${STORAGE_KEY_PREFIX}${quizId}`;
+                const data = localStorage.getItem(key);
+                if (!data) return null;
+
+                const parsed = JSON.parse(data);
+                if (parsed.version !== STORAGE_VERSION) {
+                    localStorage.removeItem(key);
+                    return null;
+                }
+                return parsed;
+            } catch (error) {
+                return null;
+            }
+        },
+
+        init() {
+            // Get quizId from DOM and check localStorage directly
+            const quizElement = document.querySelector("[data-quiz-id]");
+            const quizId = quizElement ? quizElement.dataset.quizId : null;
+
+            if (quizId) {
+                const savedData = this.getQuizDataFromLocalStorage(quizId);
+                if (savedData && savedData.answers && savedData.answers[this.questionId]) {
+                    const answerData = savedData.answers[this.questionId];
+                    if (answerData.questionType === "drop_down" && answerData.answer) {
+                        this.selected = answerData.answer;
+                    }
+                }
+            }
+
+            this.renderedTemplate = this.renderTemplate();
+            
+            // Listen for restore-question event
+            document.addEventListener("restore-question", (e) => {
+                if (e.detail.questionId === this.questionId && e.detail.questionType === "drop_down") {
+                    if (e.detail.answer && typeof e.detail.answer === "object") {
+                        this.selected = e.detail.answer;
+                        this.renderedTemplate = this.renderTemplate();
+                    }
+                }
+            });
+
+            // Check Livewire value when navigating to this question
+            document.addEventListener("question-navigated", (e) => {
+                if (e.detail.index !== undefined) {
+                    const quizElement = document.querySelector("[data-quiz-id]");
+                    if (quizElement) {
+                        const questionElements = quizElement.querySelectorAll("[data-question-id]");
+                        const currentQuestionElement = questionElements[e.detail.index];
+                        if (currentQuestionElement && String(currentQuestionElement.dataset.questionId) === String(this.questionId)) {
+                            setTimeout(() => this.checkLivewireValue(), 100);
+                        }
+                    }
+                }
+            });
+
+            // Also check after a short delay to handle initial load scenarios
+            setTimeout(() => this.checkLivewireValue(), 500);
+        },
+
+        checkLivewireValue() {
+            const livewireEl = this.$root?.closest("[wire\\:id]");
+            if (livewireEl && window.Livewire) {
+                const component = window.Livewire.find(livewireEl.getAttribute("wire:id"));
+                if (component) {
+                    const livewireValue = component.get(`${this.wireModel}.${this.questionId}`);
+                    if (livewireValue && JSON.stringify(livewireValue) !== JSON.stringify(this.selected)) {
+                        this.selected = livewireValue;
+                        this.renderedTemplate = this.renderTemplate();
+                    }
+                }
+            }
+        },
+
+        getBlankIds() {
+            const regex = /\{(blank\d+)\}/g;
+            const ids = [];
+            let match;
+            while ((match = regex.exec(this.template)) !== null) {
+                if (!ids.includes(match[1])) {
+                    ids.push(match[1]);
+                }
+            }
+            return ids;
+        },
+
+        renderTemplate() {
+            let result = this.template;
+            const blankIds = this.getBlankIds();
+            
+            blankIds.forEach(blankId => {
+                const options = this.blanksMap[blankId] || [];
+                const selectedValue = this.selected[blankId] || "";
+                
+                // Build dropdown HTML
+                let dropdownHtml = `<select 
+                    class="quiz-input bg-gray-800 text-yellow-400 px-2 py-1 rounded border border-yellow-600 focus:border-yellow-400 focus:outline-none cursor-pointer text-xs md:text-sm font-mono"
+                    data-blank-id="${blankId}"
+                    onchange="this.closest('[x-data]').__x.$data.selectDropdown('${blankId}', this.value)"
+                >
+                    <option value="" ${selectedValue === "" ? "selected" : ""}>Select...</option>`;
+                
+                options.forEach(opt => {
+                    dropdownHtml += `<option value="${opt.id}" ${selectedValue === opt.id ? "selected" : ""}>${opt.text}</option>`;
+                });
+                
+                dropdownHtml += `</select>`;
+                
+                // Replace {blankId} with the dropdown
+                result = result.replace(new RegExp(`\\{${blankId}\\}`, 'g'), dropdownHtml);
+            });
+            
+            // Escape HTML for display while keeping our select elements
+            return result;
+        },
+
+        selectDropdown(blankId, value) {
+            if (value) {
+                this.selected[blankId] = value;
+            } else {
+                delete this.selected[blankId];
+            }
+            this.renderedTemplate = this.renderTemplate();
+            this.updateState();
+        },
+
+        updateState() {
+            // Update Livewire
+            const livewireEl = this.$root.closest("[wire\\:id]");
+            if (livewireEl && window.Livewire) {
+                const component = window.Livewire.find(
+                    livewireEl.getAttribute("wire:id"),
+                );
+                if (component) {
+                    component.set(`${wireModel}.${questionId}`, this.selected);
+                }
+            }
+            
+            // Dispatch event for localStorage
+            const event = new CustomEvent("quiz-answer-selected", {
+                detail: {
+                    questionId: this.questionId,
+                    answer: this.selected,
+                    questionType: "drop_down",
+                },
+            });
+            document.dispatchEvent(event);
+        },
+    };
+};
+
 // ── Matching JS Component (Vanilla JS) ─────────────────────────────────────
 window.initMatchingComponent = function (
     componentId,

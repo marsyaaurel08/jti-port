@@ -112,7 +112,15 @@
                             :questionId="$currentQuestion['id']"
                         />
                     @elseif($currentQuestion['type'] === 'boolean')
-                        <x-quiz.boolean :options="$options" :selected="$answers[$currentQuestion['id']] ?? null" wireModel="answers.{{ $currentQuestion['id'] }}" :questionId="$currentQuestion['id']" :questionType="'boolean'" />       
+                        <x-quiz.boolean :options="$options" :selected="$answers[$currentQuestion['id']] ?? null" wireModel="answers.{{ $currentQuestion['id'] }}" :questionId="$currentQuestion['id']" :questionType="'boolean'" />
+                    @elseif($currentQuestion['type'] === 'drop_down')
+                        <x-quiz.drop-down
+                            :template="$config['template'] ?? ''"
+                            :blanks="$config['blanks'] ?? []"
+                            :selected="$dropDownAnswers[$currentQuestion['id']] ?? []"
+                            wireModel="dropDownAnswers"
+                            :questionId="$currentQuestion['id']"
+                        />
                     {{-- @elseif($currentQuestion['type'] === 'coding')
                         <livewire:coding-question-attempt :questionId="$currentQuestion['id']" :key="'coding-question-' . $currentQuestion['id']" /> --}}
                     @endif

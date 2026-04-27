@@ -8,7 +8,6 @@ use App\Models\QuizAttempt;
 
 class QuizScoringService
 {
-
     /**
      * Grade entire attempt
      */
@@ -38,7 +37,6 @@ class QuizScoringService
             'total_score_obtained' => $totalObtained,
         ]);
     }
-
 
     /**
      * Grade a single answer
@@ -73,8 +71,7 @@ class QuizScoringService
             'single_choice' => $this->validateSingleChoice($userAnswer, $answerKey),
             'multiple_choice' => $this->validateMultipleChoice($userAnswer, $answerKey),
             'boolean' => $this->validateBoolean($userAnswer, $answerKey),
-            'matching', 'drag_drop_sorting', 'drag_drop_zones'
-            => $this->validateMapping($userAnswer, $answerKey),
+            'matching', 'drag_drop_sorting', 'drag_drop_zones', 'drop_down' => $this->validateMapping($userAnswer, $answerKey),
             'fill_in_blank' => $this->validateFillInBlank($userAnswer, $answerKey),
             'essay' => false,
             default => false,
@@ -95,9 +92,6 @@ class QuizScoringService
         return $isCorrect ? (float) $question->score_weight : 0.0;
     }
 
-
-
-
     // ======================
     // VALIDATION METHODS
     // ======================
@@ -113,7 +107,7 @@ class QuizScoringService
 
     protected function validateMultipleChoice($userAnswer, $answerKey): bool
     {
-        if (!is_array($userAnswer) || !is_array($answerKey)) {
+        if (! is_array($userAnswer) || ! is_array($answerKey)) {
             return false;
         }
 
@@ -130,7 +124,7 @@ class QuizScoringService
 
     protected function validateMapping($userAnswer, $answerKey): bool
     {
-        if (!is_array($userAnswer) || !is_array($answerKey)) {
+        if (! is_array($userAnswer) || ! is_array($answerKey)) {
             return false;
         }
 

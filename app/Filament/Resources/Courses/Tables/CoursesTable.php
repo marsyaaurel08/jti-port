@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Courses\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -50,14 +51,14 @@ class CoursesTable
                 //         'intermediate' => 'warning',
                 //         'advanced' => 'danger',
                 //     }),
-                // TextColumn::make('status')
-                //     ->label('Status')
-                //     ->badge()
-                //     ->color(fn(string $state): string => match ($state) {
-                //         'draft' => 'gray',
-                //         'published' => 'success',
-                //         'archived' => 'warning',
-                //     }),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'published' => 'success',
+                        'archived' => 'warning',
+                    }),
                 // TextColumn::make('total_duration')
                 //     ->label('Durasi')
                 //     ->formatStateUsing(fn(int $state): string => $state . 'm')
@@ -90,6 +91,9 @@ class CoursesTable
                 ViewAction::make()
                     ->label('Detail')
                     ->icon('heroicon-o-eye'),
+                DeleteAction::make()
+                    ->label('Hapus')
+                    ->icon('heroicon-o-trash'),
                 // EditAction::make(),
             ])
             ->toolbarActions([

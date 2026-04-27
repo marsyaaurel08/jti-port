@@ -52,6 +52,7 @@ class CourseForm
                                 ->required()
                                 ->numeric()
                                 ->default(0.0)
+                                ->minValue(0)
                                 ->prefix('$'),
                             Select::make('level')
                                 ->label('Level')
@@ -106,7 +107,7 @@ class CourseForm
                                                 }),
                                             Select::make('type')
                                                 ->label('Tipe Pelajaran')
-                                                ->options(['video' => 'Video', 'text' => 'Text', 'quiz' => 'Quiz'])
+                                                ->options(['video' => 'Video', 'text' => 'Teks', 'quiz' => 'Kuis'])
                                                 ->required()
                                                 ->live(),
                                             TextInput::make('slug')
@@ -159,6 +160,8 @@ class CourseForm
                                                     TextInput::make('time_limit_minutes')
                                                         ->label('Batas Waktu (menit)')
                                                         ->numeric()
+                                                        ->default(60)
+                                                        
                                                         ->nullable(),
                                                 ]),
                                         ])->columnSpanFull(),

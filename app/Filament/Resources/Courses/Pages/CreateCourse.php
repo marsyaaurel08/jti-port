@@ -9,6 +9,7 @@ class CreateCourse extends CreateRecord
 {
     protected static string $resource = CourseResource::class;
 
+    protected ?string $heading = 'Buat Course';
     protected function getFormActions(): array
     {
         return [];

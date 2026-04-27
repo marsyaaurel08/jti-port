@@ -251,17 +251,17 @@
                                             parseInt(checkbox.value),
                                         );
                                 });
-                            } else if (questionType === "matching") {
-                                // Restore matching dropdown values
+                            } else if (questionType === "matching" || questionType === "drop_down") {
+                                // Restore matching/drop_down dropdown values
                                 const allSelects =
                                     questionElement.querySelectorAll(
-                                        "select.quiz-input",
+                                        "select.quiz-input, select[data-blank-id]",
                                     );
                                 allSelects.forEach((select) => {
-                                    const itemId = select.name.split("_").pop();
-                                    if (answerData.answer[itemId]) {
+                                    const blankId = select.dataset.blankId || select.name.split("_").pop();
+                                    if (answerData.answer[blankId]) {
                                         select.value =
-                                            answerData.answer[itemId];
+                                            answerData.answer[blankId];
                                     }
                                 });
                             } else {
@@ -364,18 +364,18 @@
                         const questionType =
                             questionElement?.dataset.questionType;
 
-                        if (!questionId || questionType !== "matching") return;
+                        if (!questionId || (questionType !== "matching" && questionType !== "drop_down")) return;
 
-                        // For matching questions, collect all select dropdown values
+                        // For matching/drop_down questions, collect all select dropdown values
                         const allSelects =
                             questionElement.querySelectorAll(
-                                "select.quiz-input",
+                                "select.quiz-input, select[data-blank-id]",
                             );
                         const selectedMatches = {};
                         allSelects.forEach((select) => {
-                            const itemId = select.name.split("_").pop();
+                            const blankId = select.dataset.blankId || select.name.split("_").pop();
                             if (select.value && select.value !== "") {
-                                selectedMatches[itemId] = select.value;
+                                selectedMatches[blankId] = select.value;
                             }
                         });
 
@@ -525,21 +525,19 @@
                                                     );
                                             });
                                         } else if (
-                                            questionType === "matching"
+                                            questionType === "matching" || questionType === "drop_down"
                                         ) {
-                                            // Restore matching dropdown values
+                                            // Restore matching/drop_down dropdown values
                                             const allSelects =
                                                 questionElement.querySelectorAll(
-                                                    "select.quiz-input",
+                                                    "select.quiz-input, select[data-blank-id]",
                                                 );
                                             allSelects.forEach((select) => {
-                                                const itemId = select.name
-                                                    .split("_")
-                                                    .pop();
-                                                if (answerData.answer[itemId]) {
+                                                const blankId = select.dataset.blankId || select.name.split("_").pop();
+                                                if (answerData.answer[blankId]) {
                                                     select.value =
                                                         answerData.answer[
-                                                            itemId
+                                                            blankId
                                                         ];
                                                 }
                                             });
@@ -627,6 +625,15 @@
                                                 "answerLoadedFromStorage",
                                                 questionId,
                                                 [],
+                                                questionType,
+                                            );
+                                        } else if (
+                                            questionType === "drop_down"
+                                        ) {
+                                            component.call(
+                                                "answerLoadedFromStorage",
+                                                questionId,
+                                                {},
                                                 questionType,
                                             );
                                         }
