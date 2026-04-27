@@ -1,0 +1,56 @@
+# =====================================================================
+# .dockerignore - Jtiport
+# FIX: Hapus exclusion untuk docker/php/php.ini dan docker/php/www.conf
+#      karena keduanya perlu di-COPY ke dalam image oleh Dockerfile.
+# =====================================================================
+
+# --- Version control ---
+.git
+.gitignore
+.gitattributes
+
+# --- Dev/CI config ---
+.github
+.env
+.env.*
+!.env.example
+
+# --- Node / frontend build artifacts ---
+node_modules
+npm-debug.log
+yarn-error.log
+
+# --- Laravel cache & storage (jangan masuk image) ---
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+
+# --- Test & dev tools ---
+tests
+phpunit.xml
+.phpunit.result.cache
+phpstan.neon
+psalm.xml
+
+# --- Docker files (tidak perlu masuk image, sudah dipakai di build context) ---
+docker-compose*.yml
+deploy.sh
+rollback.sh
+
+# --- Misc ---
+*.md
+README*
+CHANGELOG*
+.DS_Store
+Thumbs.db
+
+# =====================================================================
+# PENTING: docker/php/php.ini dan docker/php/www.conf TIDAK di-exclude
+# di sini karena Dockerfile perlu meng-COPY keduanya ke dalam image.
+# Kalau sebelumnya ada baris:
+#   docker/php/php.ini
+#   docker/php/www.conf
+# -- hapus kedua baris tersebut.
+# =====================================================================

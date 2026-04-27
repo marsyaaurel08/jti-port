@@ -1,40 +1,16 @@
 version: "3.8"
 
 services:
+
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: jtiport_nginx
     restart: unless-stopped
     ports:
       - "8000:80"
     volumes:
       - "./docker/nginx:/etc/nginx/conf.d"
-    networks:
-      - jtiport_network
-    depends_on:
-      - jtiport_blue # Minimal satu harus ada agar Nginx tidak crash saat startup awal
-
-  jtiport_blue:
-    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
-    container_name: jtiport_blue
-    restart: unless-stopped
-    volumes:
-      - "app_storage:/var/www/html/storage"
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
-    networks:
-      - jtiport_network
-
-  jtiport_green:
-    image: ${DOCKER_HUB_USERNAME}/jtiport:latest
-    container_name: jtiport_green
-    restart: unless-stopped
-    volumes:
-      - "app_storage:/var/www/html/storage"
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
-      - APP_ENV=${APP_ENV:-production}
+      - "app_storage:/var/www/html/storage:ro"
     networks:
       - jtiport_network
 
@@ -42,19 +18,33 @@ services:
     image: ${DOCKER_HUB_USERNAME}/jtiport:latest
     container_name: jtiport_worker
     restart: unless-stopped
-    command: php artisan queue:work --sleep=3 --tries=3
-    environment:
-      - LARAVEL_ENV_ENCRYPTION_KEY=${LARAVEL_ENV_ENCRYPTION_KEY}
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+    env_file:
+      - .env
     volumes:
       - "app_storage:/var/www/html/storage"
     networks:
       - jtiport_network
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
+  # ------------------------------------------------------------------
+  # DATABASE
+  # FIX 1: Pin ke mariadb:11.4 — bukan :alpine atau :latest.
+  #         mariadb:alpine mengikuti latest major version (sekarang 12.x)
+  #         dan format ib_logfile berubah antar major version.
+  #         Kalau Docker pull image baru tapi data volume dari versi lama,
+  #         InnoDB tidak bisa baca ib_logfile0 → container crash loop.
+  #
+  # FIX 2: Mount custom my.cnf untuk:
+  #         - Disable io_uring (EPERM di VM/container terbatas)
+  #         - Tuning buffer yang lebih aman untuk VPS kecil
+  # ------------------------------------------------------------------
   db:
-    image: mysql:8.0
+    image: mariadb:11.4
     container_name: jtiport_mysql
     restart: unless-stopped
     environment:
@@ -62,20 +52,34 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE:-jtiport}
     volumes:
       - jtiport_dbdata:/var/lib/mysql
+      - "./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro"
     networks:
       - jtiport_network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: jtiport_redis
+    restart: unless-stopped
     networks:
       - jtiport_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 networks:
   jtiport_network:
-    name: jtiport_network # Mengunci nama agar tidak otomatis diberi prefix oleh docker-compose
-    driver: bridge
+    external: true
 
 volumes:
   jtiport_dbdata:
+    name: jtiport_dbdata
   app_storage:
+    name: jtiport_app_storage

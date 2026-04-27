@@ -1,66 +1,72 @@
-FROM php:8.3-fpm
+FROM php:8.3-fpm-alpine
 
 WORKDIR /var/www/html
 
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    libzip-dev \
-    libicu-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-configure intl \
-    && docker-php-ext-install \
-        pdo_mysql \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        intl \
-        opcache \
-        zip \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# =========================
+# System dependencies
+# FIX: Tambah netcat-openbsd (nc) untuk health check DB di entrypoint.
+#      Tanpa ini, `nc -z db 3306` di entrypoint akan gagal.
+# =========================
+RUN apk add --no-cache \
+    git curl zip unzip \
+    libpng-dev libjpeg-turbo-dev freetype-dev \
+    icu-dev oniguruma-dev libzip-dev \
+    bash \
+    netcat-openbsd
 
-# Install Composer
+# =========================
+# PHP extensions
+# =========================
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        pdo_mysql mbstring exif pcntl bcmath gd intl zip \
+    && docker-php-ext-enable opcache
+
+# =========================
+# PHP-FPM & OPcache config
+# =========================
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# =========================
+# Composer
+# =========================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy composer files dulu untuk layer caching
+# =========================
+# Install dependencies dulu (cache layer optimization)
+# =========================
 COPY composer.json composer.lock ./
 
-# Tambahkan memory limit & install dependencies
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
+RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
     --prefer-dist \
-    --no-scripts \
-    --no-progress
+    --no-scripts
 
+# =========================
 # Copy seluruh project
+# =========================
 COPY . .
 
+# =========================
 # Permissions
+# =========================
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# =========================
+# Entrypoint
+# FIX: sed strip \r (CRLF -> LF) agar shebang terbaca benar di Linux.
+# "exec format error" hampir selalu berarti file punya Windows line
+# endings sehingga kernel membaca "#!/bin/bash\r" yang tidak dikenal.
+# =========================
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-    CMD php artisan health:check || exit 1
+EXPOSE 9000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["php-fpm"]
