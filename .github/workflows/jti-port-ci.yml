@@ -87,6 +87,11 @@ jobs:
       - name: Fix permissions
         run: chmod +x deploy.sh rollback.sh
 
+      - name: Decrypt Environment File
+        run: |
+          chmod +x decrypt.sh
+          ./decrypt.sh .env.production.enc '${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}'
+
       - name: Deploy to Production
         env:
           LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
