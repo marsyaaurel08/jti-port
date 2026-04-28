@@ -45,26 +45,6 @@ echo -e "${BLUE}═════════════════════�
 #      Nginx di-start setelah container app pertama ready.
 # =====================================================================
 
-echo -e "${YELLOW}🔐 Decrypting environment variables on host...${NC}"
-if [ -f ".env.production.encrypted" ]; then
-    # Create a temporary directory for the output
-    mkdir -p tmp_env
-    # Decode to host so we can pass it via --env-file
-    docker run --rm \
-      -u "$(id -u):$(id -g)" \
-      -v "$(pwd)/.env.production.encrypted:/var/www/html/.env.production.encrypted:ro" \
-      -v "$(pwd)/tmp_env:/var/www/html/tmp_env" \
-      --entrypoint php \
-      $DOCKER_IMAGE \
-      artisan env:decrypt --env=production --key="$LARAVEL_ENV_ENCRYPTION_KEY" --filename=tmp_env/.env --force
-
-    # Move the decrypted file to the root directory
-    mv tmp_env/.env .env
-    rm -rf tmp_env
-
-    echo -e "${GREEN}✓ .env decrypted on host${NC}"
-fi
-
 # Pastikan network ada
 if ! docker network inspect $NETWORK_NAME >/dev/null 2>&1; then
     echo -e "${YELLOW}🌐 Creating network: $NETWORK_NAME...${NC}"
@@ -153,10 +133,6 @@ done
 # =====================================================================
 # 3. LARAVEL OPTIMIZATION
 # =====================================================================
-
-echo -e "${YELLOW}⚡ Fixing folder permissions on $NEW_NAME...${NC}"
-docker exec -u root $NEW_NAME chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
-docker exec -u root $NEW_NAME chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
 echo -e "${YELLOW}⚡ Running Laravel commands on $NEW_NAME...${NC}"
 docker exec $NEW_NAME php artisan config:cache

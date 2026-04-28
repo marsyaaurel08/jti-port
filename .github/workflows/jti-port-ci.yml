@@ -87,6 +87,15 @@ jobs:
       - name: Fix permissions
         run: chmod +x deploy.sh rollback.sh
 
+      - name: Decrypt Environment File
+        run: |
+          # Kita gunakan docker untuk decrypt supaya tidak butuh vendor/ atau PHP lokal yang ribet permission-nya
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            php:8.2-cli-alpine \
+            sh -c "php artisan env:decrypt --key='${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}' --env=production --force && mv .env.production .env"
+
       - name: Deploy to Production
         env:
           LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
