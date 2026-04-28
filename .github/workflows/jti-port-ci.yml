@@ -87,11 +87,36 @@ jobs:
       - name: Fix permissions
         run: chmod +x deploy.sh rollback.sh
 
-      - name: Decrypt Environment File
+      - name: Decrypt Environment File (No Artisan)
         run: |
-          chmod +x decrypt.sh
-          ./decrypt.sh .env.production.enc '${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}'
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            php:8.2-cli-alpine \
+            php -r "
+            \$encryptedData = file_get_contents('.env.production.encrypted');
+            // Laravel menyimpan data enkripsi dalam format JSON base64
+            \$payload = json_decode(base64_decode(\$encryptedData), true);
 
+            if (!\$payload || !isset(\$payload['value'])) {
+                die('Format file enkripsi tidak valid.');
+            }
+
+            \$key = base64_decode('${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}');
+            \$iv = base64_decode(\$payload['iv']);
+            \$value = \$payload['value'];
+
+            // Dekripsi menggunakan AES-256-CBC (Standar Laravel)
+            \$decrypted = openssl_decrypt(\$value, 'aes-256-cbc', \$key, 0, \$iv);
+
+            if (\$decrypted === false) {
+                die('Dekripsi gagal. Pastikan Key benar.');
+            }
+
+            // Simpan ke file .env
+            file_put_contents('.env', \$decrypted);
+            echo 'File .env berhasil didekripsi tanpa Artisan!';
+            "
       - name: Deploy to Production
         env:
           LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
