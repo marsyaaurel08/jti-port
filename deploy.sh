@@ -135,9 +135,7 @@ done
 # =====================================================================
 
 echo -e "${YELLOW}⚡ Running Laravel commands on $NEW_NAME...${NC}"
-docker exec $NEW_NAME php artisan config:cache
-docker exec $NEW_NAME php artisan route:cache
-docker exec $NEW_NAME php artisan view:cache
+docker exec $NEW_NAME php artisan optimize
 docker exec $NEW_NAME php artisan storage:link --force || true
 docker exec $NEW_NAME php artisan migrate --force
 
