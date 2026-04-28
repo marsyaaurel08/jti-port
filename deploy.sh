@@ -45,20 +45,6 @@ echo -e "${BLUE}═════════════════════�
 #      Nginx di-start setelah container app pertama ready.
 # =====================================================================
 
-# Pastikan network ada
-if ! docker network inspect $NETWORK_NAME >/dev/null 2>&1; then
-    echo -e "${YELLOW}🌐 Creating network: $NETWORK_NAME...${NC}"
-    docker network create $NETWORK_NAME
-fi
-
-# Start DB dan Redis saja — nginx menyusul setelah container app siap
-if ! docker ps | grep -q "${PROJECT_NAME}_mysql"; then
-    echo -e "${YELLOW}🏗️ Starting infrastructure (DB, Redis)...${NC}"
-    docker-compose up -d db redis
-    echo -e "${YELLOW}⏳ Waiting for DB to be ready...${NC}"
-    sleep 10
-fi
-
 echo -e "${YELLOW}🔐 Decrypting environment variables on host...${NC}"
 if [ -f ".env.production.encrypted" ]; then
     # Create a temporary directory for the output
@@ -78,6 +64,21 @@ if [ -f ".env.production.encrypted" ]; then
 
     echo -e "${GREEN}✓ .env decrypted on host${NC}"
 fi
+
+# Pastikan network ada
+if ! docker network inspect $NETWORK_NAME >/dev/null 2>&1; then
+    echo -e "${YELLOW}🌐 Creating network: $NETWORK_NAME...${NC}"
+    docker network create $NETWORK_NAME
+fi
+
+# Start DB dan Redis saja — nginx menyusul setelah container app siap
+if ! docker ps | grep -q "${PROJECT_NAME}_mysql"; then
+    echo -e "${YELLOW}🏗️ Starting infrastructure (DB, Redis)...${NC}"
+    docker-compose up -d db redis
+    echo -e "${YELLOW}⏳ Waiting for DB to be ready...${NC}"
+    sleep 10
+fi
+
 
 # =====================================================================
 # 1. DETECT TARGET (STATE TRACKING)
