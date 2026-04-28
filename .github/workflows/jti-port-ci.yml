@@ -89,7 +89,7 @@ jobs:
 
       - name: Decrypt Environment File
         run: |
-          ./decrypt.sh .env.production.enc '${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}'
+          ./decrypt.sh .env.production.enc '${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}' .env
 
       - name: Deploy to Production
         env:
