@@ -154,6 +154,10 @@ done
 # 3. LARAVEL OPTIMIZATION
 # =====================================================================
 
+echo -e "${YELLOW}⚡ Fixing folder permissions on $NEW_NAME...${NC}"
+docker exec -u root $NEW_NAME chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+docker exec -u root $NEW_NAME chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
+
 echo -e "${YELLOW}⚡ Running Laravel commands on $NEW_NAME...${NC}"
 docker exec $NEW_NAME php artisan config:cache
 docker exec $NEW_NAME php artisan route:cache
