@@ -48,8 +48,10 @@ services:
     container_name: jtiport_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-jtiport_root_password}
       MYSQL_DATABASE: ${DB_DATABASE:-jtiport}
+      MYSQL_USER: ${DB_USERNAME:-jtiport_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-jtiport_root_password}
     volumes:
       - jtiport_dbdata:/var/lib/mysql
       - "./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro"
