@@ -89,13 +89,20 @@ jobs:
 
       - name: Decrypt Environment File
         run: |
-          # Kita gunakan docker untuk decrypt supaya tidak butuh vendor/ atau PHP lokal yang ribet permission-nya
+          # 1. Jalankan composer install sementara untuk mendapatkan vendor
+          # Kita gunakan --no-scripts agar tidak menjalankan command yang butuh .env
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            composer:latest \
+            composer install --no-interaction --no-scripts --no-autoloader
+
+          # 2. Jalankan dekripsi sekarang setelah vendor tersedia
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -w /app \
             php:8.2-cli-alpine \
             sh -c "php artisan env:decrypt --key='${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}' --env=production --force && mv .env.production .env"
-
       - name: Deploy to Production
         env:
           LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
