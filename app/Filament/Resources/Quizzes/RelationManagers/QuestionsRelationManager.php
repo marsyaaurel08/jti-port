@@ -58,6 +58,7 @@ class QuestionsRelationManager extends RelationManager
                             'boolean'         => 'Boolean',
                             'matching'        => 'Matching',
                             'drag_drop_sorting' => 'Drag & Drop Sorting',
+                            'drop_down'       => 'Drop Down',
                         ])
                         ->required()
                         ->live()
@@ -278,6 +279,61 @@ class QuestionsRelationManager extends RelationManager
                         ->label('Correct Order')
                         ->helperText('Urutkan sesuai jawaban benar'),
                 ]),
+
+            /*
+            |--------------------------------------------------------------------------
+            | DROP DOWN
+            |--------------------------------------------------------------------------
+            */
+
+            Section::make('Drop Down Configuration')
+                ->visible(fn($get) => $get('type') === 'drop_down')
+                ->schema([
+
+                    Textarea::make('question_config.template')
+                        ->label('Template')
+                        ->required()
+                        ->rows(6)
+                        ->helperText('Gunakan {blank1}, {blank2}, dst. untuk menandai bagian yang harus diisi')
+                        ->columnSpanFull(),
+
+                    Toggle::make('question_config.code_mode')
+                        ->label('Code Mode')
+                        ->default(true)
+                        ->hidden(),
+
+                    Repeater::make('question_config.blanks')
+                        ->label('Blanks')
+                        ->schema([
+                            TextInput::make('id')
+                                ->label('Blank ID')
+                                ->required(),
+
+                            Repeater::make('options')
+                                ->label('Options')
+                                ->schema([
+                                    TextInput::make('id')
+                                        ->label('Option ID')
+                                        ->required(),
+
+                                    TextInput::make('text')
+                                        ->label('Option Text')
+                                        ->required(),
+                                ])
+                                ->columns(2)
+                                ->minItems(2)
+                                ->maxItems(4),
+                        ])
+                        ->columns(1)
+                        ->minItems(1)
+                        ->columnSpanFull(),
+
+                    KeyValue::make('answer_key.correct')
+                        ->keyLabel('Blank ID')
+                        ->valueLabel('Correct Option ID')
+                        ->required()
+                        ->columnSpanFull(),
+                ]),
         ]);
     }
 
@@ -291,6 +347,66 @@ class QuestionsRelationManager extends RelationManager
             // Ensure it's an array
             if (!is_array($data['answer_key']['correct'])) {
                 $data['answer_key']['correct'] = [];
+            }
+        }
+
+        // Handle drop_down answer key
+        if (isset($data['type']) && $data['type'] === 'drop_down') {
+            if (!isset($data['answer_key']['correct'])) {
+                $data['answer_key']['correct'] = [];
+            }
+            // Ensure it's an array for KeyValue component
+            if (!is_array($data['answer_key']['correct'])) {
+                $data['answer_key']['correct'] = [];
+            }
+
+            // Auto-generate option IDs when loading data
+            if (isset($data['question_config']['blanks'])) {
+                $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                foreach ($data['question_config']['blanks'] as &$blank) {
+                    if (isset($blank['options'])) {
+                        foreach ($blank['options'] as $index => &$option) {
+                            $option['id'] = $letters[$index] ?? chr(65 + $index);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Auto-generate option IDs for drop_down type
+        if (isset($data['type']) && $data['type'] === 'drop_down') {
+            if (isset($data['question_config']['blanks'])) {
+                $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                foreach ($data['question_config']['blanks'] as &$blank) {
+                    if (isset($blank['options'])) {
+                        foreach ($blank['options'] as $index => &$option) {
+                            $option['id'] = $letters[$index] ?? chr(65 + $index);
+                        }
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Auto-generate option IDs for drop_down type on edit
+        if (isset($data['type']) && $data['type'] === 'drop_down') {
+            if (isset($data['question_config']['blanks'])) {
+                $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                foreach ($data['question_config']['blanks'] as &$blank) {
+                    if (isset($blank['options'])) {
+                        foreach ($blank['options'] as $index => &$option) {
+                            $option['id'] = $letters[$index] ?? chr(65 + $index);
+                        }
+                    }
+                }
             }
         }
         return $data;
@@ -320,6 +436,7 @@ class QuestionsRelationManager extends RelationManager
                         'essay'           => 'Essay',
                         'matching'        => 'Matching',
                         'fill_in_blank'   => 'Fill in Blank',
+                        'drop_down'       => 'Drop Down',
                     ]),
             ])
             ->headerActions([
