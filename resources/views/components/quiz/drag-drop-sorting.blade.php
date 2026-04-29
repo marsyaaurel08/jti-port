@@ -3,22 +3,27 @@
     'selected' => [],
     'wireModel' => 'dragDropAnswers',
     'questionId' => null,
+    'shuffleItems' => false,
+    'savedOrder' => null,
 ])
 
 @php
-    $orderedItems = collect($items)
-        ->sortBy(fn($item) => array_search($item['id'], $selected ?: array_column($items, 'id')))
-        ->values();
+    $originalItems = collect($items)->values()->toArray();
 @endphp
 
 <div
     x-data="dragDropComponent({
-        initialItems: @js($orderedItems),
+        initialItems: @js($originalItems),
+        shuffledItems: @js($shuffleItems ? collect($items)->shuffle()->values()->toArray() : $originalItems),
         wireModel: @js($wireModel),
         questionId: @js($questionId),
+        shuffleOnInit: @js($shuffleItems),
+        hasSavedAnswer: @js(!empty($savedOrder)),
     })"
     x-init="init()"
+    x-key="drag-drop-{{ $questionId }}"
     class="space-y-4 pb-20"
+    data-question-id="{{ $questionId }}"
 >
 
     <!-- Drop Area (sorted result) -->

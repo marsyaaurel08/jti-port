@@ -3,7 +3,90 @@
     File ini menangani tampilan UI untuk menjawab kuis.
     Component: app/Livewire/QuizAttempt.php
 --}}
-<div class="h-screen flex flex-col bg-gray-50 font-sans text-gray-800 overflow-hidden" data-quiz-id="{{ $quizId }}">
+@once
+@push('styles')
+<script>
+    // Preload localStorage data into Livewire before DOM renders
+    document.addEventListener('DOMContentLoaded', function() {
+        const STORAGE_KEY_PREFIX = "quiz_attempt_";
+        const STORAGE_VERSION = "1.2";
+        
+        function getQuizData(quizId) {
+            try {
+                const key = STORAGE_KEY_PREFIX + quizId;
+                const data = localStorage.getItem(key);
+                if (!data) return null;
+                const parsed = JSON.parse(data);
+                if (parsed.version !== STORAGE_VERSION) return null;
+                return parsed;
+            } catch (e) { return null; }
+        }
+        
+        function preloadToLivewire(quizId, savedData) {
+            if (!savedData || !savedData.answers) return;
+            
+            const quizEl = document.querySelector('[data-quiz-id]');
+            if (!quizEl) return;
+            
+            const livewireEl = quizEl.closest('[wire\\:id]');
+            if (!livewireEl || !window.Livewire) return;
+            
+            const component = window.Livewire.find(livewireEl.getAttribute('wire:id'));
+            if (!component) return;
+            
+            const answeredIds = [];
+            
+            for (const [questionId, answerData] of Object.entries(savedData.answers)) {
+                if (!answerData || !answerData.answer) continue;
+                answeredIds.push(questionId);
+                
+                const { answer, questionType } = answerData;
+                
+                if (questionType === 'drag_drop_sorting' && Array.isArray(answer)) {
+                    component.set('dragDropAnswers.' + questionId, answer);
+                } else if (questionType === 'matching' && typeof answer === 'object') {
+                    component.set('matchingAnswers.' + questionId, answer);
+                } else if (questionType === 'drop_down' && typeof answer === 'object') {
+                    component.set('dropDownAnswers.' + questionId, answer);
+                } else if (questionType === 'multiple_choice' && Array.isArray(answer)) {
+                    component.set('multipleChoiceAnswers.' + questionId, answer);
+                } else if (questionType === 'single_choice' || questionType === 'boolean') {
+                    component.set('answers.' + questionId, answer);
+                }
+            }
+            
+            if (answeredIds.length > 0) {
+                component.set('answeredQuestionIds', answeredIds);
+            }
+        }
+        
+        // Get quizId from meta tag or data attribute
+        const quizEl = document.querySelector('[data-quiz-id]');
+        const quizId = quizEl ? quizEl.dataset.quizId : null;
+        
+        if (quizId && window.Livewire) {
+            const savedData = getQuizData(quizId);
+            if (savedData) {
+                preloadToLivewire(quizId, savedData);
+            }
+        } else if (quizId) {
+            // Wait for Livewire to be ready
+            const checkLivewire = setInterval(() => {
+                if (window.Livewire) {
+                    clearInterval(checkLivewire);
+                    const savedData = getQuizData(quizId);
+                    if (savedData) {
+                        preloadToLivewire(quizId, savedData);
+                    }
+                }
+            }, 50);
+        }
+    });
+</script>
+@endpush
+@endonce
+
+<div class="h-screen flex flex-col bg-gray-50 font-sans text-gray-800 overflow-hidden" data-quiz-id="{{ $quizId }}" id="quiz-attempt-container">
     <!-- Fixed Header -->
     <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center z-20 sticky top-0">
         <div class="flex items-center gap-3">
@@ -97,9 +180,15 @@
                     @elseif($currentQuestion['type'] === 'multiple_choice')
                         <x-quiz.multiple-choice :options="$options" :selected="$multipleChoiceAnswers[$currentQuestion['id']] ?? []" wireModel="multipleChoiceAnswers.{{ $currentQuestion['id'] }}" :questionType="'multiple_choice'" :questionId="$currentQuestion['id']" />
                     @elseif($currentQuestion['type'] === 'drag_drop_sorting')
+                        @php
+                            $savedDragDropOrder = !empty($dragDropAnswers[$currentQuestion['id']]) 
+                                ? $dragDropAnswers[$currentQuestion['id']] 
+                                : null;
+                        @endphp
                         <x-quiz.drag-drop-sorting
                             :items="$config['items'] ?? []"
-                            :selected="$dragDropAnswers[$currentQuestion['id']] ?? []"
+                            :shuffleItems="$config['shuffle_items'] ?? false"
+                            :savedOrder="$dragDropAnswers[$currentQuestion['id']] ?? null"
                             wireModel="dragDropAnswers"
                             :questionId="$currentQuestion['id']"
                         />

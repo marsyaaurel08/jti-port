@@ -227,17 +227,39 @@
                 }
 
                 // Also restore UI directly for all questions
+                console.log(
+                    "[quiz-local-storage] Starting UI restoration after 300ms timeout",
+                );
                 setTimeout(() => {
+                    console.log(
+                        "[quiz-local-storage] Timeout reached, restoring UI...",
+                    );
                     const questionElements =
                         document.querySelectorAll("[data-question-id]");
+                    console.log(
+                        "[quiz-local-storage] Found questionElements:",
+                        questionElements.length,
+                    );
 
                     questionElements.forEach((questionElement) => {
                         const questionId = questionElement.dataset.questionId;
                         const questionType =
                             questionElement.dataset.questionType;
+                        console.log(
+                            "[quiz-local-storage] Processing questionId:",
+                            questionId,
+                            "questionType:",
+                            questionType,
+                        );
 
                         if (savedData.answers[questionId]) {
                             const answerData = savedData.answers[questionId];
+                            console.log(
+                                "[quiz-local-storage] Found saved answer for questionId:",
+                                questionId,
+                                "answerData:",
+                                answerData,
+                            );
 
                             // Update UI directly
                             if (questionType === "multiple_choice") {
@@ -251,19 +273,52 @@
                                             parseInt(checkbox.value),
                                         );
                                 });
-                            } else if (questionType === "matching" || questionType === "drop_down") {
+                            } else if (
+                                questionType === "matching" ||
+                                questionType === "drop_down"
+                            ) {
                                 // Restore matching/drop_down dropdown values
                                 const allSelects =
                                     questionElement.querySelectorAll(
                                         "select.quiz-input, select[data-blank-id]",
                                     );
                                 allSelects.forEach((select) => {
-                                    const blankId = select.dataset.blankId || select.name.split("_").pop();
+                                    const blankId =
+                                        select.dataset.blankId ||
+                                        select.name.split("_").pop();
                                     if (answerData.answer[blankId]) {
                                         select.value =
                                             answerData.answer[blankId];
                                     }
                                 });
+                            } else if (questionType === "drag_drop_sorting") {
+                                // Restore drag drop sorting order via restore-question event
+                                console.log(
+                                    "[quiz-local-storage] Restoring drag_drop_sorting for questionId:",
+                                    questionId,
+                                    "answer:",
+                                    answerData.answer,
+                                );
+                                const event = new CustomEvent(
+                                    "restore-question",
+                                    {
+                                        detail: {
+                                            questionId: questionId,
+                                            questionType: questionType,
+                                            answer: answerData.answer,
+                                        },
+                                    },
+                                );
+                                console.log(
+                                    "[quiz-local-storage] Dispatching restore-question event:",
+                                    event.detail,
+                                );
+                                const result = document.dispatchEvent(event);
+                                console.log(
+                                    "[quiz-local-storage] Event dispatch result:",
+                                    result,
+                                    "(true=not cancelled, false=cancelled)",
+                                );
                             } else {
                                 const radios = questionElement.querySelectorAll(
                                     'input[type="radio"]',
@@ -364,16 +419,22 @@
                         const questionType =
                             questionElement?.dataset.questionType;
 
-                        if (!questionId || (questionType !== "matching" && questionType !== "drop_down")) return;
+                        if (
+                            !questionId ||
+                            (questionType !== "matching" &&
+                                questionType !== "drop_down")
+                        )
+                            return;
 
                         // For matching/drop_down questions, collect all select dropdown values
-                        const allSelects =
-                            questionElement.querySelectorAll(
-                                "select.quiz-input, select[data-blank-id]",
-                            );
+                        const allSelects = questionElement.querySelectorAll(
+                            "select.quiz-input, select[data-blank-id]",
+                        );
                         const selectedMatches = {};
                         allSelects.forEach((select) => {
-                            const blankId = select.dataset.blankId || select.name.split("_").pop();
+                            const blankId =
+                                select.dataset.blankId ||
+                                select.name.split("_").pop();
                             if (select.value && select.value !== "") {
                                 selectedMatches[blankId] = select.value;
                             }
@@ -460,6 +521,21 @@
                                                 answerData.answer[itemId];
                                         }
                                     });
+                                } else if (
+                                    questionType === "drag_drop_sorting"
+                                ) {
+                                    // Restore drag drop sorting via restore-question
+                                    const event = new CustomEvent(
+                                        "restore-question",
+                                        {
+                                            detail: {
+                                                questionId: questionId,
+                                                questionType: questionType,
+                                                answer: answerData.answer,
+                                            },
+                                        },
+                                    );
+                                    document.dispatchEvent(event);
                                 } else {
                                     const radios =
                                         questionElement.querySelectorAll(
@@ -525,7 +601,8 @@
                                                     );
                                             });
                                         } else if (
-                                            questionType === "matching" || questionType === "drop_down"
+                                            questionType === "matching" ||
+                                            questionType === "drop_down"
                                         ) {
                                             // Restore matching/drop_down dropdown values
                                             const allSelects =
@@ -533,14 +610,40 @@
                                                     "select.quiz-input, select[data-blank-id]",
                                                 );
                                             allSelects.forEach((select) => {
-                                                const blankId = select.dataset.blankId || select.name.split("_").pop();
-                                                if (answerData.answer[blankId]) {
+                                                const blankId =
+                                                    select.dataset.blankId ||
+                                                    select.name
+                                                        .split("_")
+                                                        .pop();
+                                                if (
+                                                    answerData.answer[blankId]
+                                                ) {
                                                     select.value =
                                                         answerData.answer[
                                                             blankId
                                                         ];
                                                 }
                                             });
+                                        } else if (
+                                            questionType === "drag_drop_sorting"
+                                        ) {
+                                            // Restore drag drop sorting via restore-question
+                                            const restoreEvent =
+                                                new CustomEvent(
+                                                    "restore-question",
+                                                    {
+                                                        detail: {
+                                                            questionId:
+                                                                questionId,
+                                                            questionType:
+                                                                questionType,
+                                                            answer: answerData.answer,
+                                                        },
+                                                    },
+                                                );
+                                            document.dispatchEvent(
+                                                restoreEvent,
+                                            );
                                         } else {
                                             const radios =
                                                 questionElement.querySelectorAll(

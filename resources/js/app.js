@@ -12,27 +12,113 @@ import "./cart.js"; // ← Import cart functionality
 createIcons({ icons });
 
 // ── Quiz Alpine Components ────────────────────────────────────────────────
-window.dragDropComponent = function ({ initialItems, wireModel, questionId }) {
+window.dragDropComponent = function ({ initialItems, shuffledItems, wireModel, questionId, shuffleOnInit, hasSavedAnswer }) {
     return {
         items: initialItems,
         dragIndex: null,
 
+        /**
+         * Check localStorage directly for saved answer
+         * This ensures we detect saved answers even if Livewire state is reset
+         */
+        getSavedAnswerFromLocalStorage() {
+            try {
+                const STORAGE_KEY_PREFIX = "quiz_attempt_";
+                const STORAGE_VERSION = "1.2";
+                const quizElement = document.querySelector("[data-quiz-id]");
+                if (!quizElement) return null;
+                
+                const quizId = quizElement.dataset.quizId;
+                if (!quizId) return null;
+                
+                const key = `${STORAGE_KEY_PREFIX}${quizId}`;
+                const data = localStorage.getItem(key);
+                if (!data) return null;
+
+                const parsed = JSON.parse(data);
+
+                // Validate version
+                if (parsed.version !== STORAGE_VERSION) {
+                    localStorage.removeItem(key);
+                    return null;
+                }
+
+                // Check if there's a saved answer for this question
+                if (parsed.answers && parsed.answers[questionId]) {
+                    const answerData = parsed.answers[questionId];
+                    if (answerData.questionType === "drag_drop_sorting" && answerData.answer) {
+                        return answerData.answer;
+                    }
+                }
+
+                return null;
+            } catch (error) {
+                console.error('[dragDropComponent] Error reading from localStorage:', error);
+                return null;
+            }
+        },
+
         init() {
+            console.log('[dragDropComponent] init called for questionId:', questionId);
+            console.log('[dragDropComponent] hasSavedAnswer (from prop):', hasSavedAnswer, 'shuffleOnInit:', shuffleOnInit);
+            console.log('[dragDropComponent] initialItems:', initialItems);
+            console.log('[dragDropComponent] shuffledItems:', shuffledItems);
+            
+            // Check localStorage directly for saved answer
+            const savedAnswer = this.getSavedAnswerFromLocalStorage();
+            console.log('[dragDropComponent] savedAnswer from localStorage:', savedAnswer);
+            
+            // If shuffleOnInit is true AND no saved answer (from prop or localStorage), use shuffled order
+            if (shuffleOnInit && !hasSavedAnswer && !savedAnswer) {
+                console.log('[dragDropComponent] Shuffling items because shuffleOnInit is true and no saved answer');
+                this.items = shuffledItems;
+            } else {
+                console.log('[dragDropComponent] Using initial items (no shuffle or has saved answer)');
+                
+                // If there's a saved answer from localStorage, restore it immediately
+                if (savedAnswer && Array.isArray(savedAnswer)) {
+                    console.log('[dragDropComponent] Restoring items from localStorage immediately:', savedAnswer);
+                    const itemsMap = {};
+                    initialItems.forEach((item) => {
+                        itemsMap[item.id] = item;
+                    });
+                    const restoredItems = savedAnswer
+                        .map((id) => itemsMap[id])
+                        .filter((item) => item);
+                    console.log('[dragDropComponent] restoredItems:', restoredItems);
+                    this.items = restoredItems;
+                }
+            }
+            
+            console.log('[dragDropComponent] items after init:', this.items);
+
+// Listen for restore-question event (for restoring from localStorage on reload)
             document.addEventListener("restore-question", (e) => {
+                console.log('[dragDropComponent] restore-question event received:', e.detail);
                 if (
-                    e.detail.questionId === this.questionId &&
+                    e.detail.questionId === questionId &&
                     e.detail.questionType === "drag_drop_sorting"
                 ) {
+                    console.log('[dragDropComponent] Event matches this question. Restoring items...');
                     if (e.detail.answer && Array.isArray(e.detail.answer)) {
                         const orderedIds = e.detail.answer;
+                        console.log('[dragDropComponent] orderedIds from saved answer:', orderedIds);
                         const itemsMap = {};
                         initialItems.forEach((item) => {
                             itemsMap[item.id] = item;
                         });
-                        this.items = orderedIds
+                        console.log('[dragDropComponent] itemsMap:', itemsMap);
+                        const restoredItems = orderedIds
                             .map((id) => itemsMap[id])
                             .filter((item) => item);
+                        console.log('[dragDropComponent] restoredItems:', restoredItems);
+                        this.items = restoredItems;
+                        console.log('[dragDropComponent] items after restoration:', this.items);
+                    } else {
+                        console.log('[dragDropComponent] No valid answer to restore');
                     }
+                } else {
+                    console.log('[dragDropComponent] Event does not match this question (questionId:', questionId, ', event.questionId:', e.detail.questionId, ')');
                 }
             });
         },
@@ -54,7 +140,7 @@ window.dragDropComponent = function ({ initialItems, wireModel, questionId }) {
         },
 
         updateState() {
-            const orderedIds = this.items.map((i) => parseInt(i.id));
+            const orderedIds = this.items.map((i) => i.id);
             const livewireEl = this.$root.closest("[wire\\:id]");
             if (livewireEl && window.Livewire) {
                 const component = window.Livewire.find(
@@ -317,7 +403,7 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
             }
 
             this.renderedTemplate = this.renderTemplate();
-            
+
             // Listen for restore-question event
             document.addEventListener("restore-question", (e) => {
                 if (e.detail.questionId === this.questionId && e.detail.questionType === "drop_down") {
@@ -375,29 +461,29 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
         renderTemplate() {
             let result = this.template;
             const blankIds = this.getBlankIds();
-            
+
             blankIds.forEach(blankId => {
                 const options = this.blanksMap[blankId] || [];
                 const selectedValue = this.selected[blankId] || "";
-                
+
                 // Build dropdown HTML
-                let dropdownHtml = `<select 
+                let dropdownHtml = `<select
                     class="quiz-input bg-gray-800 text-yellow-400 px-2 py-1 rounded border border-yellow-600 focus:border-yellow-400 focus:outline-none cursor-pointer text-xs md:text-sm font-mono"
                     data-blank-id="${blankId}"
                     onchange="this.closest('[x-data]').__x.$data.selectDropdown('${blankId}', this.value)"
                 >
                     <option value="" ${selectedValue === "" ? "selected" : ""}>Select...</option>`;
-                
+
                 options.forEach(opt => {
                     dropdownHtml += `<option value="${opt.id}" ${selectedValue === opt.id ? "selected" : ""}>${opt.text}</option>`;
                 });
-                
+
                 dropdownHtml += `</select>`;
-                
+
                 // Replace {blankId} with the dropdown
                 result = result.replace(new RegExp(`\\{${blankId}\\}`, 'g'), dropdownHtml);
             });
-            
+
             // Escape HTML for display while keeping our select elements
             return result;
         },
@@ -423,7 +509,7 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
                     component.set(`${wireModel}.${questionId}`, this.selected);
                 }
             }
-            
+
             // Dispatch event for localStorage
             const event = new CustomEvent("quiz-answer-selected", {
                 detail: {
