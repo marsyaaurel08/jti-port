@@ -12,10 +12,18 @@ import "./cart.js"; // ← Import cart functionality
 createIcons({ icons });
 
 // ── Quiz Alpine Components ────────────────────────────────────────────────
-window.dragDropComponent = function ({ initialItems, shuffledItems, wireModel, questionId, shuffleOnInit, hasSavedAnswer }) {
+window.dragDropComponent = function ({
+    initialItems,
+    shuffledItems,
+    wireModel,
+    questionId,
+    shuffleOnInit,
+    hasSavedAnswer,
+}) {
     return {
         items: initialItems,
         dragIndex: null,
+        questionId: questionId,
 
         /**
          * Check localStorage directly for saved answer
@@ -27,10 +35,10 @@ window.dragDropComponent = function ({ initialItems, shuffledItems, wireModel, q
                 const STORAGE_VERSION = "1.2";
                 const quizElement = document.querySelector("[data-quiz-id]");
                 if (!quizElement) return null;
-                
+
                 const quizId = quizElement.dataset.quizId;
                 if (!quizId) return null;
-                
+
                 const key = `${STORAGE_KEY_PREFIX}${quizId}`;
                 const data = localStorage.getItem(key);
                 if (!data) return null;
@@ -46,38 +54,62 @@ window.dragDropComponent = function ({ initialItems, shuffledItems, wireModel, q
                 // Check if there's a saved answer for this question
                 if (parsed.answers && parsed.answers[questionId]) {
                     const answerData = parsed.answers[questionId];
-                    if (answerData.questionType === "drag_drop_sorting" && answerData.answer) {
+                    if (
+                        answerData.questionType === "drag_drop_sorting" &&
+                        answerData.answer
+                    ) {
                         return answerData.answer;
                     }
                 }
 
                 return null;
             } catch (error) {
-                console.error('[dragDropComponent] Error reading from localStorage:', error);
+                console.error(
+                    "[dragDropComponent] Error reading from localStorage:",
+                    error,
+                );
                 return null;
             }
         },
 
         init() {
-            console.log('[dragDropComponent] init called for questionId:', questionId);
-            console.log('[dragDropComponent] hasSavedAnswer (from prop):', hasSavedAnswer, 'shuffleOnInit:', shuffleOnInit);
-            console.log('[dragDropComponent] initialItems:', initialItems);
-            console.log('[dragDropComponent] shuffledItems:', shuffledItems);
-            
+            console.log(
+                "[dragDropComponent] init called for questionId:",
+                questionId,
+            );
+            console.log(
+                "[dragDropComponent] hasSavedAnswer (from prop):",
+                hasSavedAnswer,
+                "shuffleOnInit:",
+                shuffleOnInit,
+            );
+            console.log("[dragDropComponent] initialItems:", initialItems);
+            console.log("[dragDropComponent] shuffledItems:", shuffledItems);
+
             // Check localStorage directly for saved answer
             const savedAnswer = this.getSavedAnswerFromLocalStorage();
-            console.log('[dragDropComponent] savedAnswer from localStorage:', savedAnswer);
-            
+            console.log(
+                "[dragDropComponent] savedAnswer from localStorage:",
+                savedAnswer,
+            );
+
             // If shuffleOnInit is true AND no saved answer (from prop or localStorage), use shuffled order
             if (shuffleOnInit && !hasSavedAnswer && !savedAnswer) {
-                console.log('[dragDropComponent] Shuffling items because shuffleOnInit is true and no saved answer');
+                console.log(
+                    "[dragDropComponent] Shuffling items because shuffleOnInit is true and no saved answer",
+                );
                 this.items = shuffledItems;
             } else {
-                console.log('[dragDropComponent] Using initial items (no shuffle or has saved answer)');
-                
+                console.log(
+                    "[dragDropComponent] Using initial items (no shuffle or has saved answer)",
+                );
+
                 // If there's a saved answer from localStorage, restore it immediately
                 if (savedAnswer && Array.isArray(savedAnswer)) {
-                    console.log('[dragDropComponent] Restoring items from localStorage immediately:', savedAnswer);
+                    console.log(
+                        "[dragDropComponent] Restoring items from localStorage immediately:",
+                        savedAnswer,
+                    );
                     const itemsMap = {};
                     initialItems.forEach((item) => {
                         itemsMap[item.id] = item;
@@ -85,40 +117,65 @@ window.dragDropComponent = function ({ initialItems, shuffledItems, wireModel, q
                     const restoredItems = savedAnswer
                         .map((id) => itemsMap[id])
                         .filter((item) => item);
-                    console.log('[dragDropComponent] restoredItems:', restoredItems);
+                    console.log(
+                        "[dragDropComponent] restoredItems:",
+                        restoredItems,
+                    );
                     this.items = restoredItems;
                 }
             }
-            
-            console.log('[dragDropComponent] items after init:', this.items);
 
-// Listen for restore-question event (for restoring from localStorage on reload)
+            console.log("[dragDropComponent] items after init:", this.items);
+
+            // Listen for restore-question event (for restoring from localStorage on reload)
             document.addEventListener("restore-question", (e) => {
-                console.log('[dragDropComponent] restore-question event received:', e.detail);
+                console.log(
+                    "[dragDropComponent] restore-question event received:",
+                    e.detail,
+                );
                 if (
                     e.detail.questionId === questionId &&
                     e.detail.questionType === "drag_drop_sorting"
                 ) {
-                    console.log('[dragDropComponent] Event matches this question. Restoring items...');
+                    console.log(
+                        "[dragDropComponent] Event matches this question. Restoring items...",
+                    );
                     if (e.detail.answer && Array.isArray(e.detail.answer)) {
                         const orderedIds = e.detail.answer;
-                        console.log('[dragDropComponent] orderedIds from saved answer:', orderedIds);
+                        console.log(
+                            "[dragDropComponent] orderedIds from saved answer:",
+                            orderedIds,
+                        );
                         const itemsMap = {};
                         initialItems.forEach((item) => {
                             itemsMap[item.id] = item;
                         });
-                        console.log('[dragDropComponent] itemsMap:', itemsMap);
+                        console.log("[dragDropComponent] itemsMap:", itemsMap);
                         const restoredItems = orderedIds
                             .map((id) => itemsMap[id])
                             .filter((item) => item);
-                        console.log('[dragDropComponent] restoredItems:', restoredItems);
+                        console.log(
+                            "[dragDropComponent] restoredItems:",
+                            restoredItems,
+                        );
                         this.items = restoredItems;
-                        console.log('[dragDropComponent] items after restoration:', this.items);
+                        console.log(
+                            "[dragDropComponent] items after restoration:",
+                            this.items,
+                        );
                     } else {
-                        console.log('[dragDropComponent] No valid answer to restore');
+                        console.log(
+                            "[dragDropComponent] No valid answer to restore",
+                        );
                     }
                 } else {
-                    console.log('[dragDropComponent] Event does not match this question (questionId:', questionId, ', event.questionId:', e.detail.questionId, ')');
+                    console.log(
+                        "[dragDropComponent] Event does not match this question (questionId:",
+                        questionId,
+                        ", event.questionId:",
+                        e.detail.questionId,
+                        ")",
+                    );
                 }
             });
         },
@@ -359,11 +416,17 @@ window.matchingComponent = function ({
 };
 
 // ── Drop Down Component (Alpine) ─────────────────────────────────────────
-window.dropDownComponent = function ({ template, blanksMap, selected, wireModel, questionId }) {
+window.dropDownComponent = function ({
+    template,
+    blanksMap,
+    selected,
+    wireModel,
+    questionId,
+}) {
     return {
         template: template,
         blanksMap: blanksMap,
-        selected: selected || {},
+        selected: Array.isArray(selected) ? {} : selected || {},
         wireModel: wireModel,
         questionId: questionId,
         renderedTemplate: "",
@@ -394,21 +457,46 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
 
             if (quizId) {
                 const savedData = this.getQuizDataFromLocalStorage(quizId);
-                if (savedData && savedData.answers && savedData.answers[this.questionId]) {
+                if (
+                    savedData &&
+                    savedData.answers &&
+                    savedData.answers[this.questionId]
+                ) {
                     const answerData = savedData.answers[this.questionId];
-                    if (answerData.questionType === "drop_down" && answerData.answer) {
-                        this.selected = answerData.answer;
+                    if (
+                        answerData.questionType === "drop_down" &&
+                        answerData.answer
+                    ) {
+                        this.selected = Array.isArray(answerData.answer)
+                            ? {}
+                            : answerData.answer;
                     }
                 }
             }
 
             this.renderedTemplate = this.renderTemplate();
 
+            const self = this;
+            this.$el.addEventListener("change", (e) => {
+                const select = e.target.closest("select[data-blank-id]");
+                if (select) {
+                    self.selectDropdown(select.dataset.blankId, select.value);
+                }
+            });
+
             // Listen for restore-question event
             document.addEventListener("restore-question", (e) => {
-                if (e.detail.questionId === this.questionId && e.detail.questionType === "drop_down") {
-                    if (e.detail.answer && typeof e.detail.answer === "object") {
-                        this.selected = e.detail.answer;
+                if (
+                    e.detail.questionId === this.questionId &&
+                    e.detail.questionType === "drop_down"
+                ) {
+                    if (
+                        e.detail.answer &&
+                        typeof e.detail.answer === "object"
+                    ) {
+                        this.selected = Array.isArray(e.detail.answer)
+                            ? {}
+                            : e.detail.answer;
                         this.renderedTemplate = this.renderTemplate();
                     }
                 }
@@ -417,11 +505,19 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
             // Check Livewire value when navigating to this question
             document.addEventListener("question-navigated", (e) => {
                 if (e.detail.index !== undefined) {
-                    const quizElement = document.querySelector("[data-quiz-id]");
+                    const quizElement =
+                        document.querySelector("[data-quiz-id]");
                     if (quizElement) {
-                        const questionElements = quizElement.querySelectorAll("[data-question-id]");
-                        const currentQuestionElement = questionElements[e.detail.index];
-                        if (currentQuestionElement && String(currentQuestionElement.dataset.questionId) === String(this.questionId)) {
+                        const questionElements =
+                            quizElement.querySelectorAll("[data-question-id]");
+                        const currentQuestionElement =
+                            questionElements[e.detail.index];
+                        if (
+                            currentQuestionElement &&
+                            String(
+                                currentQuestionElement.dataset.questionId,
+                            ) === String(this.questionId)
+                        ) {
                             setTimeout(() => this.checkLivewireValue(), 100);
                         }
                     }
@@ -435,11 +531,21 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
         checkLivewireValue() {
             const livewireEl = this.$root?.closest("[wire\\:id]");
             if (livewireEl && window.Livewire) {
-                const component = window.Livewire.find(livewireEl.getAttribute("wire:id"));
+                const component = window.Livewire.find(
+                    livewireEl.getAttribute("wire:id"),
+                );
                 if (component) {
-                    const livewireValue = component.get(`${this.wireModel}.${this.questionId}`);
-                    if (livewireValue && JSON.stringify(livewireValue) !== JSON.stringify(this.selected)) {
-                        this.selected = livewireValue;
+                    const livewireValue = component.get(
+                        `${this.wireModel}.${this.questionId}`,
+                    );
+                    const normalizedValue = Array.isArray(livewireValue)
+                        ? {}
+                        : livewireValue || {};
+                    if (
+                        JSON.stringify(normalizedValue) !==
+                        JSON.stringify(this.selected)
+                    ) {
+                        this.selected = normalizedValue;
                         this.renderedTemplate = this.renderTemplate();
                     }
                 }
@@ -462,7 +568,7 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
             let result = this.template;
             const blankIds = this.getBlankIds();
 
-            blankIds.forEach(blankId => {
+            blankIds.forEach((blankId) => {
                 const options = this.blanksMap[blankId] || [];
                 const selectedValue = this.selected[blankId] || "";
 
@@ -470,18 +576,20 @@ window.dropDownComponent = function ({ template, blanksMap, selected, wireModel,
                 let dropdownHtml = `<select
                     class="quiz-input bg-gray-800 text-yellow-400 px-2 py-1 rounded border border-yellow-600 focus:border-yellow-400 focus:outline-none cursor-pointer text-xs md:text-sm font-mono"
                     data-blank-id="${blankId}"
-                    onchange="this.closest('[x-data]').__x.$data.selectDropdown('${blankId}', this.value)"
                 >
                     <option value="" ${selectedValue === "" ? "selected" : ""}>Select...</option>`;
 
-                options.forEach(opt => {
+                options.forEach((opt) => {
                     dropdownHtml += `<option value="${opt.id}" ${selectedValue === opt.id ? "selected" : ""}>${opt.text}</option>`;
                 });
 
                 dropdownHtml += `</select>`;
 
                 // Replace {blankId} with the dropdown
-                result = result.replace(new RegExp(`\\{${blankId}\\}`, 'g'), dropdownHtml);
+                result = result.replace(
+                    new RegExp(`\\{${blankId}\\}`, "g"),
+                    dropdownHtml,
+                );
             });
 
             // Escape HTML for display while keeping our select elements

@@ -111,6 +111,10 @@ class QuizScoringService
             return false;
         }
 
+        // Normalize both arrays to strings for comparison
+        $userAnswer = array_map('strval', $userAnswer);
+        $answerKey = array_map('strval', $answerKey);
+
         sort($userAnswer);
         sort($answerKey);
 
@@ -133,10 +137,25 @@ class QuizScoringService
             $answerKey = $answerKey['correct_matches'];
         }
 
-        ksort($userAnswer);
-        ksort($answerKey);
+        // Extract correct_order if it exists (for drag_drop_sorting questions)
+        if (isset($answerKey['correct_order'])) {
+            $answerKey = $answerKey['correct_order'];
+        }
 
-        return $userAnswer === $answerKey;
+        // For drop-down and mapping questions, only compare keys that exist in the answerKey
+        // This allows user answers to have extra keys without causing a mismatch
+        foreach ($answerKey as $key => $value) {
+            if (!isset($userAnswer[$key])) {
+                return false;
+            }
+            // Normalize both values to strings for comparison to handle type mismatches
+            // (e.g., string "1" vs integer 1)
+            if ((string) $userAnswer[$key] !== (string) $value) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function validateFillInBlank($userAnswer, $answerKey): bool

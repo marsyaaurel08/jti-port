@@ -21,7 +21,6 @@
         hasSavedAnswer: @js(!empty($savedOrder)),
     })"
     x-init="init()"
-    x-key="drag-drop-{{ $questionId }}"
     class="space-y-4 pb-20"
     data-question-id="{{ $questionId }}"
 >

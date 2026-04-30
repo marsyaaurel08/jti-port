@@ -10,7 +10,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const STORAGE_KEY_PREFIX = "quiz_attempt_";
         const STORAGE_VERSION = "1.2";
-        
+
         function getQuizData(quizId) {
             try {
                 const key = STORAGE_KEY_PREFIX + quizId;
@@ -21,27 +21,27 @@
                 return parsed;
             } catch (e) { return null; }
         }
-        
+
         function preloadToLivewire(quizId, savedData) {
             if (!savedData || !savedData.answers) return;
-            
+
             const quizEl = document.querySelector('[data-quiz-id]');
             if (!quizEl) return;
-            
+
             const livewireEl = quizEl.closest('[wire\\:id]');
             if (!livewireEl || !window.Livewire) return;
-            
+
             const component = window.Livewire.find(livewireEl.getAttribute('wire:id'));
             if (!component) return;
-            
+
             const answeredIds = [];
-            
+
             for (const [questionId, answerData] of Object.entries(savedData.answers)) {
                 if (!answerData || !answerData.answer) continue;
                 answeredIds.push(questionId);
-                
+
                 const { answer, questionType } = answerData;
-                
+
                 if (questionType === 'drag_drop_sorting' && Array.isArray(answer)) {
                     component.set('dragDropAnswers.' + questionId, answer);
                 } else if (questionType === 'matching' && typeof answer === 'object') {
@@ -54,16 +54,16 @@
                     component.set('answers.' + questionId, answer);
                 }
             }
-            
+
             if (answeredIds.length > 0) {
                 component.set('answeredQuestionIds', answeredIds);
             }
         }
-        
+
         // Get quizId from meta tag or data attribute
         const quizEl = document.querySelector('[data-quiz-id]');
         const quizId = quizEl ? quizEl.dataset.quizId : null;
-        
+
         if (quizId && window.Livewire) {
             const savedData = getQuizData(quizId);
             if (savedData) {
@@ -174,15 +174,14 @@
                     $options = $config['options'] ?? [];
                 @endphp
 
-                <div data-question-id="{{ $currentQuestion['id'] }}" data-question-type="{{ $currentQuestion['type'] }}">
-                    @if($currentQuestion['type'] === 'single_choice')
+<div wire:key="question-{{ $currentQuestion['id'] }}" data-question-id="{{ $currentQuestion['id'] }}" data-question-type="{{ $currentQuestion['type'] }}">                    @if($currentQuestion['type'] === 'single_choice')
                         <x-quiz.single-choice :options="$options" :selected="$answers[$currentQuestion['id']] ?? null" wireModel="answers.{{ $currentQuestion['id'] }}" :questionId="$currentQuestion['id']" :questionType="'single_choice'" />
                     @elseif($currentQuestion['type'] === 'multiple_choice')
                         <x-quiz.multiple-choice :options="$options" :selected="$multipleChoiceAnswers[$currentQuestion['id']] ?? []" wireModel="multipleChoiceAnswers.{{ $currentQuestion['id'] }}" :questionType="'multiple_choice'" :questionId="$currentQuestion['id']" />
                     @elseif($currentQuestion['type'] === 'drag_drop_sorting')
                         @php
-                            $savedDragDropOrder = !empty($dragDropAnswers[$currentQuestion['id']]) 
-                                ? $dragDropAnswers[$currentQuestion['id']] 
+                            $savedDragDropOrder = !empty($dragDropAnswers[$currentQuestion['id']])
+                                ? $dragDropAnswers[$currentQuestion['id']]
                                 : null;
                         @endphp
                         <x-quiz.drag-drop-sorting
