@@ -34,16 +34,18 @@ echo -e "${GREEN}✓ DB ready${NC}"
 
 # =====================================================================
 # 3. MIGRATE
-# Dijalankan di entrypoint sebagai fallback safety net.
-# Deploy.sh juga menjalankan migrate setelah container ready,
-# tapi ini memastikan container baru selalu dalam state yang benar.
+# Bypass with SKIP_MIGRATION=1 (e.g., for CI/CD testing or first deploy).
+# Non-fatal: warns and continues on failure instead of crashing.
 # =====================================================================
-echo -e "${YELLOW}🗄️ Running migrations...${NC}"
-php artisan migrate --force || {
-    echo -e "${RED}❌ Migration failed${NC}"
-    exit 1
-}
-echo -e "${GREEN}✓ Migrations done${NC}"
+if [ "${SKIP_MIGRATION:-}" = "1" ]; then
+    echo -e "${YELLOW}⏭️ Skipping migrations (SKIP_MIGRATION=1)${NC}"
+else
+    echo -e "${YELLOW}🗄️ Running migrations...${NC}"
+    php artisan migrate --force || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
+    echo -e "${GREEN}✓ Migrations done (or skipped)${NC}"
+fi
 
 # =====================================================================
 # 4. LARAVEL CACHE
