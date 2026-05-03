@@ -116,15 +116,17 @@ docker run -d \
   -v app_storage:/var/www/html/storage \
   $DOCKER_IMAGE
 
-# Tunggu container siap (PHP-FPM butuh waktu start)
+# Tunggu entrypoint selesai (cek marker file, tanpa spawn PHP process)
 echo -e "${YELLOW}⏳ Waiting for $NEW_NAME to be ready...${NC}"
-for i in $(seq 1 15); do
-    if docker exec $NEW_NAME php -r "echo 'ok';" >/dev/null 2>&1; then
+for i in $(seq 1 60); do
+    if docker exec $NEW_NAME test -f /tmp/.entrypoint-ready 2>/dev/null; then
         echo -e "${GREEN}✓ $NEW_NAME is ready (${i}s)${NC}"
         break
     fi
-    if [ $i -eq 15 ]; then
+    if [ $i -eq 60 ]; then
         echo -e "${RED}❌ Container $NEW_NAME failed to start in time${NC}"
+        echo -e "${RED}   Container logs:${NC}"
+        docker logs $NEW_NAME --tail 20
         exit 1
     fi
     sleep 2
@@ -134,10 +136,8 @@ done
 # 3. LARAVEL OPTIMIZATION
 # =====================================================================
 
-echo -e "${YELLOW}⚡ Running Laravel commands on $NEW_NAME...${NC}"
-# docker exec $NEW_NAME php artisan optimize
-docker exec $NEW_NAME php artisan storage:link --force || true
-docker exec $NEW_NAME php artisan migrate --force
+# Laravel commands sudah dijalankan di entrypoint (migrate, cache, storage:link).
+# Tidak perlu jalankan ulang untuk hemat RAM di VPS 1GB.
 
 # =====================================================================
 # 4. NGINX CONFIG & TRAFFIC SWITCH

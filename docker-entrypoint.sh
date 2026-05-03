@@ -73,6 +73,9 @@ echo -e "${GREEN}✓ Storage linked${NC}"
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
+# Mark entrypoint as complete (so deploy script can wait without spawning PHP)
+touch /tmp/.entrypoint-ready
+
 # =====================================================================
 # 7. SLACK NOTIFY (optional)
 # =====================================================================
