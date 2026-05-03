@@ -383,7 +383,7 @@ class QuizAttempt extends Component
         $this->dispatch('requestLocalStorageData');
 
         // Finalize submission
-        $this->finalizeSubmission();
+        // $this->finalizeSubmission();
     }
 
     #[\Livewire\Attributes\On('finalizeSubmission')]
