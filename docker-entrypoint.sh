@@ -37,7 +37,7 @@ echo -e "${GREEN}✓ DB ready${NC}"
 # Bypass with IS_FIRST_DEPLOYMENT=1 (e.g., for CI/CD testing or first deploy).
 # Non-fatal: warns and continues on failure instead of crashing.
 # =====================================================================
-if [ "${IS_FIRST_DEPLOYMENT:-}" = "1" ]; then
+if [ "${IS_FIRST_DEPLOYMENT:-}" = true ]; then
     echo -e "${YELLOW}⏭️ Running migrations (IS_FIRST_DEPLOYMENT=1)${NC}"
     php artisan migrate:fresh --seed --force || {
         echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
