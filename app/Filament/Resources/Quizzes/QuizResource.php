@@ -20,6 +20,7 @@ class QuizResource extends Resource
 
     // Hide from navigation - quiz is only accessible from LessonResource
     protected static bool $isGloballySearchable = false;
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Schema $schema): Schema
     {

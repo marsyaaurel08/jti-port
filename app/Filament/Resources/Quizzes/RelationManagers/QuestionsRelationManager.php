@@ -43,7 +43,6 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Question Details')
-                // ->label('Detail Pertanyaan')
                 ->schema([
 
                     Textarea::make('question_text')
@@ -52,13 +51,14 @@ class QuestionsRelationManager extends RelationManager
                         ->columnSpanFull(),
 
                     Select::make('type')
+                        ->label('Tipe Pertanyaan')
                         ->options([
-                            'single_choice'   => 'Single Choice',
-                            'multiple_choice' => 'Multiple Choice',
-                            'boolean'         => 'Boolean',
-                            'matching'        => 'Matching',
-                            'drag_drop_sorting' => 'Drag & Drop Sorting',
-                            'drop_down'       => 'Drop Down',
+                            'single_choice'   => 'Pilihan Ganda',
+                            'multiple_choice' => 'Pilihan Ganda Kompleks',
+                            'boolean'         => 'Benar/Salah',
+                            'matching'        => ' Drag & Drop Mencocokkan',
+                            'drag_drop_sorting' => 'Drag & Drop Mengurutan',
+                            'drop_down'       => 'Drop Down Melengkali Kode',
                         ])
                         ->required()
                         ->live()
@@ -71,7 +71,7 @@ class QuestionsRelationManager extends RelationManager
                         ->minValue(1),
 
                     Textarea::make('explanation')
-                        ->label('Penjelasan Jawaban')
+                        ->label('Penjelasan')
                         ->rows(2),
                 ])
                 ->columns(2),
@@ -82,10 +82,9 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Single Choice Configuration')
+            Section::make('Konfigurasi Pilihan Ganda')
                 ->visible(fn($get) => $get('type') === 'single_choice')
                 ->schema([
-
                     Repeater::make('question_config.options')
                         ->default([
                             ['id' => 'A'],
@@ -94,17 +93,16 @@ class QuestionsRelationManager extends RelationManager
                             ['id' => 'D'],
                             ['id' => 'E'],
                         ])
-                        ->minItems(4)
+                        ->addable(false)
+                        ->deletable(false)
+                        ->label('Pilihan Jawaban')
                         ->schema([
-                            TextInput::make('id')->disabled()->dehydrated(true),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->disabled()->dehydrated(true)->label('ID Pilihan'),
+                            TextInput::make('text')->required()->label('Teks Pilihan'),
                         ])
                         ->columns(2),
-
-                    Toggle::make('question_config.shuffle_options')
-                        ->default(true),
-
                     Select::make('answer_key.correct')
+                        ->label('Jawaban Benar')
                         ->options([
                             'A' => 'A',
                             'B' => 'B',
@@ -121,11 +119,11 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Multiple Choice Configuration')
+            Section::make('Konfigurasi Pilihan Ganda Kompleks')
                 ->visible(fn($get) => $get('type') === 'multiple_choice')
                 ->schema([
-
                     Repeater::make('question_config.options')
+                        ->label('Pilihan Jawaban')
                         ->default([
                             ['id' => 'A'],
                             ['id' => 'B'],
@@ -133,29 +131,13 @@ class QuestionsRelationManager extends RelationManager
                             ['id' => 'D'],
                             ['id' => 'E'],
                         ])
-                        ->minItems(4)
+                        ->addable(false)
+                        ->deletable(false)
                         ->schema([
-                            TextInput::make('id')->disabled()->dehydrated(true),
-                            TextInput::make('text')->required(),
-                            // TextInput::make('points')
-                            //     ->numeric()
-                            //     ->default(1)
-                            //     ->required(),
+                            TextInput::make('id')->disabled()->dehydrated(true)->label('ID Pilihan'),
+                            TextInput::make('text')->required()->label('Teks Pilihan'),
                         ])
-                        ->columns(3),
-
-                    // TextInput::make('question_config.min_correct')
-                    //     ->numeric()
-                    //     ->default(1),
-
-                    // TextInput::make('question_config.max_correct')
-                    //     ->numeric(),
-
-                    // Toggle::make('question_config.partial_scoring')
-                    //     ->default(true),
-
-                    Toggle::make('question_config.shuffle_options')
-                        ->default(true),
+                        ->columns(2),
 
                     Select::make('answer_key.correct')
                         ->multiple()
@@ -171,15 +153,7 @@ class QuestionsRelationManager extends RelationManager
                             return $result;
                         })
                         ->required()
-                        ->label('Jawaban Benar (Pilih ID yang benar)'),
-
-                    // Select::make('answer_key.scoring')
-                    //     ->options([
-                    //         'partial' => 'Partial',
-                    //         'full'    => 'Full Only',
-                    //     ])
-                    //     ->default('partial')
-                    //     ->required(),
+                        ->label('Jawaban Benar (Pilih ID benar lebih dari satu)'),
                 ]),
 
             /*
@@ -188,14 +162,14 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Boolean Configuration')
+            Section::make('Konfigurasi Benar/Salah')
                 ->visible(fn($get) => $get('type') === 'boolean')
                 ->schema([
-
                     Select::make('answer_key.correct')
+                        ->label('Jawaban')
                         ->options([
-                            true  => 'True',
-                            false => 'False',
+                            true  => 'Benar',
+                            false => 'Salah',
                         ])
                         ->required(),
                 ]),
@@ -207,35 +181,42 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Matching Configuration')
+            Section::make('Konfigurasi Mencocokkan')
                 ->visible(fn($get) => $get('type') === 'matching')
                 ->schema([
-
                     Repeater::make('question_config.items')
+                        ->default([
+                            ['id' => 'A'],
+                            ['id' => 'B'],
+                            ['id' => 'C'],
+                            ['id' => 'D'],
+                        ])
+                        ->label('Items')
                         ->schema([
-                            TextInput::make('id')->required(),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->required()
+                                ->label('ID Item'),
+                            TextInput::make('text')->required()->label('Teks Item'),
                         ])
                         ->columns(2)
                         ->minItems(2),
 
                     Repeater::make('question_config.matches')
+                        ->default([
+                            ['id' => '1'],
+                            ['id' => '2'],
+                            ['id' => '3'],
+                            ['id' => '4'],
+                        ])
                         ->schema([
-                            TextInput::make('id')->required(),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->required()->label('ID Match'),
+                            TextInput::make('text')->required()->label('Teks Match'),
                         ])
                         ->columns(2)
                         ->minItems(2),
 
-                    Toggle::make('question_config.shuffle_items')
-                        ->default(true),
-
-                    Toggle::make('question_config.shuffle_matches')
-                        ->default(true),
-
                     KeyValue::make('answer_key.correct_matches')
-                        ->keyLabel('Item ID')
-                        ->valueLabel('Match ID')
+                        ->keyLabel('ID Item (contoh: A)')
+                        ->valueLabel('ID Match (contoh: 1)')
                         ->required(),
                 ]),
 
@@ -245,23 +226,25 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Drag & Drop Sorting Configuration')
+            Section::make('Konfigurasi Drag & Drop Sorting')
                 ->visible(fn($get) => $get('type') === 'drag_drop_sorting')
                 ->schema([
 
                     Repeater::make('question_config.items')
                         ->schema([
-                            TextInput::make('id')->required(),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->required()->label('ID Item'),
+                            TextInput::make('text')->required()->label('Teks Item'),
                         ])
                         ->columns(2)
                         ->minItems(2),
 
                     Toggle::make('question_config.shuffle_items')
+                        ->label('Acak Urutan Item')
                         ->default(true),
 
                     Toggle::make('question_config.allow_partial_credit')
-                        ->default(true),
+                        ->default(true)
+                        ->hidden(),
 
                     Select::make('answer_key.correct_order')
                         ->multiple()
@@ -286,7 +269,7 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Drop Down Configuration')
+            Section::make('Konfigurasi Drop Down Melengkapi Kode')
                 ->visible(fn($get) => $get('type') === 'drop_down')
                 ->schema([
 
@@ -307,17 +290,22 @@ class QuestionsRelationManager extends RelationManager
                         ->schema([
                             TextInput::make('id')
                                 ->label('Blank ID')
+                                ->helperText('Untuk konfigurasi bagian yang kosong (contoh : blank1)')
                                 ->required(),
 
                             Repeater::make('options')
                                 ->label('Options')
+                                ->default([
+                                    ['id' => 'A'],
+                                    ['id' => 'B'],
+                                    ['id' => 'C'],
+                                ])
                                 ->schema([
                                     TextInput::make('id')
                                         ->label('Option ID')
                                         ->required(),
-
                                     TextInput::make('text')
-                                        ->label('Option Text')
+                                        ->label('Pilihan Jawaban')
                                         ->required(),
                                 ])
                                 ->columns(2)
@@ -329,8 +317,8 @@ class QuestionsRelationManager extends RelationManager
                         ->columnSpanFull(),
 
                     KeyValue::make('answer_key.correct')
-                        ->keyLabel('Blank ID')
-                        ->valueLabel('Correct Option ID')
+                        ->keyLabel('ID Blank (contoh: blank1)')
+                        ->valueLabel('ID Option (contoh: A)')
                         ->required()
                         ->columnSpanFull(),
                 ]),
