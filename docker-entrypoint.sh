@@ -42,10 +42,11 @@ if [ "${IS_FIRST_DEPLOYMENT:-}" = true ]; then
     php artisan migrate:fresh --seed --force || {
         echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
     }
+    echo -e "${YELLOW}⏭️ Running migrations (IS_FIRST_DEPLOYMENT=1)${NC}"
     php artisan shield:generate --all --panel=admin || {
         echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
     }
-    php artisan shield:super-admin --user=10 --panel=admin || {
+    php artisan shield:super-admin --user=1 --panel=admin || {
         echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
     }
 else
