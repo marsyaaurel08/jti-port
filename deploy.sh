@@ -112,7 +112,7 @@ docker run -d \
   --name $NEW_NAME \
   --network $NETWORK_NAME \
   --restart unless-stopped \
-  -e SKIP_MIGRATION=1 \
+  -e SKIP_MIGRATION=0 \
   $ENV_OPTS \
   -v app_storage:/var/www/html/storage \
   $DOCKER_IMAGE
