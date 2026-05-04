@@ -82,7 +82,7 @@ class StudentProfile extends Component
         ]);
 
         $this->user->update([
-            'password' => Hash::make($this->password),
+            'password' => bcrypt($this->password),
         ]);
 
         $this->reset(['currentPassword', 'password', 'passwordConfirmation']);
