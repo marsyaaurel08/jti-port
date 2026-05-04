@@ -12,12 +12,15 @@ RUN apk add --no-cache \
     libpng-dev libjpeg-turbo-dev freetype-dev \
     icu-dev oniguruma-dev libzip-dev \
     bash \
-    netcat-openbsd
+    netcat-openbsd \
+    autoconf automake libtool make gcc g++ libc-dev
 
 # =========================
 # PHP extensions
 # =========================
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+RUN pecl install redis \
+    && docker-php-ext-enable redis \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo_mysql mbstring exif pcntl bcmath gd intl zip \
     && docker-php-ext-enable opcache
