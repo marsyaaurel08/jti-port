@@ -242,6 +242,35 @@ fi
 echo -e "${YELLOW}⚙️ Starting/Updating queue worker...${NC}"
 docker-compose up -d worker
 
+# =====================================================================
+# 6. COPY BUILD ASSETS TO NGINX
+# =====================================================================
+
+echo -e "${YELLOW}📦 Copying build assets to nginx...${NC}"
+
+# Verify build assets exist in app container
+if docker exec $NEW_NAME test -d /var/www/html/public/build; then
+    echo -e "${GREEN}✓ Build assets found in $NEW_NAME${NC}"
+    
+    # Remove old build in nginx
+    docker exec jtiport_nginx rm -rf /var/www/html/public/build 2>/dev/null || true
+    
+    # Copy directly from app container to nginx container
+    docker cp $NEW_NAME:/var/www/html/public/build jtiport_nginx:/var/www/html/public/build
+    
+    # Verify copy succeeded
+    if docker exec jtiport_nginx test -d /var/www/html/public/build; then
+        echo -e "${GREEN}✓ Build assets copied to nginx${NC}"
+        # Reload nginx to pick up new assets
+        docker exec jtiport_nginx nginx -s reload 2>/dev/null || true
+    else
+        echo -e "${RED}❌ Failed to copy build assets to nginx${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️ No build assets found in $NEW_NAME${NC}"
+    echo -e "${YELLOW}   Make sure npm run build runs in Dockerfile${NC}"
+fi
+
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL: $NEW_NAME IS ACTIVE${NC}"
 echo -e "${GREEN}   Image   : $DOCKER_IMAGE${NC}"
