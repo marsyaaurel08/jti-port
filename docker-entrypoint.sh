@@ -37,7 +37,7 @@ echo -e "${GREEN}✓ DB ready${NC}"
 # Bypass with SKIP_MIGRATION=1 (e.g., for CI/CD testing or first deploy).
 # Non-fatal: warns and continues on failure instead of crashing.
 # =====================================================================
-if [ "${SKIP_MIGRATION:-}" = "0" ]; then
+if [ "${SKIP_MIGRATION:-}" = "1" ]; then
     echo -e "${YELLOW}⏭️ Skipping migrations (SKIP_MIGRATION=1)${NC}"
 else
     echo -e "${YELLOW}🗄️ Running migrations...${NC}"
