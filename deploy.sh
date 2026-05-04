@@ -112,7 +112,7 @@ docker run -d \
   --name $NEW_NAME \
   --network $NETWORK_NAME \
   --restart unless-stopped \
-  -e SKIP_MIGRATION=0 \
+  -e IS_FIRST_DEPLOYMENT=$IS_FIRST_DEPLOYMENT \
   $ENV_OPTS \
   -v app_storage:/var/www/html/storage \
   $DOCKER_IMAGE

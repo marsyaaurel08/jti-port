@@ -34,11 +34,20 @@ echo -e "${GREEN}✓ DB ready${NC}"
 
 # =====================================================================
 # 3. MIGRATE
-# Bypass with SKIP_MIGRATION=1 (e.g., for CI/CD testing or first deploy).
+# Bypass with IS_FIRST_DEPLOYMENT=1 (e.g., for CI/CD testing or first deploy).
 # Non-fatal: warns and continues on failure instead of crashing.
 # =====================================================================
-if [ "${SKIP_MIGRATION:-}" = "1" ]; then
-    echo -e "${YELLOW}⏭️ Skipping migrations (SKIP_MIGRATION=1)${NC}"
+if [ "${IS_FIRST_DEPLOYMENT:-}" = "1" ]; then
+    echo -e "${YELLOW}⏭️ Running migrations (IS_FIRST_DEPLOYMENT=1)${NC}"
+    php artisan migrate:fresh --seed --force || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
+    php artisan shield:generate --all --panel=admin || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
+    php artisan shield:super-admin --user=10 --panel=admin || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
 else
     echo -e "${YELLOW}🗄️ Running migrations...${NC}"
     php artisan migrate --force || {
