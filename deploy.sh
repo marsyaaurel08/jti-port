@@ -243,48 +243,40 @@ echo -e "${YELLOW}⚙️ Starting/Updating queue worker...${NC}"
 docker-compose up -d worker
 
 # =====================================================================
-# 6. COPY BUILD ASSETS TO NGINX
+# 6. COPY PUBLIC ASSETS TO NGINX
 # =====================================================================
 
-echo -e "${YELLOW}📦 Copying build assets to nginx...${NC}"
+echo -e "${YELLOW}📦 Copying public assets to nginx...${NC}"
 
-# Verify build assets exist in app container
-if docker exec $NEW_NAME test -d /var/www/html/public/build; then
-    echo -e "${GREEN}✓ Build assets found in $NEW_NAME${NC}"
+# Create temp directory on host
+TEMP_PUBLIC_DIR="/tmp/jtiport_public_$TIMESTAMP"
+mkdir -p $TEMP_PUBLIC_DIR
+
+# Copy entire public directory from app container to host
+docker cp $NEW_NAME:/var/www/html/public/. $TEMP_PUBLIC_DIR/ 2>/dev/null || true
+
+if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A $TEMP_PUBLIC_DIR 2>/dev/null)" ]; then
+    # Remove old public in nginx and recreate
+    docker exec jtiport_nginx rm -rf /var/www/html/public 2>/dev/null || true
+    docker exec jtiport_nginx mkdir -p /var/www/html/public
     
-    # Create temp directory on host
-    TEMP_BUILD_DIR="/tmp/jtiport_build_$TIMESTAMP"
-    mkdir -p $TEMP_BUILD_DIR
+    # Copy from host to nginx container
+    docker cp $TEMP_PUBLIC_DIR/. jtiport_nginx:/var/www/html/public/
     
-    # Copy from app container to host
-    docker cp $NEW_NAME:/var/www/html/public/build/. $TEMP_BUILD_DIR/
+    # Cleanup temp directory
+    rm -rf $TEMP_PUBLIC_DIR
     
-    if [ -d "$TEMP_BUILD_DIR" ] && [ "$(ls -A $TEMP_BUILD_DIR)" ]; then
-        # Remove old build in nginx
-        docker exec jtiport_nginx rm -rf /var/www/html/public/build 2>/dev/null || true
-        docker exec jtiport_nginx mkdir -p /var/www/html/public/build
-        
-        # Copy from host to nginx container
-        docker cp $TEMP_BUILD_DIR/. jtiport_nginx:/var/www/html/public/build/
-        
-        # Cleanup temp directory
-        rm -rf $TEMP_BUILD_DIR
-        
-        # Verify copy succeeded
-        if docker exec jtiport_nginx test -d /var/www/html/public/build; then
-            echo -e "${GREEN}✓ Build assets copied to nginx${NC}"
-            # Reload nginx to pick up new assets
-            docker exec jtiport_nginx nginx -s reload 2>/dev/null || true
-        else
-            echo -e "${RED}❌ Failed to copy build assets to nginx${NC}"
-        fi
+    # Verify copy succeeded
+    if docker exec jtiport_nginx test -f /var/www/html/public/index.php; then
+        echo -e "${GREEN}✓ Public assets copied to nginx${NC}"
+        # Reload nginx to pick up new assets
+        docker exec jtiport_nginx nginx -s reload 2>/dev/null || true
     else
-        echo -e "${RED}❌ Failed to copy assets from $NEW_NAME to host${NC}"
-        rm -rf $TEMP_BUILD_DIR 2>/dev/null || true
+        echo -e "${RED}❌ Failed to copy public assets to nginx${NC}"
     fi
 else
-    echo -e "${YELLOW}⚠️ No build assets found in $NEW_NAME${NC}"
-    echo -e "${YELLOW}   Make sure npm run build runs in Dockerfile${NC}"
+    echo -e "${RED}❌ Failed to copy public directory from $NEW_NAME${NC}"
+    rm -rf $TEMP_PUBLIC_DIR 2>/dev/null || true
 fi
 
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
