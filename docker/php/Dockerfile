@@ -13,7 +13,8 @@ RUN apk add --no-cache \
     icu-dev oniguruma-dev libzip-dev \
     bash \
     netcat-openbsd \
-    autoconf automake libtool make gcc g++ libc-dev
+    autoconf automake libtool make gcc g++ libc-dev \
+    nodejs npm
 
 # =========================
 # PHP extensions
@@ -52,6 +53,16 @@ RUN composer install \
 # Copy seluruh project
 # =========================
 COPY . .
+
+# =========================
+# Build frontend assets (cache npm dependencies)
+# =========================
+RUN npm install && npm run build
+
+# =========================
+# Clean up node_modules to reduce image size
+# =========================
+RUN rm -rf node_modules
 
 # =========================
 # Permissions
