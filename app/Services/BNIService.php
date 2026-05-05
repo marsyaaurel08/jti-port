@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Order;
+use App\Models\{Order, PaymentWebhook, ReconciliationLog};
 use BniApi\BniPhp\api\Ecollection;
 use BniApi\BniPhp\Bni;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -125,32 +126,44 @@ class BNIService
      *
      * @throws Exception
      */
-    public function getPaymentStatus(Order $order): array
+
+    public function getPaymentStatus(Order $order, string $trigger = 'scheduler'): array
     {
         try {
-            if (! $order->bni_transaction_id) {
-                throw new Exception('BNI Transaction ID not found for order: ' . $order->id);
+            if (!$order->bni_transaction_id) {
+                throw new Exception('BNI Transaction ID not found');
             }
 
-            Log::info('Checking BNI payment status', [
-                'order_id' => $order->id,
-                'bni_transaction_id' => $order->bni_transaction_id,
-            ]);
-
-            // Inquiry billing status
             $response = $this->ecollection->inquiryBilling(
                 trxId: $order->bni_transaction_id
             );
 
-            if (! $this->isSuccessResponse($response)) {
-                throw new Exception('Failed to get BNI payment status: ' . json_encode($response));
+            if (!$this->isSuccessResponse($response)) {
+                throw new Exception('BNI inquiry failed');
             }
 
-            return $this->parseStatusResponse($response, $order);
-        } catch (Exception $e) {
-            Log::error('Failed to get BNI payment status', [
+            $parsed = $this->parseStatusResponse($response, $order);
+
+            ReconciliationLog::create([
                 'order_id' => $order->id,
-                'error' => $e->getMessage(),
+                'attempt_number' => $order->inquiry_count + 1,
+                'trigger_type' => $trigger,
+                'result' => $parsed['status'] === 'paid' ? 'paid' : 'pending',
+                'response_message' => json_encode($response),
+                'checked_at' => now(),
+            ]);
+
+            return $parsed;
+        } catch (Exception $e) {
+
+            // log failure juga
+            ReconciliationLog::create([
+                'order_id' => $order->id,
+                'attempt_number' => $order->inquiry_count + 1,
+                'trigger_type' => $trigger,
+                'result' => 'failed',
+                'response_message' => $e->getMessage(),
+                'checked_at' => now(),
             ]);
 
             throw $e;
@@ -163,52 +176,70 @@ class BNIService
      * @param  array  $payload  Webhook payload from BNI
      * @return bool Whether payment is verified
      */
-    public function verifyWebhookPayload(array $payload): bool
+    private function verifyWebhookPayload(array $payload): bool
     {
-        try {
-            // TODO: Implement signature verification if BNI provides it
-            // For now, basic validation
-            return isset($payload['trxId'], $payload['trxAmount'], $payload['paymentStatus']);
-        } catch (Exception $e) {
-            Log::error('Failed to verify BNI webhook', [
-                'error' => $e->getMessage(),
-            ]);
-
+        if (!isset($payload['trxId'], $payload['paymentStatus'])) {
             return false;
         }
+
+        // optional: validate amount
+        $order = Order::where('bni_transaction_id', $payload['trxId'])->first();
+
+        if (!$order) return false;
+
+        if ((int)$payload['trxAmount'] !== (int)$order->total_amount) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
      * Handle payment confirmation webhook from BNI
      */
+
     public function handlePaymentWebhook(array $payload): bool
     {
+        DB::beginTransaction();
+
         try {
             $order = Order::where('bni_transaction_id', $payload['trxId'])->first();
 
-            if (! $order) {
-                Log::warning('Order not found for BNI webhook', ['trxId' => $payload['trxId']]);
-
+            if (!$order) {
+                Log::warning('Order not found for BNI webhook', [
+                    'trxId' => $payload['trxId']
+                ]);
                 return false;
             }
 
-            // Update order with payment confirmation
-            if ($payload['paymentStatus'] === 'APPROVED' || $payload['paymentStatus'] === '1') {
+            // ✅ SIMPAN WEBHOOK (observability)
+            PaymentWebhook::create([
+                'order_id' => $order->id,
+                'invoice_number' => $order->invoice_number,
+                'event_type' => $payload['paymentStatus'] ?? null,
+                'payload' => $payload,
+                'received_at' => now(),
+            ]);
+
+            // Idempotency (anti double update)
+            if ($order->status === 'paid') {
+                DB::commit();
+                return true;
+            }
+
+            if (in_array($payload['paymentStatus'], ['APPROVED', '1'])) {
                 $order->update([
                     'status' => 'paid',
                     'paid_at' => now(),
                 ]);
-
-                Log::info('Payment confirmed via BNI webhook', [
-                    'order_id' => $order->id,
-                    'trxId' => $payload['trxId'],
-                ]);
-
-                return true;
             }
 
-            return false;
+            DB::commit();
+
+            return true;
         } catch (Exception $e) {
+            DB::rollBack();
+
             Log::error('Failed to handle BNI webhook', [
                 'error' => $e->getMessage(),
             ]);

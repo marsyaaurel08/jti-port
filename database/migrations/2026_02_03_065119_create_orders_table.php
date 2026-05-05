@@ -15,11 +15,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->string('invoice_number')->unique();
+            $table->string('bni_transaction_id')->nullable();
+            $table->string('bni_va_number')->nullable();
+            $table->timestamp('bni_va_expired_at')->nullable();
             $table->boolean('is_fallback_va')->default(false);
             $table->decimal('subtotal', 12, 2);
             $table->decimal('discount_amount', 12, 2)->default(0);
             $table->decimal('total_amount', 12, 2);
-            $table->enum('status', ['pending', 'paid','cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('payment_proof')->nullable();
             $table->dateTime('paid_at')->nullable();
