@@ -94,7 +94,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span class="hidden sm:inline">Back To Course</span>
+                <span class="hidden sm:inline">Kembali ke Materi</span>
             </a>
 
             <!-- Mobile Sidebar Toggle -->
@@ -115,8 +115,8 @@
     <div class="flex flex-1 overflow-hidden relative">
         <!-- Sidebar (hidden on mobile by default) -->
         <aside id="sidebar" class="absolute md:relative z-10 shrink-0 w-64 bg-white border-r border-gray-200 p-4 md:p-6 hidden md:block h-full overflow-y-auto">
-            <h2 class="font-bold text-gray-900 mb-2 text-sm">Test Progress</h2>
-            <p class="text-xs text-gray-500 mb-4">{{ $this->getAnsweredCount() }} of {{ $this->getTotalQuestions() }} Answered</p>
+            <h2 class="font-bold text-gray-900 mb-2 text-sm">Progress Tes</h2>
+            <p class="text-xs text-gray-500 mb-4">{{ $this->getAnsweredCount() }} dari {{ $this->getTotalQuestions() }} Dijawab</p>
 
             <div class="w-full bg-gray-100 rounded-full h-1.5 mb-6">
                 <div class="bg-jti-yellow h-1.5 rounded-full" style="width: {{ $this->getProgressPercentage() }}%"></div>
@@ -140,13 +140,13 @@
 
             <div class="space-y-3 pt-4 border-t border-gray-100">
                 <div class="flex items-center text-xs text-gray-500">
-                    <span class="w-3 h-3 rounded-full bg-green-100 border border-green-300 mr-2"></span> Answered
+                    <span class="w-3 h-3 rounded-full bg-green-100 border border-green-300 mr-2"></span> Dijawab
                 </div>
                 <div class="flex items-center text-xs text-gray-500">
-                    <span class="w-3 h-3 rounded-full bg-jti-yellow mr-2"></span> Current
+                    <span class="w-3 h-3 rounded-full bg-jti-yellow mr-2"></span> Soal Saat Ini
                 </div>
                 <div class="flex items-center text-xs text-gray-500">
-                    <span class="w-3 h-3 rounded-full bg-gray-200 mr-2"></span> Unanswered
+                    <span class="w-3 h-3 rounded-full bg-gray-200 mr-2"></span> Belum Dijawab
                 </div>
             </div>
         </aside>
@@ -154,9 +154,9 @@
         <!-- Scrollable Main Content -->
         <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12">
             <nav class="flex text-sm text-gray-400 mb-4 md:mb-6 font-medium">
-                <span>Practice Test</span>
+                <span>Tes Latihan</span>
                 <span class="mx-2">></span>
-                <span class="text-jti-yellow">Question {{ $this->getQuestionNumber() }}</span>
+                <span class="text-jti-yellow">Soal {{ $this->getQuestionNumber() }}</span>
             </nav>
 
             @php $currentQuestion = $this->getCurrentQuestion(); @endphp
@@ -222,14 +222,14 @@
         <button wire:click="previousQuestion"
                 @disabled($currentQuestionIndex === 0) class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm {{ $currentQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : '' }}">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-            <span class="hidden sm:inline">Previous Question</span>
+            <span class="hidden sm:inline">Soal Sebelumnya</span>
             <span class="sm:hidden">Previous</span>
         </button>
 
         @if($currentQuestionIndex < count($questions) - 1)
             <button wire:click="nextQuestion"
                     class="flex items-center px-4 md:px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-semibold text-sm">
-                <span class="hidden sm:inline">Next Question</span>
+                <span class="hidden sm:inline">Soal Berikutnya</span>
                 <span class="sm:hidden">Next</span>
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
