@@ -199,13 +199,10 @@
                 <div class="bg-white rounded-lg shadow-md p-5 md:p-8 mb-6">
                     <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
                         <h1 class="text-xl md:text-3xl font-bold text-gray-900 leading-tight">{{ $lesson->title }}</h1>
-                        <span class="px-3 py-1 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap">
+                        {{-- <span class="px-3 py-1 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap">
                             {{ ucfirst($lesson->type) }}
-                        </span>
+                        </span> --}}
                     </div>
-                    <p class="text-sm text-gray-600">
-                        {{ $lesson->duration_seconds ? floor($lesson->duration_seconds / 60) . ' menit' : 'Durasi tidak ditentukan' }}
-                    </p>
                 </div>
 
                 <!-- Video/Content Section -->

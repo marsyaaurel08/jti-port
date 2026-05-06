@@ -14,6 +14,62 @@
         </div>
     @endif
 
+    <style>
+        .article-content h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #1a202c;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        .article-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #2d3748;
+        }
+        .article-content p {
+            margin-bottom: 1rem;
+            line-height: 1.75;
+            color: #4a5568;
+        }
+        .article-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+        .article-content pre {
+            background-color: #f7fafc;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        .article-content code {
+            background-color: #f7fafc;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-family: Menlo, Monaco, Consolas, monospace;
+        }
+        .article-content hr {
+            border: 0;
+            border-top: 2px solid #e2e8f0;
+            margin: 2rem 0;
+        }
+        .article-content strong {
+            font-weight: 600;
+            color: #1a202c;
+        }
+    </style>
+
     {{-- Mobile Sidebar Toggle Bar --}}
     <div class="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm"
          x-data="{ open: false }">
@@ -143,21 +199,18 @@
                 <div class="bg-white rounded-lg shadow-md p-5 md:p-8 mb-6">
                     <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
                         <h1 class="text-xl md:text-3xl font-bold text-gray-900 leading-tight">{{ $lesson->title }}</h1>
-                        <span class="px-3 py-1 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap">
+                        {{-- <span class="px-3 py-1 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap">
                             {{ ucfirst($lesson->type) }}
-                        </span>
+                        </span> --}}
                     </div>
-                    <p class="text-sm text-gray-600">
-                        {{ $lesson->duration_seconds ? floor($lesson->duration_seconds / 60) . ' menit' : 'Durasi tidak ditentukan' }}
-                    </p>
                 </div>
 
                 <!-- Video/Content Section -->
                 <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                     @if ($lesson->type === 'video')
                         @if (in_array($lesson->text_position, ['before', 'both']) && $lesson->content_text)
-                            <div class="p-5 md:p-8 w-full mx-auto">
-                                <div class="prose prose-sm">
+                             <div class="p-5 md:p-8 w-full mx-auto">
+                                <div class="article-content">
                                     {!! $lesson->content_text !!}
                                 </div>
                             </div>
@@ -173,15 +226,15 @@
 
                         @if (in_array($lesson->text_position, ['after', 'both']) && $lesson->text_after_video)
                             <div class="p-5 md:p-8 w-full mx-auto">
-                                <div class="prose prose-sm">
-                                    {!! $lesson->content_text !!}
+                                <div class="article-content">
+                                    {!! $lesson->text_after_video !!}
                                 </div>
                             </div>
                         @endif
 
                     @elseif ($lesson->type === 'text' && $lesson->content_text)
                         <div class="p-5 md:p-8 w-full mx-auto">
-                            <div class="prose prose-sm">
+                            <div class="article-content">
                                 {!! $lesson->content_text !!}
                             </div>
                         </div>

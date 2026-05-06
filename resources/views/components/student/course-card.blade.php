@@ -32,12 +32,12 @@
         </div>
         <div class="flex justify-between items-center mt-4">
             <span class="text-sm {{ $isCompleted ? 'text-green-500 font-semibold' : 'text-gray-400' }}">
-                {{ $isCompleted ? 'Completed' : 'In Progress' }}
+                {{ $isCompleted ? 'Selesai' : 'Dalam Proses' }}
             </span>
             @if ($canNavigate)
                 <a href="{{ route('student.lesson', ['courseSlug' => $slug, 'lessonSlug' => $lessonSlug]) }}"
                     class="{{ $isCompleted ? 'border px-4 py-2 text-sm rounded-md hover:bg-gray-100 transition-colors' : 'bg-jti-primary text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-jti-primary-hover transition-colors' }}">
-                    {{ $isCompleted ? 'Review' : 'Continue' }}
+                    {{ $isCompleted ? 'Review' : 'Lanjutkan' }}
                 </a>
             @else
                 <button class="bg-gray-300 text-sm font-semibold px-4 py-2 rounded-md cursor-not-allowed" disabled>No
