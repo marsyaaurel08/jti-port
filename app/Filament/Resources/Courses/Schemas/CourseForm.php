@@ -14,7 +14,7 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -58,13 +58,11 @@ class CourseForm
                                 ->label('Level')
                                 ->options(['beginner' => 'Beginner', 'intermediate' => 'Intermediate', 'advanced' => 'Advanced'])
                                 ->required(),
-                            SpatieMediaLibraryFileUpload::make('thumbnail')
+                            FileUpload::make('thumbnail_url')
                                 ->label('Thumbnail')
-                                ->collection('thumbnail')
                                 ->image()
                                 ->imageEditor()
                                 ->preserveFilenames()
-                                ->responsiveImages()
                                 ->visibility('public'),
                             Select::make('status')
                                 ->label('Status')
@@ -161,7 +159,7 @@ class CourseForm
                                                         ->label('Batas Waktu (menit)')
                                                         ->numeric()
                                                         ->default(60)
-                                                        
+
                                                         ->nullable(),
                                                 ]),
                                         ])->columnSpanFull(),
