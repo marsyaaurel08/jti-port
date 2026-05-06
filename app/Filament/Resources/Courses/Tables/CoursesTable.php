@@ -41,7 +41,7 @@ class CoursesTable
                     ->color('primary'),
                 TextColumn::make('price')
                     ->label('Harga')
-                    ->money()
+                    ->money('IDR')
                     ->sortable(),
                 // TextColumn::make('level')
                 //     ->label('Level')
