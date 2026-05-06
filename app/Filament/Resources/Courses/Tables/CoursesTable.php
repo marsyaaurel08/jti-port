@@ -21,9 +21,8 @@ class CoursesTable
     {
         return $table
             ->columns([
-                SpatieMediaLibraryImageColumn::make('thumbnail')
+                ImageColumn::make('thumbnail_url')
                     ->label('Thumbnail')
-                    ->collection('thumbnail')
                     ->extraImgAttributes(['class' => 'w-full h-64 object-cover rounded-lg mb-3']),
 
                 TextColumn::make('title')
