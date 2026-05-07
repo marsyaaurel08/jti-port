@@ -62,6 +62,7 @@ class CourseForm
                                 ->image()
                                 ->imageEditor()
                                 ->preserveFilenames()
+                                ->default('https://picsum.photos/400/200?random=1')
                                 ->visibility('public'),
                             Select::make('status')
                                 ->label('Status')
