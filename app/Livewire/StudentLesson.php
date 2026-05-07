@@ -195,51 +195,6 @@ class StudentLesson extends Component
         }
     }
 
-    public function markAsCompleted(): void
-    {
-        try {
-            $existingProgress = CourseProgress::where('enrollment_id', $this->enrollment->id)
-                ->where('lesson_id', $this->lesson->id)
-                ->first();
-
-            if ($existingProgress) {
-                $existingProgress->update(['is_completed' => true]);
-            } else {
-                CourseProgress::create([
-                    'enrollment_id' => $this->enrollment->id,
-                    'lesson_id' => $this->lesson->id,
-                    'is_completed' => true,
-                ]);
-            }
-
-            $this->isLessonCompleted = true;
-
-            // Reload to update progress
-            $this->loadLesson();
-
-            session()->flash('success', 'Pelajaran berhasil ditandai sebagai selesai!');
-        } catch (\Exception $e) {
-            Log::error('Failed to mark lesson as completed: ' . $e->getMessage());
-            session()->flash('error', 'Gagal menandai pelajaran. Silakan coba lagi.');
-        }
-    }
-
-    public function markAsIncomplete(): void
-    {
-        try {
-            CourseProgress::where('enrollment_id', $this->enrollment->id)
-                ->where('lesson_id', $this->lesson->id)
-                ->update(['is_completed' => false]);
-
-            $this->isLessonCompleted = false;
-            $this->loadLesson();
-
-            session()->flash('success', 'Pelajaran ditandai sebagai belum selesai.');
-        } catch (\Exception $e) {
-            Log::error('Failed to mark lesson as incomplete: ' . $e->getMessage());
-            session()->flash('error', 'Gagal mengubah status pelajaran. Silakan coba lagi.');
-        }
-    }
 
     public function markAsCompletedAndNext(): void
     {
