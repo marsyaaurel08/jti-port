@@ -104,14 +104,34 @@
              x-transition:leave-end="opacity-0 -translate-y-2"
              class="border-t border-gray-100 bg-white max-h-72 overflow-y-auto px-4 py-4">
 
-            {{-- Progress Bar --}}
-            <div class="mb-4 pb-4 border-b border-gray-100">
-                <p class="text-xs text-gray-500 mb-1 uppercase tracking-wide">Progress Kursus</p>
-                <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
-                    <div class="bg-jti-yellow h-2 rounded-full transition-all" style="width: {{ $progress }}%"></div>
-                </div>
-                <p class="text-xs text-gray-500">{{ count($completedLessonIds) }}/{{ $course['total_lessons'] ?? 0 }} pelajaran</p>
+        {{-- Progress Bar --}}
+        <div class="mb-4 pb-4 border-b border-gray-100">
+            <p class="text-xs text-gray-500 mb-1 uppercase tracking-wide">Progress Kursus</p>
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                <div class="bg-jti-yellow h-2 rounded-full transition-all" style="width: {{ $progress }}%"></div>
             </div>
+            <p class="text-xs text-gray-500">{{ count($completedLessonIds) }}/{{ $course['total_lessons'] ?? 0 }} pelajaran</p>
+        </div>
+
+        @php
+            $nextAccessibleLessonId = null;
+            $allLessonsCompleted = false;
+            $allLessons = [];
+            foreach ($chapters as $chapter) {
+                foreach ($chapter['lessons'] as $lessonItem) {
+                    $allLessons[] = $lessonItem;
+                }
+            }
+            // Check if all lessons are completed
+            $allLessonsCompleted = count($completedLessonIds) >= count($allLessons);
+            // Find the first uncompleted lesson
+            foreach ($allLessons as $lessonItem) {
+                if (!in_array($lessonItem['id'], $completedLessonIds)) {
+                    $nextAccessibleLessonId = $lessonItem['id'];
+                    break;
+                }
+            }
+        @endphp
 
             <div class="space-y-2">
                 @if (!empty($chapters))
@@ -124,15 +144,26 @@
                                     @php
                                         $isCompleted = in_array($chapterLesson['id'], $completedLessonIds);
                                         $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
+                                        $isAccessible = $isCompleted ||
+                                                        $chapterLesson['id'] === $nextAccessibleLessonId ||
+                                                        $allLessonsCompleted ||
+                                                        $isActive;
                                     @endphp
-                                    <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
-                                       @click="open = false"
-                                       class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
-                                        <span class="inline-block mr-2">
-                                            @if ($isCompleted) ✓ @else • @endif
+                                    @if ($isAccessible)
+                                        <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
+                                           @click="open = false"
+                                           class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                            <span class="inline-block mr-2">
+                                                @if ($isCompleted) ✓ @else • @endif
+                                            </span>
+                                            {{ $chapterLesson['title'] }}
+                                        </a>
+                                    @else
+                                        <span class="block p-2 rounded-md text-sm text-gray-400 cursor-not-allowed">
+                                            <span class="inline-block mr-2">🔒</span>
+                                            {{ $chapterLesson['title'] }}
                                         </span>
-                                        {{ $chapterLesson['title'] }}
-                                    </a>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -174,14 +205,25 @@
                                             @php
                                                 $isCompleted = in_array($chapterLesson['id'], $completedLessonIds);
                                                 $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
+                                                $isAccessible = $isCompleted ||
+                                                                $chapterLesson['id'] === $nextAccessibleLessonId ||
+                                                                $allLessonsCompleted ||
+                                                                $isActive;
                                             @endphp
-                                            <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
-                                               class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
-                                                <span class="inline-block mr-2">
-                                                    @if ($isCompleted) ✓ @else • @endif
+                                            @if ($isAccessible)
+                                                <a href="{{ route('student.lesson', [$courseSlug, $chapterLesson['slug']]) }}"
+                                                   class="block p-2 rounded-md text-sm transition-all {{ $isActive ? 'bg-jti-yellow text-white font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                                    <span class="inline-block mr-2">
+                                                        @if ($isCompleted) ✓ @else • @endif
+                                                    </span>
+                                                    {{ $chapterLesson['title'] }}
+                                                </a>
+                                            @else
+                                                <span class="block p-2 rounded-md text-sm text-gray-400 cursor-not-allowed">
+                                                    <span class="inline-block mr-2">🔒</span>
+                                                    {{ $chapterLesson['title'] }}
                                                 </span>
-                                                {{ $chapterLesson['title'] }}
-                                            </a>
+                                            @endif
                                         @endforeach
                                     </div>
                                 </div>
@@ -323,7 +365,7 @@
                     <svg fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </span>
             </button>

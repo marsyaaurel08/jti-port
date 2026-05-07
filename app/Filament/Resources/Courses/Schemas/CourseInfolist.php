@@ -43,7 +43,7 @@ class CourseInfolist
                                     ->columnSpanFull(),
                                 TextEntry::make('price')
                                     ->label('Harga')
-                                    ->icon('heroicon-o-currency-dollar'),
+                                    ->money('IDR'),
                                 TextEntry::make('level')
                                     ->label('Level')
                                     ->icon('heroicon-o-academic-cap')
