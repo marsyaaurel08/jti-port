@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
@@ -31,10 +32,13 @@ class UserForm
 
                         TextInput::make('password')
                             ->password()
-                            ->required(fn (string $context): bool => $context === 'create')
+                            ->required(fn(string $context): bool => $context === 'create')
                             ->maxLength(255)
-                            ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
-                            ->dehydrated(fn ($state) => filled($state)),
+                            ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
+                            ->dehydrated(fn($state) => filled($state)),
+
+                        Hidden::make('email_verified_at')
+                            ->default(now()),
 
                         Select::make('roles')
                             ->label('User Level (Roles)')
@@ -57,7 +61,7 @@ class UserForm
                             ->preload()
                             ->searchable()
                             ->helperText('Select one or more roles to assign to this user')
-                            ->visible(fn () => Auth::check() && Auth::user()->hasRole('super_admin'))
+                            ->visible(fn() => Auth::check() && Auth::user()->hasRole('super_admin'))
                             ->required(),
                     ])
                     ->columnSpan(2),
