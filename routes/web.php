@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified', 'non-admin'])->prefix('student')->name('s
     Route::get('/profile', StudentProfile::class)->name('profile');
 
     // Enrollment & Belajar
-    Route::get('/enrolled', [EnrollmentController::class, 'index'])->name('enrolled');
+    // Route::get('/enrolled', [EnrollmentController::class, 'index'])->name('enrolled');
     Route::get('/my-courses', [StudentController::class, 'myCourses'])->name('my-courses');
     Route::get('/my-classes', [StudentController::class, 'myClasses'])->name('my-classes');
 
