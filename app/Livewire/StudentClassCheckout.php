@@ -6,8 +6,6 @@ use App\Models\CourseClass;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\UserCart;
-use App\Services\VABankService;
-use App\Services\BNIService;
 use App\Services\Payment\Exceptions\PaymentException;
 use App\Services\Payment\PaymentFactory;
 use Illuminate\Support\Facades\Auth;
