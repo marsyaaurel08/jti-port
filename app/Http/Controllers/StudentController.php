@@ -30,11 +30,11 @@ class StudentController extends Controller
         try {
             $user = Auth::user();
             $filter = $request->get('filter', 'all');
-            $courses = $this->courseStudentService->getStudentCourses($user->id, $filter);
+            $courses = $this->courseStudentService->getStudentCoursesWithTrashed($user->id, $filter);
 
             return view('pages.user.mycourse', compact('courses'));
         } catch (\Exception $e) {
-            Log::error('Failed to load student courses: '.$e->getMessage());
+            Log::error('Failed to load student courses: ' . $e->getMessage());
 
             return back()->with('error', 'Gagal memuat kursus. Silakan coba lagi.');
         }
@@ -45,11 +45,11 @@ class StudentController extends Controller
         try {
             $user = Auth::user();
             $filter = $request->get('filter', 'all');
-            $classes = $this->classStudentService->getStudentClasses($user->id, $filter);
+            $classes = $this->classStudentService->getStudentClassesWithTrashed($user->id, $filter);
 
             return view('pages.user.myclass', compact('classes'));
         } catch (\Exception $e) {
-            Log::error('Failed to load student classes: '.$e->getMessage());
+            Log::error('Failed to load student classes: ' . $e->getMessage());
 
             return back()->with('error', 'Gagal memuat kelas. Silakan coba lagi.');
         }
@@ -131,7 +131,7 @@ class StudentController extends Controller
                 'user'
             ));
         } catch (\Exception $e) {
-            Log::error('Failed to load lesson: '.$e->getMessage());
+            Log::error('Failed to load lesson: ' . $e->getMessage());
 
             return back()->with('error', 'Gagal memuat materi. Silakan coba lagi.');
         }

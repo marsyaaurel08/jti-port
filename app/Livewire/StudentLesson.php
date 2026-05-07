@@ -80,7 +80,8 @@ class StudentLesson extends Component
             $user = Auth::user();
 
             // Find the course by slug
-            $course = Course::where('slug', $this->courseSlug)
+            $course = Course::withTrashed()
+                ->where('slug', $this->courseSlug)
                 ->where('status', 'published')
                 ->firstOrFail();
 
@@ -183,6 +184,18 @@ class StudentLesson extends Component
                 // Recalculate progress percentage
                 $completedCount = count($this->completedLessonIds) + 1;
                 $this->progress = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
+
+                // Update enrollment completed lesson count and completion status
+                $updateData = [
+                    'completed_lesson_count' => $completedCount,
+                ];
+
+                if ($totalLessons > 0 && $completedCount >= $totalLessons && !$this->enrollment->is_completed) {
+                    $updateData['is_completed'] = true;
+                    $updateData['completed_at'] = now();
+                }
+
+                $this->enrollment->update($updateData);
             }
 
             // Update last accessed lesson
@@ -206,19 +219,44 @@ class StudentLesson extends Component
         ]);
 
         try {
+            $isNewCompletion = false;
+            
             // Mark current lesson as completed
             $existingProgress = CourseProgress::where('enrollment_id', $this->enrollment->id)
                 ->where('lesson_id', $this->lesson->id)
                 ->first();
 
             if ($existingProgress) {
-                $existingProgress->update(['is_completed' => true]);
+                if (!$existingProgress->is_completed) {
+                    $existingProgress->update(['is_completed' => true]);
+                    $isNewCompletion = true;
+                }
             } else {
                 CourseProgress::create([
                     'enrollment_id' => $this->enrollment->id,
                     'lesson_id' => $this->lesson->id,
                     'is_completed' => true,
                 ]);
+                $isNewCompletion = true;
+            }
+
+            if ($isNewCompletion) {
+                $completedCount = CourseProgress::where('enrollment_id', $this->enrollment->id)
+                    ->where('is_completed', true)
+                    ->count();
+
+                $totalLessons = $this->course['total_lessons'] ?? 0;
+
+                $updateData = [
+                    'completed_lesson_count' => $completedCount,
+                ];
+
+                if ($totalLessons > 0 && $completedCount >= $totalLessons && !$this->enrollment->is_completed) {
+                    $updateData['is_completed'] = true;
+                    $updateData['completed_at'] = now();
+                }
+
+                $this->enrollment->update($updateData);
             }
 
             // Log::info('Lesson marked as completed', ['lesson_id' => $this->lesson->id]);

@@ -18,12 +18,12 @@ class Enrollment extends Model
         'order_id',
         'enrolled_at',
         'expires_at',
-        'is_completed',
+        'is_completed',   // apakah course / class sudah selesai
         'completed_at',
         'certificate_code',
         'certificate_url',
-        'completed_lesson_count',
-        'last_accessed_lesson_id',
+        'completed_lesson_count', // jumlah pelajaran yang sudah diselesaikan, ini bisa dihitung dari CourseProgress tapi disimpan di sini untuk query yang lebih cepat
+        'last_accessed_lesson_id', // untuk menyimpan pelajaran terakhir yang diakses, memudahkan untuk melanjutkan belajar
     ];
 
     protected function casts(): array
@@ -82,12 +82,10 @@ class Enrollment extends Model
     {
         return $this->belongsTo(Course::class);
     }
-
     public function class(): BelongsTo
     {
         return $this->belongsTo(CourseClass::class, 'class_id');
     }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
