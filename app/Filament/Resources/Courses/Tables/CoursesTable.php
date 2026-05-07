@@ -93,14 +93,32 @@ class CoursesTable
                     ->icon('heroicon-o-eye'),
                 DeleteAction::make()
                     ->label('Hapus')
-                    ->icon('heroicon-o-trash'),
+                    ->icon('heroicon-o-trash')
+                    ->after(function ($record) {
+                        \App\Models\CourseClass::where('course_id', $record->id)->delete();
+                    }),
                 // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->after(function ($records) {
+                            foreach ($records as $record) {
+                                \App\Models\CourseClass::where('course_id', $record->id)->delete();
+                            }
+                        }),
+                    ForceDeleteBulkAction::make()
+                        ->after(function ($records) {
+                            foreach ($records as $record) {
+                                \App\Models\CourseClass::where('course_id', $record->id)->forceDelete();
+                            }
+                        }),
+                    RestoreBulkAction::make()
+                        ->after(function ($records) {
+                            foreach ($records as $record) {
+                                \App\Models\CourseClass::withTrashed()->where('course_id', $record->id)->restore();
+                            }
+                        }),
                 ]),
             ]);
     }
