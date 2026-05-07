@@ -77,7 +77,7 @@ class DemoSeeder extends Seeder
         foreach ($courseTitles as $index => $title) {
             $randomId = $index + 1;
             $course = Course::create([
-                'category_course_id' => $category->id,
+                'category_id' => $category->id,
                 'title' => $title,
                 'slug' => strtolower(str_replace(' ', '-', $title)),
                 'description' => "Learn the basics of {$title}",
