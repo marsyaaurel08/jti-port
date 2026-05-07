@@ -27,7 +27,8 @@
     @if (!isset($showFooter) || $showFooter)
         <x-layout.footer />
     @endif
-
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('payment.midtrans.client_key') }}"></script>
 </body>
 
 </html>
