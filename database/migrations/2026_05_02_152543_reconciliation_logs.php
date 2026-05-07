@@ -13,28 +13,13 @@ return new class extends Migration
     {
         Schema::create('reconciliation_logs', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-
-            $table->integer('attempt_number');
-            $table->enum('trigger_type', [
-                'scheduler',
-                'user_action',
-                'payment_proof',
-                'manual'
-            ]);
-
-            $table->enum('result', [
-                'paid',
-                'not_found',
-                'pending',
-                'failed'
-            ]);
-
-            $table->text('response_message')->nullable();
-
-            $table->timestamp('checked_at');
-
+            $table->string('gateway'); // 'bni' atau 'midtrans'
+            $table->string('action'); // misal: 'scheduled_inquiry', 'manual_sync_by_admin'
+            $table->json('request_payload')->nullable(); // Data yang dikirim saat inquiry
+            $table->json('response_payload')->nullable(); // Respon dari BNI/Midtrans
+            $table->enum('status', ['success', 'failed', 'unresolved']); // success: sinkron, unresolved: API error/timeout
+            $table->text('notes')->nullable(); // Catatan tambahan, misal: "Max retry reached"
             $table->timestamps();
         });
     }

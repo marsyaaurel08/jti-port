@@ -13,16 +13,12 @@ return new class extends Migration
     {
         Schema::create('payment_webhooks', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-
-            $table->string('invoice_number')->index();
-            $table->string('event_type')->nullable(); // PAID, EXPIRED, dll
-
-            $table->json('payload');
-
-            $table->timestamp('received_at');
-
+            $table->string('payment_gateway'); // 'bni' atau 'midtrans'
+            $table->string('order_invoice_number')->nullable(); // ID Order / Invoice Anda
+            $table->string('external_id')->nullable(); // ID Transaksi dari Midtrans/BNI
+            $table->json('payload'); // Simpan seluruh data JSON asli dari gateway di sini
+            $table->enum('status', ['pending', 'processed', 'failed'])->default('pending');
+            $table->text('error_message')->nullable(); // Jika gagal diproses oleh sistem Anda
             $table->timestamps();
         });
     }
