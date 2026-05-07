@@ -15,7 +15,6 @@ class CourseClass extends Model
     protected $fillable = [
         'course_id',
         'instructor_id',
-        'category_id',
         'level',
         'thumbnail_url',
         'description',
@@ -45,11 +44,6 @@ class CourseClass extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
-    }
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 
     public function instructor(): BelongsTo

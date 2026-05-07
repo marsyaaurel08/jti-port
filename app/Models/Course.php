@@ -23,7 +23,7 @@ class Course extends Model implements HasMedia
     }
 
     protected $fillable = [
-        'category_id',
+        'category_course_id',
         'title',
         'slug',
         'description',
@@ -50,7 +50,7 @@ class Course extends Model implements HasMedia
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_course_id');
     }
 
     public function classes(): HasMany

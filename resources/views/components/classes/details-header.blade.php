@@ -12,8 +12,8 @@
                 <span class="text-gray-700">/</span>
                 <a href="/classes" class="hover:text-jti-orange transition-colors">Classes</a>
                 <span class="text-gray-700">/</span>
-                <a href="/classes/?selectedCategories[0]={{ $class->category->id }}" class="text-jti-orange/80 hover:text-jti-orange transition-colors">
-                    {{ $class->category->name }}
+                <a href="/classes/?selectedCategories[0]={{ $class->course->category->id }}" class="text-jti-orange/80 hover:text-jti-orange transition-colors">
+                    {{ $class->course->category->name }}
                 </a>
             </nav>
 
