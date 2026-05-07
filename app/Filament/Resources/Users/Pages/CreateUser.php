@@ -11,6 +11,13 @@ class CreateUser extends CreateRecord
 
     protected static bool $canCreateAnother = false;
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['email_verified_at'] = now();
+
+        return $data;
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

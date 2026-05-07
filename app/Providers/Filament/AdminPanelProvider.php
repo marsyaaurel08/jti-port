@@ -37,8 +37,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('staff')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
-            ->brandname('jti-port')
+            ->brandName('jti-port')
             ->brandLogo(asset('img/logo-jti.png'))
+            ->favicon(asset('img/logo-jti.png'))
             ->brandLogoHeight('3rem')
             ->passwordReset()
             ->colors([
