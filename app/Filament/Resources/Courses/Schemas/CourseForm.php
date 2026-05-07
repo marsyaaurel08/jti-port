@@ -51,9 +51,8 @@ class CourseForm
                                 ->label('Harga')
                                 ->required()
                                 ->numeric()
-                                ->default(0.0)
                                 ->minValue(0)
-                                ->prefix('$'),
+                                ->prefix('Rp'),
                             Select::make('level')
                                 ->label('Level')
                                 ->options(['beginner' => 'Beginner', 'intermediate' => 'Intermediate', 'advanced' => 'Advanced'])

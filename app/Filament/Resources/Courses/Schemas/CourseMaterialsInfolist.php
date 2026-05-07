@@ -17,7 +17,7 @@ class CourseMaterialsInfolist
     {
         return $schema
             ->components([
-                Section::make('📚 Detail Materi')
+                Section::make('Detail Materi')
                     ->icon('heroicon-m-academic-cap')
                     ->description('Semua bab dan materi dalam kursus ini')
                     ->schema([
@@ -108,7 +108,7 @@ class CourseMaterialsInfolist
                                             ->extraAttributes(['class' => 'bg-gray-50 rounded-lg p-3']),
                                     ]),
                             ])
-                            ->extraAttributes(['class' => 'border rounded-lg p-4 mb-4']),
+                            ->extraAttributes(['class' => 'rounded-lg p-4 mb-4']),
                     ])
                     ->columnSpanFull(),
             ]);
