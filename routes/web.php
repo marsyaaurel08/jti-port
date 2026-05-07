@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialiteController;
-use App\Http\Controllers\{CartController, ClassesController, CourseController, EnrollmentController, HomeController, PaymentCallbackController, StudentController};
+use App\Http\Controllers\{CartController, ClassesController, CourseController, EnrollmentController, HomeController, PaymentController, StudentController};
+use App\Http\Controllers\Payment\WebhookController;
 use App\Livewire\{StudentCart, StudentLesson, StudentOrders, StudentClassCheckout, StudentClassLesson, StudentCourseCheckout, StudentProfile, StudentTransactions};
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -35,7 +36,7 @@ Route::middleware(['auth'])->prefix('/user')->name('user.')->group(function () {
 
 // --- User Dashboard Routes (Authenticated) ---
 // Menggunakan middleware 'auth' yang sekarang akan me-redirect ke filament.user.auth.login jika belum login
-Route::middleware(['auth', 'verified','non-admin'])->prefix('student')->name('student.')->group(function () {
+Route::middleware(['auth', 'verified', 'non-admin'])->prefix('student')->name('student.')->group(function () {
     // Profil & Keamanan
     Route::get('/', function () {
         return redirect()->route('student.profile');
@@ -43,7 +44,7 @@ Route::middleware(['auth', 'verified','non-admin'])->prefix('student')->name('st
     Route::get('/profile', StudentProfile::class)->name('profile');
 
     // Enrollment & Belajar
-    Route::get('/enrolled', [EnrollmentController::class, 'index'])->name('enrolled');
+    // Route::get('/enrolled', [EnrollmentController::class, 'index'])->name('enrolled');
     Route::get('/my-courses', [StudentController::class, 'myCourses'])->name('my-courses');
     Route::get('/my-classes', [StudentController::class, 'myClasses'])->name('my-classes');
 
@@ -83,20 +84,13 @@ Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect']
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('socialite.callback');
 Route::delete('/auth/{provider}/unlink', [SocialiteController::class, 'unlink'])->middleware('auth')->name('socialite.unlink');
 
-// --- Payment Callback Routes ---
-Route::prefix('api/payments')->name('payments.')->group(function () {
-    // BNI Webhook - Public route (no auth required)
-    Route::post('/bni-callback', [PaymentCallbackController::class, 'bniCallback'])
-        ->name('bni.callback')
-        ->withoutMiddleware(VerifyCsrfToken::class);
 
-    // Payment Status Check - Protected route
-    Route::post('/status', [PaymentCallbackController::class, 'checkPaymentStatus'])
-        ->middleware('auth')
-        ->name('status');
+// ============================================================
+// Midtrans Finish / Error / Unfinish (Redirect dari Snap)
+// ============================================================
 
-    // Get Order Payment Details - Protected route
-    Route::get('/order/{order}', [PaymentCallbackController::class, 'getOrderPayment'])
-        ->middleware('auth')
-        ->name('order.detail');
+Route::prefix('payment')->name('payment.')->group(function () {
+    Route::get('/finish',   fn () => redirect()->route('student.orders'))->name('finish');
+    Route::get('/unfinish', fn () => redirect()->route('student.orders'))->name('unfinish');
+    Route::get('/error',    fn () => redirect()->route('student.orders'))->name('error');
 });

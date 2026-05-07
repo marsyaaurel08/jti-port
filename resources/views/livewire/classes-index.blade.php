@@ -41,7 +41,7 @@
             </aside>
 
             {{-- Results List: Mengambil sisa space yang ada --}}
-            <main class="grow min-w-0">
+            <main class="w-full">
                 {{-- Search Component --}}
                 <x-classes.search :classes="$classes" :search="$search" />
 

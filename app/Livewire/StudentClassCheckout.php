@@ -6,9 +6,11 @@ use App\Models\CourseClass;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\UserCart;
-use App\Services\VABankService;
-use App\Services\BNIService;
+use App\Services\Payment\Exceptions\PaymentException;
+use App\Services\Payment\PaymentFactory;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -40,7 +42,7 @@ class StudentClassCheckout extends Component
     public string $promoMessage = '';
 
     // Transfer Method (Cara Transfer ke BNI VA)
-    public string $transferMethod = 'bni_mobile';
+    public string $transferMethod = 'bni_va';
 
     public array $transferMethods;
 
@@ -126,52 +128,91 @@ class StudentClassCheckout extends Component
         $this->isProcessing = true;
 
         try {
-            // Create Order
+            DB::beginTransaction();
+
+            // 1. Ambil gateway aktif dari settings
+            $activeGateway = DB::table('settings')
+                ->where('key', 'payment_gateway')
+                ->value('value') ?? 'bni';
+
+            // 2. Buat Order
             $order = Order::create([
-                'user_id' => Auth::id(),
-                'invoice_number' => $this->generateInvoiceNumber(),
-                'subtotal' => $this->getProductPrice(),
+                'user_id'         => Auth::id(),
+                'invoice_number'  => $this->generateInvoiceNumber(),
+                'subtotal'        => $this->getProductPrice(),
                 'discount_amount' => $this->discountAmount,
-                'total_amount' => $this->getTotalAmount(),
-                'status' => 'pending',
-                'payment_method' => $this->transferMethod,
+                'total_amount'    => $this->getTotalAmount(),
+                'status'          => 'pending',
+                'payment_gateway' => $activeGateway,
+                'payment_method'  => $this->transferMethod,
             ]);
 
-            // Create Order Item
+            // 3. Buat Order Item
             OrderItem::create([
-                'order_id' => $order->id,
-                'course_id' => $this->class->course_id,
-                'class_id' => $this->class->id,
+                'order_id'          => $order->id,
+                'course_id'         => $this->class->course_id,
+                'class_id'          => $this->class->id,
                 'price_at_purchase' => $this->getTotalAmount(),
-                'item_name' => $this->class->title,
+                'item_name'         => $this->class->title,
             ]);
 
-            // Generate BNI Virtual Account using BNI Ecollection API
-            $bniService = new BNIService;
-            $vaDataResponse = $bniService->createVirtualAccount($order);
+            // 4. Kirim ke Payment Gateway via Factory
+            $paymentService  = PaymentFactory::make($activeGateway);
+            $gatewayResponse = $paymentService->createTransaction($order, $this->transferMethod);
 
-            // Store BNI details in order
-            $order->update([
-                'bni_transaction_id' => $vaDataResponse['va_number'] ?? null,
-                'bni_va_number' => $vaDataResponse['va_number'] ?? null,
-                'is_fallback_va' => $vaDataResponse['is_fallback'] ?? false,
-                'bni_va_expired_at' => $vaDataResponse['expired_at'] ?? null,
-            ]);
+            // 5. Simpan response gateway ke Order (snap_token / va_number / dll)
+            $order->update($gatewayResponse);
 
-            $this->vaData = $vaDataResponse;
-            $this->showVAInstructions = true;
+            DB::commit();
 
-            // Clear cart items after order created
             $this->clearCartItems();
 
-            // Flash success notification
-            session()->flash('success', 'Nomor Virtual Account berhasil dibuat. Silakan lakukan transfer sesuai instruksi.');
-        } catch (\Exception $e) {
+            // 6. Tindak lanjut UI sesuai gateway
+            $this->handlePostPayment($activeGateway, $order, $gatewayResponse);
+        } catch (PaymentException $e) {
+            // Error spesifik dari gateway (BNI / Midtrans)
+            DB::rollBack();
+
+            Log::error('[Checkout] Payment Gateway Error', [
+                'gateway'  => $e->getGatewayName(),
+                'message'  => $e->getMessage(),
+                'user_id'  => Auth::id(),
+            ]);
+
+            session()->flash('error', 'Gagal terhubung ke layanan pembayaran. Silakan coba beberapa saat lagi.');
+        } catch (\Throwable $e) {
+            // Error tak terduga lainnya
+            DB::rollBack();
+
+            Log::error('[Checkout] Unexpected Error saat processPayment', [
+                'message' => $e->getMessage(),
+                'user_id' => Auth::id(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            session()->flash('error', 'Terjadi kesalahan. Silakan coba lagi atau hubungi support.');
+        } finally {
             $this->isProcessing = false;
-            session()->flash('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
+        }
+    }
+
+    // ============================================================
+    // Helper: tindak lanjut UI setelah transaksi berhasil dibuat
+    // ============================================================
+
+    private function handlePostPayment(string $gateway, Order $order, array $gatewayResponse): void
+    {
+        if ($gateway === 'midtrans') {
+            // Kirim snap_token ke frontend untuk memunculkan Midtrans Snap popup
+            $this->dispatch('trigger-midtrans-snap', token: $gatewayResponse['snap_token']);
+            return;
         }
 
-        $this->isProcessing = false;
+        // BNI: tampilkan instruksi Virtual Account di halaman yang sama
+        $this->vaData            = $order->getVaData();
+        $this->showVAInstructions = true;
+
+        session()->flash('success', 'Nomor Virtual Account berhasil dibuat. Silakan lakukan transfer sesuai instruksi.');
     }
 
     public function generateInvoiceNumber(): string

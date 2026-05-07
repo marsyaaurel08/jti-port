@@ -191,43 +191,35 @@
                         @foreach ($transferMethods as $key => $method)
                             <div
                                 class="group relative rounded-2xl transition-all duration-300 {{ $transferMethod === $key ? 'ring-2 ring-jti-yellow border-transparent bg-yellow-50/30 shadow-md' : 'border border-slate-200 bg-white hover:border-jti-yellow hover:bg-slate-50' }}">
-                                <label class="flex items-center gap-5 p-5 cursor-pointer">
-                                    <input type="radio" name="transferMethod" wire:model.live="transferMethod"
-                                        value="{{ $key }}"
-                                        class="w-5 h-5 text-jti-yellow border-slate-300 focus:ring-jti-yellow">
+                                <label class="flex items-center gap-4 p-4 cursor-pointer w-full">
 
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-3">
-                                            <p class="font-bold text-slate-900">{{ $method['name'] }}</p>
-                                        </div>
+                                    <!-- 1. Radio Button -->
+                                    <div class="flex-shrink-0 flex items-center">
+                                        <input type="radio" name="transferMethod" wire:model.live="transferMethod"
+                                            value="{{ $key }}"
+                                            class="w-5 h-5 text-jti-yellow border-slate-300 focus:ring-jti-yellow cursor-pointer transition-colors">
+                                    </div>
+
+                                    <!-- 2. Logo Container -->
+                                    <div
+                                        class="flex-shrink-0 w-16 h-12 bg-white border border-slate-100 rounded-lg flex items-center justify-center p-1.5 shadow-sm overflow-hidden">
+                                        <img src="{{ $method['logo'] }}" alt="{{ $method['name'] }}"
+                                            class="max-w-full max-h-full object-contain mix-blend-multiply"
+                                            onerror="this.style.display='none'">
+                                        <!-- onerror berguna agar jika gambar gagal dimuat/belum ada, tidak muncul icon broken -->
+                                    </div>
+
+                                    <!-- 3. Text Details -->
+                                    <div class="flex-1 flex flex-col justify-center">
+                                        <p class="font-bold text-slate-900 text-sm md:text-base leading-tight">
+                                            {{ $method['name'] }}
+                                        </p>
                                         <p class="text-xs text-slate-500 mt-1 leading-snug">
-                                            {{ $method['description'] }}</p>
+                                            {{ $method['description'] }}
+                                        </p>
                                     </div>
-                                </label>
 
-                                @if ($transferMethod === $key)
-                                    <div class="px-6 pb-6 pt-2 animate-fadeIn">
-                                        <div class="bg-white rounded-xl border border-yellow-100 p-5 shadow-inner">
-                                            <p class="text-[10px] font-bold text-slate-400 tracking-widest mb-4">
-                                                INSTRUKSI PEMBAYARAN:</p>
-                                            <ul class="space-y-4">
-                                                @forelse ($transferInstructions[$key] as $index => $step)
-                                                    <li class="flex gap-4">
-                                                        <span
-                                                            class="flex-shrink-0 w-6 h-6 bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center rounded-lg border border-slate-200">
-                                                            {{ $index + 1 }}
-                                                        </span>
-                                                        <p class="text-sm text-slate-600 leading-relaxed">
-                                                            {{ $step }}</p>
-                                                    </li>
-                                                @empty
-                                                    <li class="text-sm text-slate-400 italic">Instruksi belum
-                                                        tersedia</li>
-                                                @endforelse
-                                            </ul>
-                                        </div>
-                                    </div>
-                                @endif
+                                </label>
                             </div>
                         @endforeach
                     </div>
@@ -318,7 +310,28 @@
     </style>
     {{-- VA Instructions Modal --}}
     @if ($showVAInstructions && !empty($vaData))
-        <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions[$transferMethod] ?? []"
+        <x-checkout.va-instructions-modal
+            :show="$showVAInstructions"
+            :vaData="$vaData"
+            :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'"
+            :instructions="$transferInstructions[$transferMethod] ?? []"
             :redirectRoute="$redirectRoute" />
     @endif
 </div>
+@script
+    <script>
+        $wire.on('trigger-midtrans-snap', (event) => {
+            window.snap.pay(event.token, {
+                onSuccess: function(result) {
+                    window.location.href = '/student/transactions';
+                },
+                onPending: function(result) {
+                    window.location.href = '/student/orders';
+                },
+                onError: function(result) {
+                    alert("Pembayaran gagal!");
+                }
+            });
+        });
+    </script>
+@endscript

@@ -12,6 +12,7 @@ use App\Models\Lesson;
 use App\Models\LogSelfHealing;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -104,7 +105,7 @@ class DemoSeeder extends Seeder
                         'chapter_id' => $chapter->id,
                         'title' => "Lesson {$lessonCounter}: Introduction",
                         'type' => 'video',
-                        'slug' => strtolower(str_replace(' ', '-', $title))."-lesson-{$lessonCounter}",
+                        'slug' => strtolower(str_replace(' ', '-', $title)) . "-lesson-{$lessonCounter}",
                         'content_url' => 'https://youtu.be/dSq0Z5XpoLc?si=JEzcvVg0EO8e1jYr',
                         'content_text' => 'Lesson content goes here...',
                         'duration_seconds' => 600, // 10 minutes
@@ -130,7 +131,6 @@ class DemoSeeder extends Seeder
 
             CourseClass::create([
                 'course_id' => $course->id,
-                'category_id' => $course->category_id,
                 'instructor_id' => $instructors[$instructorKey]->id,
                 'thumbnail_url' => "https://picsum.photos/400/200?random={$randomId}",
                 'description' => "Class description for {$course->title}",
@@ -202,7 +202,6 @@ class DemoSeeder extends Seeder
         $classCode = CourseClass::create([
             'course_id' => $allCourses[0]->id, // Use first course (Laravel Fundamentals)
             'instructor_id' => $instructor->id,
-            'category_id' => $category->id,
             'title' => 'Laravel Fundamentals - Advanced Batch',
             'slug' => 'laravel-fundamentals-advanced-batch',
             'description' => 'Advanced batch for Laravel fundamentals',
@@ -298,6 +297,10 @@ class DemoSeeder extends Seeder
                 'repair_code' => 'SH-002',
             ],
         ]);
+
+        Setting::create(
+            ['key' => 'payment_gateway', 'value' => 'midtrans'],
+        );
 
         $this->command->info('- Created 2 self-healing logs (1 course, 1 class)');
 

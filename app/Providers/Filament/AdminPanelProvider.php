@@ -26,7 +26,6 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
-use Openplain\FilamentShadcnTheme\Color as ShadcnColor;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -43,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3rem')
             ->passwordReset()
             ->colors([
-                'primary' => ShadcnColor::Default,
+                'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

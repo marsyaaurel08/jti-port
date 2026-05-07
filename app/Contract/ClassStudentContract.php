@@ -8,7 +8,11 @@ interface ClassStudentContract
 {
     public function getStudentClasses(int $userId, ?string $filter = null): \Illuminate\Support\Collection;
 
+    public function getStudentClassesWithTrashed(int $userId, ?string $filter = null): \Illuminate\Support\Collection;
+
     public function getClassDetails(Enrollment $enrollment): array;
+
+    public function getClassDetailsWithTrashed(Enrollment $enrollment): array;
 
     public function calculateClassProgress(Enrollment $enrollment): int;
 

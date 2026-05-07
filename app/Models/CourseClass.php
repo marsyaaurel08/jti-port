@@ -4,18 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 
 class CourseClass extends Model
 {
     protected $table = 'classes';
 
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'course_id',
         'instructor_id',
-        'category_id',
         'level',
         'thumbnail_url',
         'description',
@@ -45,11 +45,6 @@ class CourseClass extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
-    }
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 
     public function instructor(): BelongsTo

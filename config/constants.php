@@ -213,115 +213,96 @@ return [
 
     'transfer_methods' => [
         // Bank BNI
-        'bni_mobile' => [
-            'name' => 'BNI Mobile Banking',
+        'bni_va' => [
+            'name' => 'BNI Virtual Account',
             'bank' => 'BNI',
-            'type' => 'mobile_banking',
-            'description' => 'Transfer via aplikasi BNI Mobile Banking',
-        ],
-        'bni_atm' => [
-            'name' => 'BNI ATM',
-            'bank' => 'BNI',
-            'type' => 'atm',
-            'description' => 'Transfer via mesin ATM BNI',
-        ],
-        'bni_internet' => [
-            'name' => 'BNI Internet Banking',
-            'bank' => 'BNI',
-            'type' => 'internet_banking',
-            'description' => 'Transfer via website BNI',
-        ],
+            'type' => 'virtual_account',
+            'description' => 'Transfer via BNI Mobile, Internet Banking, atau ATM',
+            'logo' => 'bni-logo.png',
+            ],
 
         // Bank BCA
-        'bca_mobile' => [
-            'name' => 'BCA Mobile Banking',
+        'bca_va' => [
+            'name' => 'BCA Virtual Account',
             'bank' => 'BCA',
-            'type' => 'mobile_banking',
-            'description' => 'Transfer dari bank BCA - mBanking',
-        ],
-        'bca_atm' => [
-            'name' => 'BCA ATM',
-            'bank' => 'BCA',
-            'type' => 'atm',
-            'description' => 'Transfer via mesin ATM BCA',
-        ],
-        'bca_internet' => [
-            'name' => 'BCA Internet Banking',
-            'bank' => 'BCA',
-            'type' => 'internet_banking',
-            'description' => 'Transfer via website BCA (KlikBCA)',
-        ],
+            'type' => 'virtual_account',
+            'description' => 'Transfer via BCA Mobile, KlikBCA, atau ATM BCA',
+            'logo' => 'bni-logo.png',
+            ],
 
-        // Bank Mandiri
-        'mandiri_mobile' => [
-            'name' => 'Mandiri Mobile Banking',
+        // Bank Mandiri (Midtrans menggunakan key 'echannel' untuk Mandiri Bill)
+        'echannel' => [
+            'name' => 'Mandiri Bill Payment',
             'bank' => 'Mandiri',
-            'type' => 'mobile_banking',
-            'description' => 'Transfer via aplikasi Livin\' Mandiri',
-        ],
-        'mandiri_atm' => [
-            'name' => 'Mandiri ATM',
-            'bank' => 'Mandiri',
-            'type' => 'atm',
-            'description' => 'Transfer via mesin ATM Mandiri',
-        ],
+            'type' => 'virtual_account',
+            'description' => 'Transfer via Livin\' by Mandiri, Internet Banking, atau ATM',
+            'logo' => 'bni-logo.png',
+            ],
 
         // Bank BRI
-        'bri_mobile' => [
-            'name' => 'BRI Mobile Banking',
+        'bri_va' => [
+            'name' => 'BRI Virtual Account',
             'bank' => 'BRI',
-            'type' => 'mobile_banking',
-            'description' => 'Transfer via aplikasi BRImo',
-        ],
-        'bri_atm' => [
-            'name' => 'BRI ATM',
-            'bank' => 'BRI',
-            'type' => 'atm',
-            'description' => 'Transfer via mesin ATM BRI',
-        ],
+            'type' => 'virtual_account',
+            'description' => 'Transfer via aplikasi BRImo, Internet Banking, atau ATM',
+            'logo' => 'bni-logo.png',
+            ],
 
         // Bank CIMB Niaga
-        'cimb_mobile' => [
-            'name' => 'CIMB Niaga Mobile',
+        'cimb_va' => [
+            'name' => 'CIMB Niaga Virtual Account',
             'bank' => 'CIMB Niaga',
-            'type' => 'mobile_banking',
-            'description' => 'Transfer via aplikasi OCTO Mobile',
-        ],
-        'cimb_atm' => [
-            'name' => 'CIMB Niaga ATM',
-            'bank' => 'CIMB Niaga',
-            'type' => 'atm',
-            'description' => 'Transfer via mesin ATM CIMB Niaga',
-        ],
-
-        // Bank Danamon
-        'danamon_mobile' => [
-            'name' => 'Danamon Mobile',
-            'bank' => 'Danamon',
-            'type' => 'mobile_banking',
-            'description' => 'Transfer via aplikasi D-Mobile',
-        ],
+            'type' => 'virtual_account',
+            'description' => 'Transfer via OCTO Mobile, OCTO Clicks, atau ATM',
+            'logo' => 'bni-logo.png',
+            ],
 
         // Bank Permata
-        'permata_mobile' => [
-            'name' => 'Permata Mobile',
+        'permata_va' => [
+            'name' => 'Permata Virtual Account',
             'bank' => 'Permata',
-            'type' => 'mobile_banking',
-            'description' => 'Transfer via aplikasi PermataMobile X',
-        ],
+            'type' => 'virtual_account',
+            'description' => 'Transfer via PermataMobile X atau ATM',
+            'logo' => 'bni-logo.png',
+            ],
 
-        // Retail / Minimarket
+        // Retail / Minimarket (Key sudah sesuai standar Midtrans)
         'indomaret' => [
             'name' => 'Indomaret',
             'bank' => null,
             'type' => 'retail',
             'description' => 'Bayar tunai di gerai Indomaret terdekat',
-        ],
+            'logo' => 'bni-logo.png',
+            ],
         'alfamart' => [
             'name' => 'Alfamart',
             'bank' => null,
             'type' => 'retail',
             'description' => 'Bayar tunai di gerai Alfamart terdekat',
-        ],
+            'logo' => 'bni-logo.png',
+            ],
+
+        // Opsional: E-Wallet (Sangat disarankan untuk ditambahkan)
+        'gopay' => [
+            'name' => 'GoPay',
+            'bank' => null,
+            'type' => 'e_wallet',
+            'description' => 'Bayar instan menggunakan saldo GoPay',
+            'logo' => 'bni-logo.png',
+            ],
+        'shopeepay' => [
+            'name' => 'ShopeePay',
+            'bank' => null,
+            'type' => 'e_wallet',
+            'description' => 'Bayar instan menggunakan saldo ShopeePay',
+            'logo' => 'bni-logo.png',
+            ],
+        'qris' => [
+            'name' => 'QRIS',
+            'bank' => null,
+            'type' => 'e_wallet',
+            'description' => 'Scan QR code menggunakan e-wallet atau m-banking apa saja',
+            'logo' => 'bni-logo.png',
+            ],
     ],
 ];

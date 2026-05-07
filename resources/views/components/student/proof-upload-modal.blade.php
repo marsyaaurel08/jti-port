@@ -35,9 +35,8 @@
                         <i data-lucide="info" class="w-4 h-4 text-white"></i>
                     </div>
                     <div class="text-sm text-blue-900 space-y-1">
-                        <p class="font-semibold">Bukti Pembayaran (Optional)</p>
-                        <p>Upload bukti transfer Anda, untuk berjaga-jaga jika terjadi kendala dalam proses verifikasi
-                            pembayaran.</p>
+                        <p class="font-semibold">Bukti Pembayaran</p>
+                        <p>Upload bukti transfer Anda, jika pembayaran anda tidak segera terverifikasi.</p>
                     </div>
                 </div>
 

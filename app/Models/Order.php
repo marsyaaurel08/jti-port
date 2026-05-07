@@ -6,123 +6,138 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * Model Order
- *
- * Model ini merepresentasikan sebuah pesanan (order) yang dibuat oleh user.
- * Digunakan untuk menyimpan informasi transaksi, pembayaran, dan status order.
- *
- * @property int $id
- * @property int $user_id
- * @property string $invoice_number
- * @property float $subtotal
- * @property float $discount_amount
- * @property float $total_amount
- * @property string $status
- * @property string|null $payment_method
- * @property string|null $payment_proof
- * @property \Carbon\Carbon|null $paid_at
- * @property string|null $bni_transaction_id
- * @property string|null $bni_va_number
- * @property \Carbon\Carbon|null $bni_va_expired_at
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- *
- * @property-read \App\Models\User $user
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OrderItem> $orderItems
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Enrollment> $enrollments
- *
- * @package App\Models
- */
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    /**
-     * Kolom yang boleh diisi secara massal (mass assignable).
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'invoice_number',
+        'external_id',       // Bisa digunakan untuk trx_id dari Midtrans / ref ID BNI
+        'snap_token',        // (BARU) Wajib untuk Midtrans Snap
+        'payment_gateway',   // (BARU) Isi: 'bni', 'midtrans', 'manual'
+        'payment_method',    // Isi: 'bca_va', 'qris', 'gopay', 'bni_va'
+        'va_number',
+        'va_expired_at',
+        'is_fallback_va',
         'subtotal',
         'discount_amount',
         'total_amount',
-        'status',
-        'payment_method',
+        'status',            // Sebaiknya distandarisasi (misal: 'unpaid', 'paid', 'expired', 'failed')
         'payment_proof',
         'paid_at',
-        'bni_transaction_id',
-        'bni_va_number',
-        'bni_va_expired_at',
+        'last_inquiry_at',
+        'inquiry_count',
     ];
 
-    /**
-     * Casting attribute untuk kolom tertentu.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'subtotal'      => 'decimal:2',
+            'subtotal'        => 'decimal:2',
             'discount_amount' => 'decimal:2',
-            'total_amount'  => 'decimal:2',
-            'paid_at'       => 'datetime',
-            'bni_va_expired_at' => 'datetime',
+            'total_amount'    => 'decimal:2',
+            'paid_at'         => 'datetime',
+            'va_expired_at'   => 'datetime',
+            'last_inquiry_at' => 'datetime',
+            'deleted_at'      => 'datetime',
+            'is_fallback_va'  => 'boolean',
+            'inquiry_count'   => 'integer',
         ];
     }
 
-    /**
-     * Relasi ke model User (pemilik order).
-     *
-     * @return BelongsTo
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relasi ke OrderItem (detail barang/jasa dalam order).
-     *
-     * Satu order dapat memiliki banyak item.
-     *
-     * @return HasMany
-     */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    /**
-     * Relasi ke Enrollment (pendaftaran kursus/materi setelah pembayaran berhasil).
-     *
-     * Satu order dapat menghasilkan banyak enrollment.
-     *
-     * @return HasMany
-     */
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
     }
 
-    public function getVaData(): array
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER METHODS
+    |--------------------------------------------------------------------------
+    */
+
+    public function getVaData(): ?array
     {
+        // Midtrans mungkin memakai QRIS/GoPay yang tidak punya VA
+        if (!$this->va_number) {
+            return null;
+        }
+
         return [
-            'va_number' => $this->bni_va_number,
-            'bank_code' => '009',
-            'bank_name' => 'BNI',
+            'va_number'      => $this->va_number,
+            'bank_code'      => $this->getBankCode(),
+            'bank_name'      => $this->getBankName(),
             'account_holder' => $this->user->name,
-            'amount' => $this->total_amount,
-            'expired_at' => $this->bni_va_expired_at->toIso8601String(),
-            'description' => "Transfer untuk Invoice {$this->invoice_number}",
-            'status' => $this->status,
+            'amount'         => $this->total_amount,
+            'expired_at'     => optional($this->va_expired_at)?->toIso8601String(),
+            'description'    => "Transfer untuk Invoice {$this->invoice_number}",
+            'status'         => $this->status,
             'is_fallback_va' => $this->is_fallback_va,
-            'response_code' => 'FALLBACK',
-            'response_message' => 'Menggunakan Virtual Account Backup - Verifikasi Manual Diperlukan',
+            'response_code'  => $this->is_fallback_va ? 'FALLBACK' : null,
+            'response_message' => $this->is_fallback_va
+                ? 'Menggunakan Virtual Account Backup - Verifikasi Manual Diperlukan'
+                : null,
         ];
+    }
+
+    public function getBankCode(): ?string
+    {
+        // Sesuaikan dengan gateway atau method yang spesifik
+        if ($this->payment_gateway === 'bni') {
+            return '009';
+        }
+
+        // Jika menggunakan Midtrans, kodenya bergantung pada payment_method
+        return match ($this->payment_method) {
+            'bca_va' => '014',
+            'mandiri_va' => '008',
+            'bni_va' => '009',
+            'bri_va' => '002',
+            default => null,
+        };
+    }
+
+    public function getBankName(): ?string
+    {
+        if ($this->payment_gateway === 'bni') {
+            return 'BNI';
+        }
+
+        if ($this->payment_gateway === 'manual') {
+            return 'Manual Verifikasi';
+        }
+
+        // Midtrans bisa menangani banyak channel
+        if ($this->payment_gateway === 'midtrans') {
+            return match ($this->payment_method) {
+                'bca_va' => 'BCA',
+                'mandiri_va' => 'Mandiri',
+                'bni_va' => 'BNI',
+                'bri_va' => 'BRI',
+                'qris' => 'QRIS',
+                'gopay' => 'GoPay',
+                default => 'Midtrans (Lainnya)',
+            };
+        }
+
+        return null;
     }
 }
