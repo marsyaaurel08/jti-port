@@ -112,19 +112,22 @@ docker run -d \
   --name $NEW_NAME \
   --network $NETWORK_NAME \
   --restart unless-stopped \
+  -e IS_FIRST_DEPLOYMENT=$IS_FIRST_DEPLOYMENT \
   $ENV_OPTS \
   -v app_storage:/var/www/html/storage \
   $DOCKER_IMAGE
 
-# Tunggu container siap (PHP-FPM butuh waktu start)
+# Tunggu entrypoint selesai (cek marker file, tanpa spawn PHP process)
 echo -e "${YELLOW}⏳ Waiting for $NEW_NAME to be ready...${NC}"
-for i in $(seq 1 15); do
-    if docker exec $NEW_NAME php -r "echo 'ok';" >/dev/null 2>&1; then
+for i in $(seq 1 60); do
+    if docker exec $NEW_NAME test -f /tmp/.entrypoint-ready 2>/dev/null; then
         echo -e "${GREEN}✓ $NEW_NAME is ready (${i}s)${NC}"
         break
     fi
-    if [ $i -eq 15 ]; then
+    if [ $i -eq 60 ]; then
         echo -e "${RED}❌ Container $NEW_NAME failed to start in time${NC}"
+        echo -e "${RED}   Container logs:${NC}"
+        docker logs $NEW_NAME --tail 20
         exit 1
     fi
     sleep 2
@@ -134,10 +137,8 @@ done
 # 3. LARAVEL OPTIMIZATION
 # =====================================================================
 
-echo -e "${YELLOW}⚡ Running Laravel commands on $NEW_NAME...${NC}"
-# docker exec $NEW_NAME php artisan optimize
-docker exec $NEW_NAME php artisan storage:link --force || true
-docker exec $NEW_NAME php artisan migrate --force
+# Laravel commands sudah dijalankan di entrypoint (migrate, cache, storage:link).
+# Tidak perlu jalankan ulang untuk hemat RAM di VPS 1GB.
 
 # =====================================================================
 # 4. NGINX CONFIG & TRAFFIC SWITCH
@@ -240,6 +241,43 @@ fi
 # Restart/Update worker
 echo -e "${YELLOW}⚙️ Starting/Updating queue worker...${NC}"
 docker-compose up -d worker
+
+# =====================================================================
+# 6. COPY PUBLIC ASSETS TO NGINX
+# =====================================================================
+
+echo -e "${YELLOW}📦 Copying public assets to nginx...${NC}"
+
+# Create temp directory on host
+TEMP_PUBLIC_DIR="/tmp/jtiport_public_$TIMESTAMP"
+mkdir -p $TEMP_PUBLIC_DIR
+
+# Copy entire public directory from app container to host
+docker cp $NEW_NAME:/var/www/html/public/. $TEMP_PUBLIC_DIR/ 2>/dev/null || true
+
+if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A $TEMP_PUBLIC_DIR 2>/dev/null)" ]; then
+    # Remove old public in nginx and recreate
+    docker exec jtiport_nginx rm -rf /var/www/html/public 2>/dev/null || true
+    docker exec jtiport_nginx mkdir -p /var/www/html/public
+    
+    # Copy from host to nginx container
+    docker cp $TEMP_PUBLIC_DIR/. jtiport_nginx:/var/www/html/public/
+    
+    # Cleanup temp directory
+    rm -rf $TEMP_PUBLIC_DIR
+    
+    # Verify copy succeeded
+    if docker exec jtiport_nginx test -f /var/www/html/public/index.php; then
+        echo -e "${GREEN}✓ Public assets copied to nginx${NC}"
+        # Reload nginx to pick up new assets
+        docker exec jtiport_nginx nginx -s reload 2>/dev/null || true
+    else
+        echo -e "${RED}❌ Failed to copy public assets to nginx${NC}"
+    fi
+else
+    echo -e "${RED}❌ Failed to copy public directory from $NEW_NAME${NC}"
+    rm -rf $TEMP_PUBLIC_DIR 2>/dev/null || true
+fi
 
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL: $NEW_NAME IS ACTIVE${NC}"

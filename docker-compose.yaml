@@ -85,3 +85,5 @@ volumes:
     name: jtiport_dbdata
   app_storage:
     name: jtiport_app_storage
+  app_build:
+    name: jtiport_app_build

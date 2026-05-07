@@ -802,56 +802,46 @@
 
             // Listen for request to send localStorage data to Livewire (on submission)
             if (window.Livewire) {
-                window.Livewire.on("requestLocalStorageData", function () {
-                    const savedData = exportQuizData(quizId);
+                window.Livewire.on(
+                    "requestLocalStorageData",
+                    async function () {
+                        const savedData = exportQuizData(quizId);
 
-                    if (
-                        savedData &&
-                        savedData.answers &&
-                        Object.keys(savedData.answers).length > 0
-                    ) {
                         const quizElement =
                             document.querySelector("[data-quiz-id]");
-                        if (quizElement) {
-                            const livewireComponent =
-                                quizElement.closest("[wire\\:id]");
-                            if (livewireComponent && window.Livewire) {
-                                const wireId =
-                                    livewireComponent.getAttribute("wire:id");
-
-                                const component = window.Livewire.find(wireId);
-                                if (component) {
-                                    isSubmitting = true;
-
-                                    component.call(
-                                        "submitFromLocalStorage",
-                                        savedData,
-                                    );
-
-                                    component.call("finalizeSubmission");
-                                }
-                            }
+                        if (!quizElement) {
+                            return;
                         }
-                    } else {
-                        const quizElement =
-                            document.querySelector("[data-quiz-id]");
-                        if (quizElement) {
-                            const livewireComponent =
-                                quizElement.closest("[wire\\:id]");
-                            if (livewireComponent && window.Livewire) {
-                                const wireId =
-                                    livewireComponent.getAttribute("wire:id");
 
-                                const component = window.Livewire.find(wireId);
-                                if (component) {
-                                    isSubmitting = true;
-
-                                    component.call("finalizeSubmission");
-                                }
-                            }
+                        const livewireComponent =
+                            quizElement.closest("[wire\\:id]");
+                        if (!livewireComponent || !window.Livewire) {
+                            return;
                         }
-                    }
-                });
+
+                        const wireId =
+                            livewireComponent.getAttribute("wire:id");
+                        const component = window.Livewire.find(wireId);
+                        if (!component) {
+                            return;
+                        }
+
+                        isSubmitting = true;
+
+                        if (
+                            savedData &&
+                            savedData.answers &&
+                            Object.keys(savedData.answers).length > 0
+                        ) {
+                            await component.call(
+                                "submitFromLocalStorage",
+                                savedData,
+                            );
+                        }
+
+                        await component.call("finalizeSubmission");
+                    },
+                );
             }
 
             // Listen for quiz submitted event

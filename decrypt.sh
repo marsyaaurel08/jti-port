@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Parameter 1: Nama File Encrypt (Contoh: .env.production.enc)
-# Parameter 2: Key/Password
+# Parameter 2: Key/
+
+
 # Parameter 3: Nama File Output (Opsional, Contoh: .env)
 
 FILE_IN=$1

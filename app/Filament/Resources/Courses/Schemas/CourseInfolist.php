@@ -8,6 +8,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ImageColumn;
 
 class CourseInfolist
 {
@@ -17,15 +18,13 @@ class CourseInfolist
             ->components([
                 Section::make('Detail Kursus')
                     ->icon('heroicon-m-book-open')
-                    ->description('Detail lengkap kursus')
+                    ->description('Detail lengkap course')
                     ->collapsible()
                     ->schema([
                         Grid::make(1)
                             ->schema([
-                                SpatieMediaLibraryImageEntry::make('thumbnail')
+                                ImageEntry::make('thumbnail_url')
                                     ->label('Thumbnail')
-                                    ->collection('thumbnail')
-
                                     ]),
                         Grid::make(2)
                             ->schema([
@@ -44,7 +43,7 @@ class CourseInfolist
                                     ->columnSpanFull(),
                                 TextEntry::make('price')
                                     ->label('Harga')
-                                    ->icon('heroicon-o-currency-dollar'),
+                                    ->money('IDR'),
                                 TextEntry::make('level')
                                     ->label('Level')
                                     ->icon('heroicon-o-academic-cap')

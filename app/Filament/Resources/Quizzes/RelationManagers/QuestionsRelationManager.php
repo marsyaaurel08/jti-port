@@ -2,29 +2,23 @@
 
 namespace App\Filament\Resources\Quizzes\RelationManagers;
 
-use Filament\Forms\Components\{
-    Select,
-    Textarea,
-    TextInput,
-    Toggle,
-    Repeater,
-    CheckboxList,
-    KeyValue
-};
-use Filament\Schemas\Components\Section;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Actions\{
-    CreateAction,
-    EditAction,
-    DeleteAction,
-    BulkActionGroup,
-    DeleteBulkAction
-};
+use Filament\Tables\Table;
 
 class QuestionsRelationManager extends RelationManager
 {
@@ -43,7 +37,6 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Question Details')
-                // ->label('Detail Pertanyaan')
                 ->schema([
 
                     Textarea::make('question_text')
@@ -52,13 +45,14 @@ class QuestionsRelationManager extends RelationManager
                         ->columnSpanFull(),
 
                     Select::make('type')
+                        ->label('Tipe Pertanyaan')
                         ->options([
-                            'single_choice'   => 'Single Choice',
-                            'multiple_choice' => 'Multiple Choice',
-                            'boolean'         => 'Boolean',
-                            'matching'        => 'Matching',
-                            'drag_drop_sorting' => 'Drag & Drop Sorting',
-                            'drop_down'       => 'Drop Down',
+                            'single_choice' => 'Pilihan Ganda',
+                            'multiple_choice' => 'Pilihan Ganda Kompleks',
+                            'boolean' => 'Benar/Salah',
+                            'matching' => ' Drag & Drop Mencocokkan',
+                            'drag_drop_sorting' => 'Drag & Drop Mengurutan',
+                            'drop_down' => 'Drop Down Melengkali Kode',
                         ])
                         ->required()
                         ->live()
@@ -71,7 +65,7 @@ class QuestionsRelationManager extends RelationManager
                         ->minValue(1),
 
                     Textarea::make('explanation')
-                        ->label('Penjelasan Jawaban')
+                        ->label('Penjelasan')
                         ->rows(2),
                 ])
                 ->columns(2),
@@ -82,10 +76,9 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Single Choice Configuration')
-                ->visible(fn($get) => $get('type') === 'single_choice')
+            Section::make('Konfigurasi Pilihan Ganda')
+                ->visible(fn ($get) => $get('type') === 'single_choice')
                 ->schema([
-
                     Repeater::make('question_config.options')
                         ->default([
                             ['id' => 'A'],
@@ -94,17 +87,16 @@ class QuestionsRelationManager extends RelationManager
                             ['id' => 'D'],
                             ['id' => 'E'],
                         ])
-                        ->minItems(4)
+                        ->addable(false)
+                        ->deletable(false)
+                        ->label('Pilihan Jawaban')
                         ->schema([
-                            TextInput::make('id')->disabled()->dehydrated(true),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->disabled()->dehydrated(true)->label('ID Pilihan'),
+                            TextInput::make('text')->required()->label('Teks Pilihan'),
                         ])
                         ->columns(2),
-
-                    Toggle::make('question_config.shuffle_options')
-                        ->default(true),
-
-                    Select::make('answer_key.correct')
+                    Select::make('answer_key_correct_single')
+                        ->label('Jawaban Benar')
                         ->options([
                             'A' => 'A',
                             'B' => 'B',
@@ -112,7 +104,15 @@ class QuestionsRelationManager extends RelationManager
                             'D' => 'D',
                             'E' => 'E',
                         ])
-                        ->required(),
+                        ->dehydrated(false)
+                        ->required()
+                        ->afterStateHydrated(function ($state, callable $set, callable $get) {
+                            // Get the correct answer from answer_key
+                            $answerKey = $get('answer_key') ?? [];
+                            if (isset($answerKey['correct']) && ! is_array($answerKey['correct'])) {
+                                $set('answer_key_correct_single', $answerKey['correct']);
+                            }
+                        }),
                 ]),
 
             /*
@@ -121,11 +121,11 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Multiple Choice Configuration')
-                ->visible(fn($get) => $get('type') === 'multiple_choice')
+            Section::make('Konfigurasi Pilihan Ganda Kompleks')
+                ->visible(fn ($get) => $get('type') === 'multiple_choice')
                 ->schema([
-
                     Repeater::make('question_config.options')
+                        ->label('Pilihan Jawaban')
                         ->default([
                             ['id' => 'A'],
                             ['id' => 'B'],
@@ -133,31 +133,15 @@ class QuestionsRelationManager extends RelationManager
                             ['id' => 'D'],
                             ['id' => 'E'],
                         ])
-                        ->minItems(4)
+                        ->addable(false)
+                        ->deletable(false)
                         ->schema([
-                            TextInput::make('id')->disabled()->dehydrated(true),
-                            TextInput::make('text')->required(),
-                            // TextInput::make('points')
-                            //     ->numeric()
-                            //     ->default(1)
-                            //     ->required(),
+                            TextInput::make('id')->disabled()->dehydrated(true)->label('ID Pilihan'),
+                            TextInput::make('text')->required()->label('Teks Pilihan'),
                         ])
-                        ->columns(3),
+                        ->columns(2),
 
-                    // TextInput::make('question_config.min_correct')
-                    //     ->numeric()
-                    //     ->default(1),
-
-                    // TextInput::make('question_config.max_correct')
-                    //     ->numeric(),
-
-                    // Toggle::make('question_config.partial_scoring')
-                    //     ->default(true),
-
-                    Toggle::make('question_config.shuffle_options')
-                        ->default(true),
-
-                    Select::make('answer_key.correct')
+                    Select::make('answer_key_correct_multiple')
                         ->multiple()
                         ->live()
                         ->options(function (callable $get) {
@@ -168,18 +152,19 @@ class QuestionsRelationManager extends RelationManager
                                     $result[$option['id']] = $option['id'];
                                 }
                             }
+
                             return $result;
                         })
+                        ->dehydrated(false)
                         ->required()
-                        ->label('Jawaban Benar (Pilih ID yang benar)'),
-
-                    // Select::make('answer_key.scoring')
-                    //     ->options([
-                    //         'partial' => 'Partial',
-                    //         'full'    => 'Full Only',
-                    //     ])
-                    //     ->default('partial')
-                    //     ->required(),
+                        ->label('Jawaban Benar (Pilih ID benar lebih dari satu)')
+                        ->afterStateHydrated(function ($state, callable $set, callable $get) {
+                            // Get the correct answer from answer_key
+                            $answerKey = $get('answer_key') ?? [];
+                            if (isset($answerKey['correct']) && is_array($answerKey['correct'])) {
+                                $set('answer_key_correct_multiple', $answerKey['correct']);
+                            }
+                        }),
                 ]),
 
             /*
@@ -188,18 +173,25 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Boolean Configuration')
-                ->visible(fn($get) => $get('type') === 'boolean')
+            Section::make('Konfigurasi Benar/Salah')
+                ->visible(fn ($get) => $get('type') === 'boolean')
                 ->schema([
-
-                    Select::make('answer_key.correct')
+                    Select::make('answer_key_correct_boolean')
+                        ->label('Jawaban')
                         ->options([
-                            true  => 'True',
-                            false => 'False',
+                            '1' => 'Benar',
+                            '0' => 'Salah',
                         ])
-                        ->required(),
+                        ->dehydrated(false)
+                        ->required()
+                        ->afterStateHydrated(function ($state, callable $set, callable $get) {
+                            // Get the correct answer from answer_key
+                            $answerKey = $get('answer_key') ?? [];
+                            if (isset($answerKey['correct'])) {
+                                $set('answer_key_correct_boolean', $answerKey['correct'] ? '1' : '0');
+                            }
+                        }),
                 ]),
-
 
             /*
             |--------------------------------------------------------------------------
@@ -207,35 +199,42 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Matching Configuration')
-                ->visible(fn($get) => $get('type') === 'matching')
+            Section::make('Konfigurasi Mencocokkan')
+                ->visible(fn ($get) => $get('type') === 'matching')
                 ->schema([
-
                     Repeater::make('question_config.items')
+                        ->default([
+                            ['id' => 'A'],
+                            ['id' => 'B'],
+                            ['id' => 'C'],
+                            ['id' => 'D'],
+                        ])
+                        ->label('Items')
                         ->schema([
-                            TextInput::make('id')->required(),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->required()
+                                ->label('ID Item'),
+                            TextInput::make('text')->required()->label('Teks Item'),
                         ])
                         ->columns(2)
                         ->minItems(2),
 
                     Repeater::make('question_config.matches')
+                        ->default([
+                            ['id' => '1'],
+                            ['id' => '2'],
+                            ['id' => '3'],
+                            ['id' => '4'],
+                        ])
                         ->schema([
-                            TextInput::make('id')->required(),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->required()->label('ID Match'),
+                            TextInput::make('text')->required()->label('Teks Match'),
                         ])
                         ->columns(2)
                         ->minItems(2),
 
-                    Toggle::make('question_config.shuffle_items')
-                        ->default(true),
-
-                    Toggle::make('question_config.shuffle_matches')
-                        ->default(true),
-
                     KeyValue::make('answer_key.correct_matches')
-                        ->keyLabel('Item ID')
-                        ->valueLabel('Match ID')
+                        ->keyLabel('ID Item (contoh: A)')
+                        ->valueLabel('ID Match (contoh: 1)')
                         ->required(),
                 ]),
 
@@ -245,23 +244,25 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Drag & Drop Sorting Configuration')
-                ->visible(fn($get) => $get('type') === 'drag_drop_sorting')
+            Section::make('Konfigurasi Drag & Drop Sorting')
+                ->visible(fn ($get) => $get('type') === 'drag_drop_sorting')
                 ->schema([
 
                     Repeater::make('question_config.items')
                         ->schema([
-                            TextInput::make('id')->required(),
-                            TextInput::make('text')->required(),
+                            TextInput::make('id')->required()->label('ID Item'),
+                            TextInput::make('text')->required()->label('Teks Item'),
                         ])
                         ->columns(2)
                         ->minItems(2),
 
                     Toggle::make('question_config.shuffle_items')
+                        ->label('Acak Urutan Item')
                         ->default(true),
 
                     Toggle::make('question_config.allow_partial_credit')
-                        ->default(true),
+                        ->default(true)
+                        ->hidden(),
 
                     Select::make('answer_key.correct_order')
                         ->multiple()
@@ -273,6 +274,7 @@ class QuestionsRelationManager extends RelationManager
                                     $result[$item['id']] = $item['id'];
                                 }
                             }
+
                             return $result;
                         })
                         ->required()
@@ -286,8 +288,8 @@ class QuestionsRelationManager extends RelationManager
             |--------------------------------------------------------------------------
             */
 
-            Section::make('Drop Down Configuration')
-                ->visible(fn($get) => $get('type') === 'drop_down')
+            Section::make('Konfigurasi Drop Down Melengkapi Kode')
+                ->visible(fn ($get) => $get('type') === 'drop_down')
                 ->schema([
 
                     Textarea::make('question_config.template')
@@ -307,17 +309,22 @@ class QuestionsRelationManager extends RelationManager
                         ->schema([
                             TextInput::make('id')
                                 ->label('Blank ID')
+                                ->helperText('Untuk konfigurasi bagian yang kosong (contoh : blank1)')
                                 ->required(),
 
                             Repeater::make('options')
                                 ->label('Options')
+                                ->default([
+                                    ['id' => 'A'],
+                                    ['id' => 'B'],
+                                    ['id' => 'C'],
+                                ])
                                 ->schema([
                                     TextInput::make('id')
                                         ->label('Option ID')
                                         ->required(),
-
                                     TextInput::make('text')
-                                        ->label('Option Text')
+                                        ->label('Pilihan Jawaban')
                                         ->required(),
                                 ])
                                 ->columns(2)
@@ -328,39 +335,27 @@ class QuestionsRelationManager extends RelationManager
                         ->minItems(1)
                         ->columnSpanFull(),
 
-                    KeyValue::make('answer_key.correct')
-                        ->keyLabel('Blank ID')
-                        ->valueLabel('Correct Option ID')
+                    KeyValue::make('answer_key_correct_dropdown')
+                        ->keyLabel('ID Blank (contoh: blank1)')
+                        ->valueLabel('ID Option (contoh: A)')
+                        ->dehydrated(false)
                         ->required()
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->afterStateHydrated(function ($state, callable $set, callable $get) {
+                            // Get the correct answer from answer_key
+                            $answerKey = $get('answer_key') ?? [];
+                            if (isset($answerKey['correct']) && is_array($answerKey['correct'])) {
+                                $set('answer_key_correct_dropdown', $answerKey['correct']);
+                            }
+                        }),
                 ]),
         ]);
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Handle multiple choice answer key
-        if (isset($data['type']) && $data['type'] === 'multiple_choice') {
-            if (!isset($data['answer_key']['correct'])) {
-                $data['answer_key']['correct'] = [];
-            }
-            // Ensure it's an array
-            if (!is_array($data['answer_key']['correct'])) {
-                $data['answer_key']['correct'] = [];
-            }
-        }
-
-        // Handle drop_down answer key
+        // Auto-generate option IDs when loading data for drop_down
         if (isset($data['type']) && $data['type'] === 'drop_down') {
-            if (!isset($data['answer_key']['correct'])) {
-                $data['answer_key']['correct'] = [];
-            }
-            // Ensure it's an array for KeyValue component
-            if (!is_array($data['answer_key']['correct'])) {
-                $data['answer_key']['correct'] = [];
-            }
-
-            // Auto-generate option IDs when loading data
             if (isset($data['question_config']['blanks'])) {
                 $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
                 foreach ($data['question_config']['blanks'] as &$blank) {
@@ -378,6 +373,24 @@ class QuestionsRelationManager extends RelationManager
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        // Map type-specific fields back to answer_key.correct
+        if (isset($data['type'])) {
+            switch ($data['type']) {
+                case 'single_choice':
+                    $data['answer_key']['correct'] = $data['answer_key_correct_single'] ?? null;
+                    break;
+                case 'multiple_choice':
+                    $data['answer_key']['correct'] = $data['answer_key_correct_multiple'] ?? [];
+                    break;
+                case 'boolean':
+                    $data['answer_key']['correct'] = ($data['answer_key_correct_boolean'] ?? '0') === '1';
+                    break;
+                case 'drop_down':
+                    $data['answer_key']['correct'] = $data['answer_key_correct_dropdown'] ?? [];
+                    break;
+            }
+        }
+
         // Auto-generate option IDs for drop_down type
         if (isset($data['type']) && $data['type'] === 'drop_down') {
             if (isset($data['question_config']['blanks'])) {
@@ -391,11 +404,33 @@ class QuestionsRelationManager extends RelationManager
                 }
             }
         }
+
         return $data;
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        // Map type-specific fields back to answer_key.correct
+        if (isset($data['type'])) {
+            switch ($data['type']) {
+                case 'single_choice':
+                    $data['answer_key']['correct'] = $data['answer_key_correct_single'] ?? null;
+                    break;
+                case 'multiple_choice':
+                    $data['answer_key']['correct'] = $data['answer_key_correct_multiple'] ?? [];
+                    break;
+                case 'boolean':
+                    $data['answer_key']['correct'] = ($data['answer_key_correct_boolean'] ?? '0') === '1';
+                    break;
+                case 'drop_down':
+                    $data['answer_key']['correct'] = $data['answer_key_correct_dropdown'] ?? [];
+                    break;
+            }
+        }
+
+        // Clean up temporary fields
+        unset($data['answer_key_correct_single'], $data['answer_key_correct_multiple'], $data['answer_key_correct_boolean'], $data['answer_key_correct_dropdown']);
+
         // Auto-generate option IDs for drop_down type on edit
         if (isset($data['type']) && $data['type'] === 'drop_down') {
             if (isset($data['question_config']['blanks'])) {
@@ -409,6 +444,7 @@ class QuestionsRelationManager extends RelationManager
                 }
             }
         }
+
         return $data;
     }
 
@@ -430,13 +466,13 @@ class QuestionsRelationManager extends RelationManager
             ->filters([
                 SelectFilter::make('type')
                     ->options([
-                        'single_choice'   => 'Single Choice',
+                        'single_choice' => 'Single Choice',
                         'multiple_choice' => 'Multiple Choice',
-                        'boolean'         => 'Boolean',
-                        'essay'           => 'Essay',
-                        'matching'        => 'Matching',
-                        'fill_in_blank'   => 'Fill in Blank',
-                        'drop_down'       => 'Drop Down',
+                        'boolean' => 'Boolean',
+                        'essay' => 'Essay',
+                        'matching' => 'Matching',
+                        'fill_in_blank' => 'Fill in Blank',
+                        'drop_down' => 'Drop Down',
                     ]),
             ])
             ->headerActions([

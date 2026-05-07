@@ -34,16 +34,28 @@ echo -e "${GREEN}✓ DB ready${NC}"
 
 # =====================================================================
 # 3. MIGRATE
-# Dijalankan di entrypoint sebagai fallback safety net.
-# Deploy.sh juga menjalankan migrate setelah container ready,
-# tapi ini memastikan container baru selalu dalam state yang benar.
+# Bypass with IS_FIRST_DEPLOYMENT=1 (e.g., for CI/CD testing or first deploy).
+# Non-fatal: warns and continues on failure instead of crashing.
 # =====================================================================
-echo -e "${YELLOW}🗄️ Running migrations...${NC}"
-php artisan migrate --force || {
-    echo -e "${RED}❌ Migration failed${NC}"
-    exit 1
-}
-echo -e "${GREEN}✓ Migrations done${NC}"
+if [ "${IS_FIRST_DEPLOYMENT:-}" = true ]; then
+    echo -e "${YELLOW}⏭️ Running migrations (IS_FIRST_DEPLOYMENT=1)${NC}"
+    php artisan migrate:fresh --seed --force || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
+    echo -e "${YELLOW}⏭️ Running migrations (IS_FIRST_DEPLOYMENT=1)${NC}"
+    php artisan shield:generate --all --panel=admin || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
+    php artisan shield:super-admin --user=1 --panel=admin || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
+else
+    echo -e "${YELLOW}🗄️ Running migrations...${NC}"
+    php artisan migrate --force || {
+        echo -e "${RED}⚠️ Migration failed — continuing anyway${NC}"
+    }
+    echo -e "${GREEN}✓ Migrations done (or skipped)${NC}"
+fi
 
 # =====================================================================
 # 4. LARAVEL CACHE
@@ -72,6 +84,9 @@ echo -e "${GREEN}✓ Storage linked${NC}"
 # =====================================================================
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
+# Mark entrypoint as complete (so deploy script can wait without spawning PHP)
+touch /tmp/.entrypoint-ready
 
 # =====================================================================
 # 7. SLACK NOTIFY (optional)

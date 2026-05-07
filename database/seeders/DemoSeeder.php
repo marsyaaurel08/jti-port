@@ -31,7 +31,7 @@ class DemoSeeder extends Seeder
                 ['email' => "peserta{$i}@example.com"],
                 [
                     'name' => "User {$i}",
-                    'password' => Hash::make('password'),
+                    'password' => bcrypt('password'),
                     'email_verified_at' => now(),
                 ]
             );
@@ -44,7 +44,7 @@ class DemoSeeder extends Seeder
                 ['email' => "instructor{$i}@example.com"],
                 [
                     'name' => "Instructor {$i}",
-                    'password' => Hash::make('password'),
+                    'password' => bcrypt('password'),
                 ]
             );
         }
@@ -194,7 +194,7 @@ class DemoSeeder extends Seeder
             ['email' => 'instructor@example.com'],
             [
                 'name' => 'Instructor User',
-                'password' => Hash::make('password'),
+                'password' => bcrypt('password'),
                 'role' => 'pengajar',
             ]
         );

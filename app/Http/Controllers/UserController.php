@@ -53,7 +53,7 @@ class UserController extends Controller
         ]);
 
         Auth::user()->update([
-            'password' => Hash::make($request->password),
+            'password' => bcrypt($request->password),
         ]);
 
         return back()->with('success', 'Password berhasil diubah!');
