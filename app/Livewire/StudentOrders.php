@@ -86,8 +86,6 @@ class StudentOrders extends Component
         $this->selectedOrder = $order;
         $this->vaData = $order->getVaData();
         $this->showVAInstructions = true;
-
-        // dd($this->vaData, $this->selectedOrder->payment_method, $this->getTransferInstructions($this->selectedOrder->payment_method));
     }
 
     public function closeModal(): void
@@ -197,6 +195,24 @@ class StudentOrders extends Component
     {
         $this->showProofView = false;
         $this->selectedOrder = null;
+    }
+
+    public function handlePaymentFinished(int $orderId): void
+    {
+        $order = Order::find($orderId);
+
+        if (!$order) {
+            return;
+        }
+
+        $order->refresh();
+
+        if (in_array($order->status, ['paid', 'success', 'settlement'])) {
+            session()->flash('success', 'Terima kasih! Pembayaran untuk Invoice ' . $order->invoice_number . ' telah berhasil dikonfirmasi.');
+        } else {
+            session()->flash('info', 'Sistem sedang memverifikasi pembayaran Anda. Status akan diperbarui secara otomatis dalam beberapa saat.');
+        }
+
     }
 
     public function render()
