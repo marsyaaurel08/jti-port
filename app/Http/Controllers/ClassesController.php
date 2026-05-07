@@ -20,7 +20,7 @@ class ClassesController extends Controller
             $query->where('user_id', $user_id);
         })->exists() : false;
         $courseClass = CourseClass::where('slug', $slug)
-            ->with(['course.chapters.lessons', 'category', 'instructor'])
+            ->with(['course.chapters.lessons', 'course.category', 'instructor'])
             ->firstOrFail();
 
         return view('pages.classes.show', ['class' => $courseClass, 'is_user_enrolled' => $is_user_enrolled]);
