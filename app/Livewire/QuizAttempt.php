@@ -7,6 +7,7 @@ use App\Models\QuizAnswer;
 use App\Models\QuizAttempt as QuizAttemptModel;
 use App\Services\QuizScoringService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -41,6 +42,9 @@ class QuizAttempt extends Component
 
     public $isSubmitting = false;
 
+    // Cache the resolved lesson URL so getLessonUrl() doesn't re-traverse relations
+    protected ?string $lessonUrlCache = null;
+
     public function mount($id)
     {
         $this->quizId = $id;
@@ -54,19 +58,17 @@ class QuizAttempt extends Component
 
     public function loadQuiz()
     {
+        // Eager-load only what's needed. questions + lesson.chapter.course covers
+        // both the question list and the redirect URL in one query.
         $this->quiz = Quiz::with(['questions', 'lesson.chapter.course'])
             ->findOrFail($this->quizId);
 
+        // Use a plain array so Livewire doesn't hydrate Eloquent models on every request
         $this->questions = $this->quiz->questions->toArray();
 
         if ($this->attempt && $this->attempt->started_at) {
-            // Ensure both times are in the same timezone for accurate calculation
-            $now = now();
-            $startedAt = $this->attempt->started_at;
-
-            // Calculate elapsed time (now - started_at) for positive value
-            $elapsed = $startedAt->diffInSeconds($now);
-            $limit = $this->quiz->time_limit_minutes * 60;
+            $elapsed = $this->attempt->started_at->diffInSeconds(now());
+            $limit   = $this->quiz->time_limit_minutes * 60;
             $this->timeRemaining = max(0, $limit - $elapsed);
         } else {
             $this->timeRemaining = $this->quiz->time_limit_minutes * 60;
@@ -81,16 +83,14 @@ class QuizAttempt extends Component
             ->first();
 
         if (! $this->attempt) {
-
             $this->attempt = QuizAttemptModel::create([
-                'user_id' => Auth::id(),
-                'quiz_id' => $this->quizId,
-                'score' => 0,
-                'started_at' => now(),
+                'user_id'                => Auth::id(),
+                'quiz_id'                => $this->quizId,
+                'score'                  => 0,
+                'started_at'             => now(),
                 'current_question_index' => 0,
             ]);
         } else {
-
             $this->currentQuestionIndex = $this->attempt->current_question_index ?? 0;
         }
     }
@@ -103,9 +103,9 @@ class QuizAttempt extends Component
 
         $this->currentQuestionIndex = $index;
 
-        // Load the answer for the current question
         $this->loadCurrentQuestionAnswer();
 
+        // Single update — only the index column changes
         $this->attempt->update([
             'current_question_index' => $this->currentQuestionIndex,
         ]);
@@ -114,8 +114,7 @@ class QuizAttempt extends Component
     }
 
     /**
-     * Load the answer for the current question from localStorage
-     * This ensures that when navigating between questions, the correct answer is displayed
+     * Load the answer for the current question from localStorage.
      */
     #[\Livewire\Attributes\On('loadCurrentQuestionAnswer')]
     public function loadCurrentQuestionAnswer()
@@ -126,22 +125,17 @@ class QuizAttempt extends Component
             return;
         }
 
-        $questionId = $currentQuestion['id'];
-        $questionType = $currentQuestion['type'];
+        $this->dispatch(
+            'request-answer-for-question',
+            questionId: $currentQuestion['id'],
+            questionType: $currentQuestion['type'],
+        );
 
-        // Get the storage key for this quiz
-        $storageKey = 'quiz_attempt_'.$this->quizId;
-
-        // Try to get the saved answer from localStorage via JavaScript
-        // We'll dispatch an event to request the answer from localStorage
-        $this->dispatch('request-answer-for-question', questionId: $questionId, questionType: $questionType);
-
-        // Also dispatch an event to load all answered question IDs from localStorage
         $this->dispatch('request-answered-question-ids');
     }
 
     /**
-     * Receive the answered question IDs from localStorage and update the Livewire property
+     * Receive the answered question IDs from localStorage.
      */
     #[\Livewire\Attributes\On('answeredQuestionIdsLoaded')]
     public function answeredQuestionIdsLoaded($answeredIds)
@@ -150,49 +144,37 @@ class QuizAttempt extends Component
     }
 
     /**
-     * Receive the answer from localStorage and update the Livewire properties
+     * Receive a single answer from localStorage.
      */
     #[\Livewire\Attributes\On('answer-loaded-from-storage')]
     public function answerLoadedFromStorage($questionId, $answer, $questionType)
     {
-        // Only update if this is the current question
         $currentQuestion = $this->getCurrentQuestion();
 
         if (! $currentQuestion || $currentQuestion['id'] != $questionId) {
             return;
         }
 
-        // Update the appropriate property based on question type
-        if ($questionType === 'single_choice') {
-            $this->answers[$questionId] = $answer;
-        } elseif ($questionType === 'multiple_choice') {
-            $this->multipleChoiceAnswers[$questionId] = is_array($answer) ? $answer : [];
-        } elseif ($questionType === 'boolean') {
-            $this->answers[$questionId] = $answer;
-        } elseif ($questionType === 'matching') {
-            $this->matchingAnswers[$questionId] = is_array($answer) ? $answer : [];
-        } elseif ($questionType === 'drag_drop_sorting') {
-            $this->dragDropAnswers[$questionId] = is_array($answer) ? $answer : [];
-        } elseif ($questionType === 'drop_down') {
-            $this->dropDownAnswers[$questionId] = is_array($answer) ? $answer : [];
-        } else {
-        }
+        match ($questionType) {
+            'single_choice', 'boolean'  => $this->answers[$questionId]              = $answer,
+            'multiple_choice'           => $this->multipleChoiceAnswers[$questionId] = is_array($answer) ? $answer : [],
+            'matching'                  => $this->matchingAnswers[$questionId]        = is_array($answer) ? $answer : [],
+            'drag_drop_sorting'         => $this->dragDropAnswers[$questionId]        = is_array($answer) ? $answer : [],
+            'drop_down'                 => $this->dropDownAnswers[$questionId]        = is_array($answer) ? $answer : [],
+            default                     => null,
+        };
     }
 
     public function previousQuestion()
     {
         if ($this->currentQuestionIndex > 0) {
-
             $this->goToQuestion($this->currentQuestionIndex - 1);
         }
     }
 
     public function nextQuestion()
     {
-        $total = count($this->questions);
-
-        if ($this->currentQuestionIndex < $total - 1) {
-
+        if ($this->currentQuestionIndex < count($this->questions) - 1) {
             $this->goToQuestion($this->currentQuestionIndex + 1);
         }
     }
@@ -211,24 +193,21 @@ class QuizAttempt extends Component
         if (isset($data['answers'])) {
             $this->answeredQuestionIds = array_keys($data['answers']);
 
-            // Dispatch restore-question event for each saved answer
             foreach ($data['answers'] as $questionId => $answerData) {
                 $this->dispatch('restore-question', [
-                    'questionId' => $questionId,
+                    'questionId'   => $questionId,
                     'questionType' => $answerData['questionType'],
-                    'answer' => $answerData['answer'],
+                    'answer'       => $answerData['answer'],
                 ]);
             }
         }
 
-        // Load the answer for the current question
         $this->loadCurrentQuestionAnswer();
     }
 
     #[\Livewire\Attributes\On('answerSavedToLocalStorage')]
     public function answerSavedToLocalStorage($questionId)
     {
-        // Add question ID to answered list if not already present
         if (! in_array($questionId, $this->answeredQuestionIds)) {
             $this->answeredQuestionIds[] = $questionId;
         }
@@ -237,10 +216,9 @@ class QuizAttempt extends Component
     #[\Livewire\Attributes\On('answerRemovedFromLocalStorage')]
     public function answerRemovedFromLocalStorage($questionId)
     {
-        // Remove question ID from answered list
         $this->answeredQuestionIds = array_values(array_filter(
             $this->answeredQuestionIds,
-            fn ($id) => $id !== $questionId
+            fn($id) => $id !== $questionId
         ));
     }
 
@@ -251,18 +229,28 @@ class QuizAttempt extends Component
             return;
         }
 
-        foreach ($data['answers'] as $questionId => $answerData) {
+        // Batch upsert instead of one query per answer
+        $rows = [];
+        $now  = now();
 
-            QuizAnswer::updateOrCreate(
-                [
-                    'quiz_attempt_id' => $this->attempt->id,
-                    'question_id' => $questionId,
-                ],
-                [
-                    'user_answer' => $answerData['answer'],
-                    'is_correct' => false,
-                    'score_obtained' => 0,
-                ]
+        foreach ($data['answers'] as $questionId => $answerData) {
+            $rows[] = [
+                'quiz_attempt_id' => $this->attempt->id,
+                'question_id'     => $questionId,
+                'user_answer'     => json_encode($answerData['answer']),
+                'is_correct'      => false,
+                'score_obtained'  => 0,
+                'created_at'      => $now,
+                'updated_at'      => $now,
+            ];
+        }
+
+        if (! empty($rows)) {
+            // Single upsert call; conflicts on (quiz_attempt_id, question_id) update the answer
+            DB::table('quiz_answers')->upsert(
+                $rows,
+                ['quiz_attempt_id', 'question_id'],
+                ['user_answer', 'is_correct', 'score_obtained', 'updated_at']
             );
         }
     }
@@ -280,13 +268,11 @@ class QuizAttempt extends Component
     }
 
     /**
-     * Handle timer warning from JavaScript
-     * This is called when the timer reaches specific warning thresholds
+     * Handle timer warning from JavaScript.
      */
     #[\Livewire\Attributes\On('showTimerWarning')]
     public function showTimerWarning($message)
     {
-        // Dispatch event to frontend to show notification
         $this->dispatch('timer-warning', message: $message);
     }
 
@@ -294,121 +280,78 @@ class QuizAttempt extends Component
     {
         $this->isSubmitting = true;
 
-        // Process single choice answers from Livewire property
+        // Collect all answer maps into a single flat list of rows for one upsert
+        $rows = [];
+        $now  = now();
+        $attemptId = $this->attempt->id;
+
+        // Single-value answers (single_choice, boolean) — encoded as JSON
         foreach ($this->answers as $questionId => $answer) {
-            if ($answer !== null) {
-                QuizAnswer::updateOrCreate(
-                    [
-                        'quiz_attempt_id' => $this->attempt->id,
-                        'question_id' => $questionId,
-                    ],
-                    [
-                        'user_answer' => $answer,
-                        'is_correct' => false,
-                        'score_obtained' => 0,
-                    ]
-                );
+            if ($answer === null) {
+                continue;
+            }
+            $rows[$questionId] = [
+                'quiz_attempt_id' => $attemptId,
+                'question_id'     => $questionId,
+                'user_answer'     => json_encode($answer),
+                'is_correct'      => false,
+                'score_obtained'  => 0,
+                'created_at'      => $now,
+                'updated_at'      => $now,
+            ];
+        }
+
+        // Array answers — stored as JSON
+        $jsonSources = [
+            $this->multipleChoiceAnswers,
+            $this->matchingAnswers,
+            $this->dragDropAnswers,
+            $this->dropDownAnswers,
+        ];
+
+        foreach ($jsonSources as $source) {
+            foreach ($source as $questionId => $answer) {
+                if (empty($answer)) {
+                    continue;
+                }
+                // Later sources overwrite earlier ones for the same question ID,
+                // which is safe because each question type only appears in one map.
+                $rows[$questionId] = [
+                    'quiz_attempt_id' => $attemptId,
+                    'question_id'     => $questionId,
+                    'user_answer'     => json_encode($answer),
+                    'is_correct'      => false,
+                    'score_obtained'  => 0,
+                    'created_at'      => $now,
+                    'updated_at'      => $now,
+                ];
             }
         }
 
-        // Process multiple choice answers from Livewire property
-        foreach ($this->multipleChoiceAnswers as $questionId => $answer) {
-            if (! empty($answer)) {
-                QuizAnswer::updateOrCreate(
-                    [
-                        'quiz_attempt_id' => $this->attempt->id,
-                        'question_id' => $questionId,
-                    ],
-                    [
-                        'user_answer' => json_encode($answer),
-                        'is_correct' => false,
-                        'score_obtained' => 0,
-                    ]
-                );
-            }
+        if (! empty($rows)) {
+            // One round-trip to the database for all answers
+            DB::table('quiz_answers')->upsert(
+                array_values($rows),
+                ['quiz_attempt_id', 'question_id'],
+                ['user_answer', 'is_correct', 'score_obtained', 'updated_at']
+            );
         }
 
-        // Process matching answers from Livewire property
-        foreach ($this->matchingAnswers as $questionId => $answer) {
-            if (! empty($answer)) {
-                QuizAnswer::updateOrCreate(
-                    [
-                        'quiz_attempt_id' => $this->attempt->id,
-                        'question_id' => $questionId,
-                    ],
-                    [
-                        'user_answer' => json_encode($answer),
-                        'is_correct' => false,
-                        'score_obtained' => 0,
-                    ]
-                );
-            }
-        }
-
-        // Process drag drop sorting answers from Livewire property
-        foreach ($this->dragDropAnswers as $questionId => $answer) {
-            if (! empty($answer)) {
-                QuizAnswer::updateOrCreate(
-                    [
-                        'quiz_attempt_id' => $this->attempt->id,
-                        'question_id' => $questionId,
-                    ],
-                    [
-                        'user_answer' => json_encode($answer),
-                        'is_correct' => false,
-                        'score_obtained' => 0,
-                    ]
-                );
-            }
-        }
-
-        // Process drop down answers from Livewire property
-        foreach ($this->dropDownAnswers as $questionId => $answer) {
-            if (! empty($answer)) {
-                QuizAnswer::updateOrCreate(
-                    [
-                        'quiz_attempt_id' => $this->attempt->id,
-                        'question_id' => $questionId,
-                    ],
-                    [
-                        'user_answer' => json_encode($answer),
-                        'is_correct' => false,
-                        'score_obtained' => 0,
-                    ]
-                );
-            }
-        }
-
-        // Also try to get answers from localStorage as backup
+        // Request any remaining answers from localStorage as backup
         $this->dispatch('requestLocalStorageData');
-
-        // Finalize submission
-        // $this->finalizeSubmission();
     }
 
     #[\Livewire\Attributes\On('finalizeSubmission')]
     public function finalizeSubmission()
     {
-        // Grade the quiz attempt
         $scoringService = new QuizScoringService;
         $scoringService->gradeAttempt($this->attempt);
 
-        $this->attempt->update([
-            'finished_at' => now(),
-        ]);
+        $this->attempt->update(['finished_at' => now()]);
 
         $this->dispatch('quiz-submitted');
 
-        $lesson = $this->quiz->lesson;
-
-        if ($lesson && $lesson->chapter && $lesson->chapter->course) {
-            return redirect()->route('student.lesson', [
-                'courseSlug' => $lesson->chapter->course->slug,
-                'lessonSlug' => $lesson->slug,
-            ]);
-        }
-
-        return redirect()->route('home');
+        return redirect($this->getLessonUrl());
     }
 
     public function getCurrentQuestion()
@@ -435,36 +378,37 @@ class QuizAttempt extends Component
     {
         $total = $this->getTotalQuestions();
 
-        if ($total === 0) {
-            return 0;
-        }
-
-        return intval(($this->getAnsweredCount() / $total) * 100);
+        return $total === 0 ? 0 : intval(($this->getAnsweredCount() / $total) * 100);
     }
 
     public function formatTime($seconds)
     {
-        $hours = floor($seconds / 3600);
-
+        $hours   = floor($seconds / 3600);
         $minutes = floor(($seconds % 3600) / 60);
-
-        $secs = (int) ($seconds % 60);
+        $secs    = (int) ($seconds % 60);
 
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
     }
 
     public function getLessonUrl()
     {
+        // Return cached URL to avoid re-traversing relations on every call
+        if ($this->lessonUrlCache !== null) {
+            return $this->lessonUrlCache;
+        }
+
         $lesson = $this->quiz->lesson;
 
         if ($lesson && $lesson->chapter && $lesson->chapter->course) {
-            return route('student.lesson', [
+            $this->lessonUrlCache = route('student.lesson', [
                 'courseSlug' => $lesson->chapter->course->slug,
                 'lessonSlug' => $lesson->slug,
             ]);
+        } else {
+            $this->lessonUrlCache = route('home');
         }
 
-        return route('home');
+        return $this->lessonUrlCache;
     }
 
     public function render()
