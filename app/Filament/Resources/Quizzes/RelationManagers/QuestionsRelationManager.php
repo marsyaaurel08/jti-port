@@ -47,12 +47,12 @@ class QuestionsRelationManager extends RelationManager
                     Select::make('type')
                         ->label('Tipe Pertanyaan')
                         ->options([
-                            'single_choice' => 'Pilihan Ganda',
-                            'multiple_choice' => 'Pilihan Ganda Kompleks',
-                            'boolean' => 'Benar/Salah',
-                            'matching' => ' Drag & Drop Mencocokkan',
+                            'single_choice'    => 'Pilihan Ganda',
+                            'multiple_choice'  => 'Pilihan Ganda Kompleks',
+                            'boolean'          => 'Benar/Salah',
+                            'matching'         => 'Drag & Drop Mencocokkan',
                             'drag_drop_sorting' => 'Drag & Drop Mengurutan',
-                            'drop_down' => 'Drop Down Melengkali Kode',
+                            'drop_down'        => 'Drop Down Melengkali Kode',
                         ])
                         ->required()
                         ->live()
@@ -77,7 +77,7 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Konfigurasi Pilihan Ganda')
-                ->visible(fn ($get) => $get('type') === 'single_choice')
+                ->visible(fn($get) => $get('type') === 'single_choice')
                 ->schema([
                     Repeater::make('question_config.options')
                         ->default([
@@ -95,6 +95,8 @@ class QuestionsRelationManager extends RelationManager
                             TextInput::make('text')->required()->label('Teks Pilihan'),
                         ])
                         ->columns(2),
+
+                    // Virtual field — hanya untuk UI, dipetakan ke answer_key.correct di processAnswerKey()
                     Select::make('answer_key_correct_single')
                         ->label('Jawaban Benar')
                         ->options([
@@ -104,10 +106,9 @@ class QuestionsRelationManager extends RelationManager
                             'D' => 'D',
                             'E' => 'E',
                         ])
-                        ->dehydrated(false)
+                        ->dehydrated(true)
                         ->required()
                         ->afterStateHydrated(function ($state, callable $set, callable $get) {
-                            // Get the correct answer from answer_key
                             $answerKey = $get('answer_key') ?? [];
                             if (isset($answerKey['correct']) && ! is_array($answerKey['correct'])) {
                                 $set('answer_key_correct_single', $answerKey['correct']);
@@ -122,7 +123,7 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Konfigurasi Pilihan Ganda Kompleks')
-                ->visible(fn ($get) => $get('type') === 'multiple_choice')
+                ->visible(fn($get) => $get('type') === 'multiple_choice')
                 ->schema([
                     Repeater::make('question_config.options')
                         ->label('Pilihan Jawaban')
@@ -141,25 +142,24 @@ class QuestionsRelationManager extends RelationManager
                         ])
                         ->columns(2),
 
+                    // Virtual field
                     Select::make('answer_key_correct_multiple')
                         ->multiple()
                         ->live()
                         ->options(function (callable $get) {
                             $options = $get('question_config.options') ?? [];
-                            $result = [];
+                            $result  = [];
                             foreach ($options as $option) {
                                 if (isset($option['id'])) {
                                     $result[$option['id']] = $option['id'];
                                 }
                             }
-
                             return $result;
                         })
-                        ->dehydrated(false)
+                        ->dehydrated(true)
                         ->required()
                         ->label('Jawaban Benar (Pilih ID benar lebih dari satu)')
                         ->afterStateHydrated(function ($state, callable $set, callable $get) {
-                            // Get the correct answer from answer_key
                             $answerKey = $get('answer_key') ?? [];
                             if (isset($answerKey['correct']) && is_array($answerKey['correct'])) {
                                 $set('answer_key_correct_multiple', $answerKey['correct']);
@@ -174,18 +174,18 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Konfigurasi Benar/Salah')
-                ->visible(fn ($get) => $get('type') === 'boolean')
+                ->visible(fn($get) => $get('type') === 'boolean')
                 ->schema([
+                    // Virtual field
                     Select::make('answer_key_correct_boolean')
                         ->label('Jawaban')
                         ->options([
                             '1' => 'Benar',
                             '0' => 'Salah',
                         ])
-                        ->dehydrated(false)
+                        ->dehydrated(true)
                         ->required()
                         ->afterStateHydrated(function ($state, callable $set, callable $get) {
-                            // Get the correct answer from answer_key
                             $answerKey = $get('answer_key') ?? [];
                             if (isset($answerKey['correct'])) {
                                 $set('answer_key_correct_boolean', $answerKey['correct'] ? '1' : '0');
@@ -200,7 +200,7 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Konfigurasi Mencocokkan')
-                ->visible(fn ($get) => $get('type') === 'matching')
+                ->visible(fn($get) => $get('type') === 'matching')
                 ->schema([
                     Repeater::make('question_config.items')
                         ->default([
@@ -211,8 +211,7 @@ class QuestionsRelationManager extends RelationManager
                         ])
                         ->label('Items')
                         ->schema([
-                            TextInput::make('id')->required()
-                                ->label('ID Item'),
+                            TextInput::make('id')->required()->label('ID Item'),
                             TextInput::make('text')->required()->label('Teks Item'),
                         ])
                         ->columns(2)
@@ -245,7 +244,7 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Konfigurasi Drag & Drop Sorting')
-                ->visible(fn ($get) => $get('type') === 'drag_drop_sorting')
+                ->visible(fn($get) => $get('type') === 'drag_drop_sorting')
                 ->schema([
 
                     Repeater::make('question_config.items')
@@ -267,14 +266,13 @@ class QuestionsRelationManager extends RelationManager
                     Select::make('answer_key.correct_order')
                         ->multiple()
                         ->options(function (callable $get) {
-                            $items = $get('question_config.items') ?? [];
+                            $items  = $get('question_config.items') ?? [];
                             $result = [];
                             foreach ($items as $item) {
                                 if (isset($item['id'])) {
                                     $result[$item['id']] = $item['id'];
                                 }
                             }
-
                             return $result;
                         })
                         ->required()
@@ -289,7 +287,7 @@ class QuestionsRelationManager extends RelationManager
             */
 
             Section::make('Konfigurasi Drop Down Melengkapi Kode')
-                ->visible(fn ($get) => $get('type') === 'drop_down')
+                ->visible(fn($get) => $get('type') === 'drop_down')
                 ->schema([
 
                     Textarea::make('question_config.template')
@@ -335,14 +333,14 @@ class QuestionsRelationManager extends RelationManager
                         ->minItems(1)
                         ->columnSpanFull(),
 
+                    // Virtual field
                     KeyValue::make('answer_key_correct_dropdown')
                         ->keyLabel('ID Blank (contoh: blank1)')
                         ->valueLabel('ID Option (contoh: A)')
-                        ->dehydrated(false)
+                        ->dehydrated(true)
                         ->required()
                         ->columnSpanFull()
                         ->afterStateHydrated(function ($state, callable $set, callable $get) {
-                            // Get the correct answer from answer_key
                             $answerKey = $get('answer_key') ?? [];
                             if (isset($answerKey['correct']) && is_array($answerKey['correct'])) {
                                 $set('answer_key_correct_dropdown', $answerKey['correct']);
@@ -352,18 +350,70 @@ class QuestionsRelationManager extends RelationManager
         ]);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Proses answer_key dari virtual fields
+    |--------------------------------------------------------------------------
+    */
+
+    private function processAnswerKey(array $data): array
+    {
+        if (! isset($data['type'])) {
+            return $data;
+        }
+
+        switch ($data['type']) {
+            case 'single_choice':
+                $data['answer_key']['correct'] = $data['answer_key_correct_single'] ?? null;
+                break;
+
+            case 'multiple_choice':
+                $data['answer_key']['correct'] = array_values($data['answer_key_correct_multiple'] ?? []);
+                break;
+
+            case 'boolean':
+                $data['answer_key']['correct'] = ($data['answer_key_correct_boolean'] ?? '0') === '1';
+                break;
+
+            case 'drop_down':
+                $data['answer_key']['correct'] = $data['answer_key_correct_dropdown'] ?? [];
+                break;
+        }
+
+        unset(
+            $data['answer_key_correct_single'],
+            $data['answer_key_correct_multiple'],
+            $data['answer_key_correct_boolean'],
+            $data['answer_key_correct_dropdown'],
+        );
+
+        // Auto-generate option IDs untuk drop_down
+        if ($data['type'] === 'drop_down' && isset($data['question_config']['blanks'])) {
+            $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            foreach ($data['question_config']['blanks'] as &$blank) {
+                foreach ($blank['options'] ?? [] as $index => &$option) {
+                    $option['id'] = $letters[$index] ?? chr(65 + $index);
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Saat form dibuka untuk edit
+    |--------------------------------------------------------------------------
+    */
+
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Auto-generate option IDs when loading data for drop_down
+        // Auto-generate option IDs saat load data drop_down
         if (isset($data['type']) && $data['type'] === 'drop_down') {
-            if (isset($data['question_config']['blanks'])) {
-                $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-                foreach ($data['question_config']['blanks'] as &$blank) {
-                    if (isset($blank['options'])) {
-                        foreach ($blank['options'] as $index => &$option) {
-                            $option['id'] = $letters[$index] ?? chr(65 + $index);
-                        }
-                    }
+            $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            foreach ($data['question_config']['blanks'] ?? [] as &$blank) {
+                foreach ($blank['options'] ?? [] as $index => &$option) {
+                    $option['id'] = $letters[$index] ?? chr(65 + $index);
                 }
             }
         }
@@ -371,82 +421,7 @@ class QuestionsRelationManager extends RelationManager
         return $data;
     }
 
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        // Map type-specific fields back to answer_key.correct
-        if (isset($data['type'])) {
-            switch ($data['type']) {
-                case 'single_choice':
-                    $data['answer_key']['correct'] = $data['answer_key_correct_single'] ?? null;
-                    break;
-                case 'multiple_choice':
-                    $data['answer_key']['correct'] = $data['answer_key_correct_multiple'] ?? [];
-                    break;
-                case 'boolean':
-                    $data['answer_key']['correct'] = ($data['answer_key_correct_boolean'] ?? '0') === '1';
-                    break;
-                case 'drop_down':
-                    $data['answer_key']['correct'] = $data['answer_key_correct_dropdown'] ?? [];
-                    break;
-            }
-        }
 
-        // Auto-generate option IDs for drop_down type
-        if (isset($data['type']) && $data['type'] === 'drop_down') {
-            if (isset($data['question_config']['blanks'])) {
-                $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-                foreach ($data['question_config']['blanks'] as &$blank) {
-                    if (isset($blank['options'])) {
-                        foreach ($blank['options'] as $index => &$option) {
-                            $option['id'] = $letters[$index] ?? chr(65 + $index);
-                        }
-                    }
-                }
-            }
-        }
-
-        return $data;
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        // Map type-specific fields back to answer_key.correct
-        if (isset($data['type'])) {
-            switch ($data['type']) {
-                case 'single_choice':
-                    $data['answer_key']['correct'] = $data['answer_key_correct_single'] ?? null;
-                    break;
-                case 'multiple_choice':
-                    $data['answer_key']['correct'] = $data['answer_key_correct_multiple'] ?? [];
-                    break;
-                case 'boolean':
-                    $data['answer_key']['correct'] = ($data['answer_key_correct_boolean'] ?? '0') === '1';
-                    break;
-                case 'drop_down':
-                    $data['answer_key']['correct'] = $data['answer_key_correct_dropdown'] ?? [];
-                    break;
-            }
-        }
-
-        // Clean up temporary fields
-        unset($data['answer_key_correct_single'], $data['answer_key_correct_multiple'], $data['answer_key_correct_boolean'], $data['answer_key_correct_dropdown']);
-
-        // Auto-generate option IDs for drop_down type on edit
-        if (isset($data['type']) && $data['type'] === 'drop_down') {
-            if (isset($data['question_config']['blanks'])) {
-                $letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-                foreach ($data['question_config']['blanks'] as &$blank) {
-                    if (isset($blank['options'])) {
-                        foreach ($blank['options'] as $index => &$option) {
-                            $option['id'] = $letters[$index] ?? chr(65 + $index);
-                        }
-                    }
-                }
-            }
-        }
-
-        return $data;
-    }
 
     public function table(Table $table): Table
     {
@@ -466,31 +441,32 @@ class QuestionsRelationManager extends RelationManager
             ->filters([
                 SelectFilter::make('type')
                     ->options([
-                        'single_choice' => 'Single Choice',
-                        'multiple_choice' => 'Multiple Choice',
-                        'boolean' => 'Boolean',
-                        'essay' => 'Essay',
-                        'matching' => 'Matching',
-                        'fill_in_blank' => 'Fill in Blank',
-                        'drop_down' => 'Drop Down',
+                        'single_choice'     => 'Single Choice',
+                        'multiple_choice'   => 'Multiple Choice',
+                        'boolean'           => 'Boolean',
+                        'essay'             => 'Essay',
+                        'matching'          => 'Matching',
+                        'fill_in_blank'     => 'Fill in Blank',
+                        'drop_down'         => 'Drop Down',
                     ]),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->mutateFormDataUsing(fn(array $data): array => $this->processAnswerKey($data)),
             ])
             ->actions([
-                EditAction::make(),
+                EditAction::make()
+                    ->mutateFormDataUsing(fn(array $data): array => $this->processAnswerKey($data)),
                 DeleteAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->after(function () {
-                            // Update the quiz's total_score_weight after bulk deletion
                             $quiz = $this->getOwnerRecord();
                             if ($quiz) {
-                                $totalScoreWeight = $quiz->questions()->sum('score_weight');
-                                $quiz->total_score_weight = $totalScoreWeight;
+                                $totalScoreWeight          = $quiz->questions()->sum('score_weight');
+                                $quiz->total_score_weight  = $totalScoreWeight;
                                 $quiz->saveQuietly();
                             }
                         }),
