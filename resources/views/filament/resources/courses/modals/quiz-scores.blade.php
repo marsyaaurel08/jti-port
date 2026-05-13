@@ -19,7 +19,7 @@
         @endforeach
     @else
         <div class="text-gray-500 italic">
-            Belum ada data nilai kuis.
+            Dat nilai kuis tidak tersedia.
         </div>
     @endif
 </div>
