@@ -78,7 +78,8 @@ class CourseProgressTable
                         ]);
                     })
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Tutup'),
+                    ->modalCancelActionLabel('Tutup')
+                    ->visible(fn($record) => $record->course->lessons()->whereHas('quiz')->exists()),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -133,7 +134,7 @@ class CourseProgressTable
 
             $scoreList = $attempts->pluck('score')
                 ->map(fn($score) => number_format((float) $score, 2, ',', ''))
-                ->implode(',');
+                ->implode(' - ');
 
             $scores[] = [
                 'quiz_name' => $lesson->quiz->title ?? $lesson->title,
