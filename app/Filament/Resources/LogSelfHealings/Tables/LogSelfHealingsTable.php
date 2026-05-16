@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\LogSelfHealings\Tables;
 
-use App\Models\LogSelfHealing;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -19,44 +17,51 @@ class LogSelfHealingsTable
                     ->sortable()
                     ->label('Waktu Kejadian'),
 
-                TextColumn::make('user.name')
-                    ->searchable()
-                    ->description(fn(LogSelfHealing $record): string => $record->invoice_number),
+                TextColumn::make('order.id')
+                    ->label('Order ID')
+                    ->searchable(),
 
-                TextColumn::make('order_type')
-                    ->label('Jenis Order')
-                    ->translateLabel()
+                TextColumn::make('gateway')
+                    ->label('Gateway')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'course' => 'info',
-                        'class' => 'warning',
+                    ->color(fn (string $state): string => match ($state) {
+                        'bni' => 'info',
+                        'midtrans' => 'warning',
+                        default => 'gray',
                     }),
 
-                // TextColumn::make('status_before')
-                //     ->label('Sebelum')
-                //     ->badge()
-                //     ->color('danger')
-                //     ->tooltip(fn(LogSelfHealing $record): string => "Status sebelumnya: {$record->status_before}"),
+                TextColumn::make('action')
+                    ->label('Aksi'),
 
-                // IconColumn::make('arrow')
-                //     ->icon('heroicon-m-arrow-right')
-                //     ->default('heroicon-m-minus')
-                //     ->label(''),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'success' => 'success',
+                        'failed' => 'danger',
+                        'unresolved' => 'warning',
+                        default => 'gray',
+                    }),
 
-                // TextColumn::make('status_after')
-                //     ->label('Sesudah')
-                //     ->badge()
-                //     ->color('success')
-                //     ->tooltip(fn(LogSelfHealing $record): string => "Status sesudahnya: {$record->status_after}"),
+                TextColumn::make('notes')
+                    ->label('Catatan')
+                    ->limit(50),
             ])
             ->filters([
-                SelectFilter::make('order_type')
-                    ->label('Jenis Order')
-                    ->translateLabel()
+                SelectFilter::make('gateway')
+                    ->label('Gateway')
                     ->searchable()
                     ->options([
-                        'course' => 'Course',
-                        'class' => 'Class',
+                        'bni' => 'BNI',
+                        'midtrans' => 'Midtrans',
+                    ]),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->searchable()
+                    ->options([
+                        'success' => 'Success',
+                        'failed' => 'Failed',
+                        'unresolved' => 'Unresolved',
                     ]),
             ])
             ->recordActions([])

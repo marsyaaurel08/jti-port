@@ -3,8 +3,14 @@
 namespace App\Filament\Resources\Classes\Schemas;
 
 use App\Models\CourseClass;
-use Filament\Forms\Components\{DateTimePicker, FileUpload, Select, TextInput, Toggle, RichEditor};
-use Filament\Schemas\Components\{Grid, Section};
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -24,8 +30,7 @@ class ClassesForm
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(
-                                        fn(string $operation, $state, $set) =>
-                                        $operation === 'create' ? $set('slug', Str::slug($state)) : null
+                                        fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null
                                     ),
 
                                 TextInput::make('slug')
@@ -60,6 +65,7 @@ class ClassesForm
                         Section::make('Detail Kursus & Pengaturan')
                             ->schema([
                                 Select::make('course_id')
+                                    ->live()
                                     ->relationship('course', 'title')
                                     ->searchable()
                                     ->preload()
@@ -71,9 +77,9 @@ class ClassesForm
                                     ->preload()
                                     ->required(),
 
-                                Select::make('category_id')
-                                    ->relationship('category', 'name')
-                                    ->preload()
+                                TextInput::make('category')
+                                    ->disabled()
+                                    ->afterStateUpdated(fn ($state, $set) => $set('category', CourseClass::find($state)?->course?->category?->name ?? 'N/A'))
                                     ->required(),
 
                                 Select::make('level')

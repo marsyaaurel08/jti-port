@@ -33,6 +33,7 @@ class StudentCourseCheckout extends Component
     #[Validate('required|phone:ID,mobile')]
     public string $phoneNumber = '';
 
+
     // Promo Code
     public string $promoCode = '';
 
@@ -43,7 +44,8 @@ class StudentCourseCheckout extends Component
     public string $promoMessage = '';
 
     // Transfer Method (Cara Transfer ke BNI VA)
-    public string $transferMethod = 'bni_mobile';
+    #[Validate('required|string')]
+    public string $transferMethod = '';
 
     public array $transferMethods;
 
@@ -121,6 +123,21 @@ class StudentCourseCheckout extends Component
         return $instructions[$this->transferMethod] ?? [];
     }
 
+    private function handlePostPayment(string $gateway, Order $order, array $gatewayResponse): void
+    {
+        if ($gateway === 'midtrans') {
+            // Kirim snap_token ke frontend untuk memunculkan Midtrans Snap popup
+            $this->dispatch('trigger-midtrans-snap', token: $gatewayResponse['snap_token']);
+            return;
+        }
+
+        // BNI: tampilkan instruksi Virtual Account di halaman yang sama
+        $this->vaData            = $order->getVaData();
+        $this->showVAInstructions = true;
+
+        session()->flash('success', 'Nomor Virtual Account berhasil dibuat. Silakan lakukan transfer sesuai instruksi.');
+    }
+
     public function processPayment(): void
     {
         $this->validate();
@@ -157,7 +174,7 @@ class StudentCourseCheckout extends Component
 
             // 4. Kirim ke Payment Gateway via Factory
             $paymentService  = PaymentFactory::make($activeGateway);
-            dd($paymentService);
+            // dd($paymentService);
             $gatewayResponse = $paymentService->createTransaction($order, $this->transferMethod);
 
             // 5. Simpan response gateway ke Order (snap_token / va_number / dll)

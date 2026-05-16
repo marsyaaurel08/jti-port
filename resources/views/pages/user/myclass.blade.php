@@ -1,5 +1,5 @@
 <x-student.layout.index :user="$user">
-    <div class="px-6 md:px-48">
+    <div class="px-4 lg:px-34">
 
         {{-- Header: Perbaikan kontras dan spacing --}}
         <div class="mb-10">
@@ -34,7 +34,7 @@
 
         {{-- Grid: Spacing antar card diperluas sedikit --}}
         @if ($classes->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div class="grid grid-cols-1  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 @foreach ($classes as $class)
                 {{-- @dd($class) --}}
                     <x-student.class-card

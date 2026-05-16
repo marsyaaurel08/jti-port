@@ -100,7 +100,28 @@ fi
 
 echo -e "${GREEN}▶ Starting: $@${NC}"
 
+# Mark entrypoint as complete
+touch /tmp/.entrypoint-ready
+
 # =====================================================================
-# 8. START MAIN PROCESS
+# 8. SETUP CRON JOB (Laravel Scheduler)
 # =====================================================================
+echo -e "${YELLOW}⏰ Setting up Laravel Scheduler (Cron)...${NC}"
+
+cat > /etc/cron.d/laravel-scheduler << EOF
+* * * * * www-data cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
+EOF
+
+chmod 0644 /etc/cron.d/laravel-scheduler
+crontab -u www-data /etc/cron.d/laravel-scheduler
+
+echo -e "${GREEN}✓ Laravel Scheduler cron installed${NC}"
+
+# =====================================================================
+# 9. START CRON + MAIN PROCESS
+# =====================================================================
+echo -e "${GREEN}▶ Starting cron and $@${NC}"
+
+# Jalankan cron di background
+cron
 exec "$@"
