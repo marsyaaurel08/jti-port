@@ -42,7 +42,8 @@ class StudentClassCheckout extends Component
     public string $promoMessage = '';
 
     // Transfer Method (Cara Transfer ke BNI VA)
-    public string $transferMethod = 'bni_va';
+    #[Validate('required|string')]
+    public string $transferMethod = '';
 
     public array $transferMethods;
 
