@@ -13,6 +13,7 @@ RUN apk add --no-cache \
     icu-dev oniguruma-dev libzip-dev \
     bash \
     netcat-openbsd \
+    dcron \
     autoconf automake libtool make gcc g++ libc-dev \
     nodejs npm
 
