@@ -92,8 +92,9 @@
                 @endif
             </div>
             @if (
-                !auth()->check() ||
-                    !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
+                !$is_user_enrolled &&
+                    (!auth()->check() ||
+                        !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar'])))
                 <button type="button"
                     @click="addToCart({{ $course->id }}, () => { isLoading = false; }); isLoading = true;"
                     :disabled="isLoading"
