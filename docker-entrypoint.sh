@@ -123,5 +123,5 @@ echo -e "${GREEN}✓ Laravel Scheduler cron installed${NC}"
 echo -e "${GREEN}▶ Starting cron and $@${NC}"
 
 # Jalankan cron di background
-cron
+dcron
 exec "$@"
