@@ -73,6 +73,11 @@ class MidtransService implements PaymentServiceInterface
         try {
             $status = Transaction::status($externalId);
 
+            Log::info('[MidtransService] Raw check transaction status', [
+                'external_id' => $externalId,
+                'response'    => (array) $status,
+            ]);
+
             return $this->normalizeTransactionStatus((array) $status);
         } catch (\Exception $e) {
             Log::error('[MidtransService] Gagal memeriksa status transaksi', [
