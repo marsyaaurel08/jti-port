@@ -9,13 +9,11 @@ use App\Models\CourseClass;
 use App\Models\CourseProgress;
 use App\Models\Enrollment;
 use App\Models\Lesson;
-use App\Models\LogSelfHealing;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DemoSeeder extends Seeder
 {
@@ -105,7 +103,7 @@ class DemoSeeder extends Seeder
                         'chapter_id' => $chapter->id,
                         'title' => "Lesson {$lessonCounter}: Introduction",
                         'type' => 'video',
-                        'slug' => strtolower(str_replace(' ', '-', $title)) . "-lesson-{$lessonCounter}",
+                        'slug' => strtolower(str_replace(' ', '-', $title))."-lesson-{$lessonCounter}",
                         'content_url' => 'https://youtu.be/dSq0Z5XpoLc?si=JEzcvVg0EO8e1jYr',
                         'content_text' => 'Lesson content goes here...',
                         'duration_seconds' => 600, // 10 minutes
@@ -156,7 +154,7 @@ class DemoSeeder extends Seeder
         // Create 1 order for user ID 3
         $order = Order::create([
             'user_id' => $users[3]->id,
-            'invoice_number' => 'INV-' . time(),
+            'invoice_number' => 'INV-'.time(),
             'subtotal' => $totalAmount,
             'discount_amount' => 0.00,
             'total_amount' => $totalAmount,
@@ -219,7 +217,7 @@ class DemoSeeder extends Seeder
         // Create order for class (shared order for all 3 students)
         $classOrder = Order::create([
             'user_id' => $users[1]->id,
-            'invoice_number' => 'INV-CLASS-' . time(),
+            'invoice_number' => 'INV-CLASS-'.time(),
             'subtotal' => 149.99 * 3,
             'discount_amount' => 0.00,
             'total_amount' => 149.99 * 3,
@@ -263,40 +261,6 @@ class DemoSeeder extends Seeder
             10, // completed_lesson_count
             true // is_completed
         );
-
-        // Data 1: Kasus Self Healing Course (Status macet di pending)
-        LogSelfHealing::create([
-            'user_id' => $users[3]->id,
-            'order_id' => $order->id,
-            'order_type' => 'course',
-            'invoice_number' => $order->invoice_number,
-            'status_before' => 'pending',
-            'status_after' => 'paid',
-            'message' => 'Sistem mendeteksi transaksi sudah sukses di payment gateway namun status di lokal masih pending. Melakukan sinkronisasi otomatis.',
-            'payload' => [
-                'gateway' => 'midtrans',
-                'transaction_id' => 'TRX-' . uniqid(),
-                'verification_status' => 'settlement',
-                'retry_attempt' => 1,
-            ],
-        ]);
-
-        // Data 2: Kasus Self Healing Class (Integritas data enrollment)
-        LogSelfHealing::create([
-            'user_id' => $users[1]->id,
-            'order_id' => $classOrder->id,
-            'order_type' => 'class',
-            'invoice_number' => $classOrder->invoice_number,
-            'status_before' => 'error_missing_enrollment',
-            'status_after' => 'success_restored',
-            'message' => 'Ditemukan ketidaksesuaian data enrollment untuk user pada kelas ini. Melakukan pemulihan akses (enrollment restore).',
-            'payload' => [
-                'action' => 'force_enroll',
-                'class_id' => $classCode->id,
-                'detected_at' => now()->toDateTimeString(),
-                'repair_code' => 'SH-002',
-            ],
-        ]);
 
         Setting::create(
             ['key' => 'payment_gateway', 'value' => 'midtrans'],
@@ -360,7 +324,7 @@ class DemoSeeder extends Seeder
             'expires_at' => now()->addYear(),
             'is_completed' => $isCompleted,
             'completed_at' => $isCompleted ? now() : null,
-            'certificate_code' => $isCompleted ? 'CERT-' . strtoupper(uniqid()) : null,
+            'certificate_code' => $isCompleted ? 'CERT-'.strtoupper(uniqid()) : null,
             'certificate_url' => $isCompleted ? 'https://example.com/certificate.pdf' : null,
             'completed_lesson_count' => $completedLessonCount,
             'last_accessed_lesson_id' => $lessons[$completedLessonCount - 1]->id ?? $lessons[0]->id,
@@ -407,7 +371,7 @@ class DemoSeeder extends Seeder
             'expires_at' => now()->addMonths(6),
             'is_completed' => $isCompleted,
             'completed_at' => $isCompleted ? now() : null,
-            'certificate_code' => $isCompleted ? 'CERT-CLASS-' . strtoupper(uniqid()) : null,
+            'certificate_code' => $isCompleted ? 'CERT-CLASS-'.strtoupper(uniqid()) : null,
             'certificate_url' => $isCompleted ? 'https://example.com/certificate.pdf' : null,
             'completed_lesson_count' => $completedLessonCount,
             'last_accessed_lesson_id' => $lessons[$completedLessonCount - 1]->id ?? $lessons[0]->id,
