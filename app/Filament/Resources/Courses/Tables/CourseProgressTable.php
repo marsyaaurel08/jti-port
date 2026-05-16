@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Courses\Tables;
 
+use App\Models\QuizAttempt;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -63,6 +65,22 @@ class CourseProgressTable
                     ->tooltip(fn($record) => $record->lastAccessedLesson?->title)
                     ->icon('heroicon-m-play-pause'),
             ])
+            ->actions([
+                Action::make('view_quiz_scores')
+                    ->label('Detail Nilai')
+                    ->icon('heroicon-m-eye')
+                    ->color('primary')
+                    ->modalHeading('Detail Nilai Kuis')
+                    ->modalContent(function ($record) {
+                        return view('filament.resources.courses.modals.quiz-scores', [
+                            'studentName' => $record->user->name,
+                            'quizScores' => self::getQuizScores($record),
+                        ]);
+                    })
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->visible(fn($record) => $record->course->lessons()->whereHas('quiz')->exists()),
+            ])
             ->filters([
                 SelectFilter::make('status')
                     ->options([
@@ -96,5 +114,34 @@ class CourseProgressTable
                     ->label('Filter Progress'),
             ])
             ->defaultSort('enrolled_at', 'desc');
+    }
+
+    public static function getQuizScores($enrollment): array
+    {
+        $quizzes = $enrollment->course->lessons()
+            ->with('quiz')
+            ->whereHas('quiz')
+            ->orderBy('sort_order')
+            ->get();
+
+        $scores = [];
+
+        foreach ($quizzes as $lesson) {
+            $attempts = QuizAttempt::where('quiz_id', $lesson->quiz->id)
+                ->where('user_id', $enrollment->user_id)
+                ->orderBy('created_at')
+                ->get();
+
+            $scoreList = $attempts->pluck('score')
+                ->map(fn($score) => number_format((float) $score, 2, ',', ''))
+                ->implode(' - ');
+
+            $scores[] = [
+                'quiz_name' => $lesson->quiz->title ?? $lesson->title,
+                'scores' => $scoreList,
+            ];
+        }
+
+        return $scores;
     }
 }
