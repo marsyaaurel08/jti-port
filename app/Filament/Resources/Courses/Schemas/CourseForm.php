@@ -32,7 +32,10 @@ class CourseForm
                             Select::make('category_id')
                                 ->relationship('category', 'name')
                                 ->label('Kategori')
-                                ->required(),
+                                ->required()
+                                ->default(function () {
+                                    return \App\Models\Category::first()?->id;
+                                }),
                             TextInput::make('title')
                                 ->label('Judul Kursus')
                                 ->required()
@@ -56,6 +59,7 @@ class CourseForm
                             Select::make('level')
                                 ->label('Level')
                                 ->options(['beginner' => 'Beginner', 'intermediate' => 'Intermediate', 'advanced' => 'Advanced'])
+                                ->default('beginner')
                                 ->required(),
                             FileUpload::make('thumbnail_url')
                                 ->label('Thumbnail')
@@ -106,6 +110,7 @@ class CourseForm
                                             Select::make('type')
                                                 ->label('Tipe Pelajaran')
                                                 ->options(['video' => 'Video', 'text' => 'Teks', 'quiz' => 'Kuis'])
+                                                ->default('video')
                                                 ->required()
                                                 ->live(),
                                             TextInput::make('slug')
@@ -142,6 +147,7 @@ class CourseForm
                                             Select::make('is_free_preview')
                                                 ->label('Preview Gratis')
                                                 ->options([0 => 'Tidak', 1 => 'Ya'])
+                                                ->default(0)
                                                 ->required(),
                                             // Quiz Configuration
                                             Section::make('Konfigurasi Quiz')
