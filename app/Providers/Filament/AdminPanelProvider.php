@@ -2,24 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard as PagesDashboard;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use DiogoGPinto\AuthUIEnhancer\AuthUIEnhancerPlugin;
-use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
-use DutchCodingCompany\FilamentSocialite\Provider;
-use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Http\Middleware\{Authenticate, AuthenticateSession, DisableBladeIconComponents, DispatchServingFilamentEvent};
 use Filament\Navigation\NavigationGroup;
-use Filament\Pages\Dashboard;
-use Filament\Panel;
-use Filament\PanelProvider;
+use Filament\{Panel, PanelProvider};
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Cookie\Middleware\{AddQueuedCookiesToResponse, EncryptCookies};
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
@@ -48,12 +38,12 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                // Dashboard::class,
+                PagesDashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -67,11 +57,6 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
-                // AuthUIEnhancerPlugin::make()
-                //     ->emptyPanelBackgroundImageUrl(asset('img/logo-jti.png'))
-                //     ->showEmptyPanelOnMobile(false)
-                //     ->formPanelWidth('40%')
-                //     ->formPanelPosition('left'),
                 FilamentShieldPlugin::make(),
 
                 BreezyCore::make()

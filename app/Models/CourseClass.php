@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 
 class CourseClass extends Model
 {
@@ -47,6 +49,11 @@ class CourseClass extends Model
         return $this->belongsTo(Course::class);
     }
 
+    public function category(): HasOneThrough
+    {
+        return $this->hasOneThrough(Category::class, Course::class, 'id', 'id', 'course_id', 'category_id');
+    }
+
     public function instructor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'instructor_id');
@@ -67,6 +74,7 @@ class CourseClass extends Model
     {
         return $this->hasMany(UserCart::class);
     }
+
     public function available_slots(): int
     {
         return $this->max_capacity - $this->current_enrolled;

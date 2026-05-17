@@ -3,8 +3,14 @@
 namespace App\Filament\Resources\Classes\Schemas;
 
 use App\Models\CourseClass;
-use Filament\Forms\Components\{DateTimePicker, FileUpload, Select, TextInput, Toggle, RichEditor};
-use Filament\Schemas\Components\{Grid, Section};
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -24,8 +30,7 @@ class ClassesForm
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(
-                                        fn(string $operation, $state, $set) =>
-                                        $operation === 'create' ? $set('slug', Str::slug($state)) : null
+                                        fn(string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null
                                     ),
 
                                 TextInput::make('slug')
@@ -46,8 +51,7 @@ class ClassesForm
                                 FileUpload::make('thumbnail_url')
                                     ->label('Thumbnail Kelas')
                                     ->image()
-                                    ->directory('course-classes')
-                                    ->required(),
+                                    ->directory('course-classes'),
 
                                 Toggle::make('is_active')
                                     ->label('Aktifkan Kelas')
@@ -60,10 +64,12 @@ class ClassesForm
                         Section::make('Detail Kursus & Pengaturan')
                             ->schema([
                                 Select::make('course_id')
+                                    ->live()
                                     ->relationship('course', 'title')
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->afterStateUpdated(fn($state, $set) => $set('category', \App\Models\Course::find($state)?->category?->name)),
 
                                 Select::make('instructor_id')
                                     ->relationship('instructor', 'name')
@@ -71,10 +77,14 @@ class ClassesForm
                                     ->preload()
                                     ->required(),
 
-                                Select::make('category_id')
-                                    ->relationship('category', 'name')
-                                    ->preload()
-                                    ->required(),
+                                TextInput::make('category')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->afterStateHydrated(function (TextInput $component, $state, $record) {
+                                        if ($record && $record->course) {
+                                            $component->state($record->course->category?->name);
+                                        }
+                                    }),
 
                                 Select::make('level')
                                     ->options([

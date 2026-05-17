@@ -1,5 +1,5 @@
 {{-- Container Utama dengan Background subtle agar card putih lebih menonjol --}}
-<div class="min-h-screen bg-[#F8FAFC]">
+<div class="min-h-screen bg-white">
     <div class="max-w-[1440px] mx-auto px-10 md:px-48 py-8">
 
         {{-- Header Section: Diberi margin bottom yang lebih besar agar layout bernapas --}}

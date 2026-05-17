@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EnrollmentClasses\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
@@ -53,6 +54,7 @@ class EnrollmentClassesTable
             ])
             ->recordActions([
                 ViewAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

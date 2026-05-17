@@ -3,9 +3,12 @@
 namespace App\Livewire;
 
 use App\Models\Order;
-use Illuminate\Support\Facades\{Auth, Cache};
-use Livewire\Attributes\{Layout, Validate};
-use Livewire\{Component, WithFileUploads};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Validate;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
 class StudentOrders extends Component
@@ -28,6 +31,7 @@ class StudentOrders extends Component
     public $paymentProof = null;
 
     public array $transferMethods;
+
     public array $transferInstructions;
 
     // Cache configuration
@@ -43,6 +47,7 @@ class StudentOrders extends Component
     {
         if (! Auth::check()) {
             redirect()->route('home');
+
             return;
         }
 
@@ -66,27 +71,28 @@ class StudentOrders extends Component
     public function getTransferInstructions(?string $transferMethod = null): array
     {
         $method = $transferMethod ?? 'bni_mobile';
+
         return $this->transferInstructions[$method] ?? [];
     }
 
-    public function viewVAInstructions($orderId): void
-    {
-        $order = Order::findOrFail($orderId);
+    // public function viewVAInstructions($orderId): void
+    // {
+    //     $order = Order::findOrFail($orderId);
 
-        if ($order->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized');
-        }
+    //     if ($order->user_id !== Auth::id()) {
+    //         abort(403, 'Unauthorized');
+    //     }
 
-        if ($order->status !== 'pending') {
-            session()->flash('error', 'Order ini sudah dibayar');
+    //     if ($order->status !== 'pending') {
+    //         session()->flash('error', 'Order ini sudah dibayar');
 
-            return;
-        }
+    //         return;
+    //     }
 
-        $this->selectedOrder = $order;
-        $this->vaData = $order->getVaData();
-        $this->showVAInstructions = true;
-    }
+    //     $this->selectedOrder = $order;
+    //     $this->vaData = $order->getVaData();
+    //     $this->showVAInstructions = true;
+    // }
 
     public function closeModal(): void
     {
@@ -125,13 +131,14 @@ class StudentOrders extends Component
     {
         if (! $this->selectedOrder) {
             session()->flash('error', 'Order tidak ditemukan');
+
             return;
         }
 
         $this->validate();
 
         try {
-            $filename = 'proof_' . $this->selectedOrder->id . '_' . now()->timestamp . '.' . $this->paymentProof->extension();
+            $filename = 'proof_'.$this->selectedOrder->id.'_'.now()->timestamp.'.'.$this->paymentProof->extension();
 
             $path = $this->paymentProof->storeAs('payments/proof', $filename, 'public');
 
@@ -141,7 +148,7 @@ class StudentOrders extends Component
 
             $this->closeProofUpload();
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal mengupload bukti pembayaran: ' . $e->getMessage());
+            session()->flash('error', 'Gagal mengupload bukti pembayaran: '.$e->getMessage());
         }
     }
 
@@ -156,6 +163,7 @@ class StudentOrders extends Component
 
             if ($order->status !== 'pending') {
                 session()->flash('error', 'Hanya order yang masih pending yang dapat dibatalkan');
+
                 return;
             }
 
@@ -163,7 +171,7 @@ class StudentOrders extends Component
 
             session()->flash('success', 'Order berhasil dibatalkan');
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal membatalkan order: ' . $e->getMessage());
+            session()->flash('error', 'Gagal membatalkan order: '.$e->getMessage());
         }
     }
 
@@ -187,7 +195,7 @@ class StudentOrders extends Component
             $this->selectedOrder = $order;
             $this->showProofView = true;
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal membuka bukti pembayaran: ' . $e->getMessage());
+            session()->flash('error', 'Gagal membuka bukti pembayaran: '.$e->getMessage());
         }
     }
 
@@ -201,14 +209,14 @@ class StudentOrders extends Component
     {
         $order = Order::find($orderId);
 
-        if (!$order) {
+        if (! $order) {
             return;
         }
 
         $order->refresh();
 
         if (in_array($order->status, ['paid', 'success', 'settlement'])) {
-            session()->flash('success', 'Terima kasih! Pembayaran untuk Invoice ' . $order->invoice_number . ' telah berhasil dikonfirmasi.');
+            session()->flash('success', 'Terima kasih! Pembayaran untuk Invoice '.$order->invoice_number.' telah berhasil dikonfirmasi.');
         } else {
             session()->flash('info', 'Sistem sedang memverifikasi pembayaran Anda. Status akan diperbarui secara otomatis dalam beberapa saat.');
         }

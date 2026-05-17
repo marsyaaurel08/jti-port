@@ -218,7 +218,7 @@ return [
             'bank' => 'BNI',
             'type' => 'virtual_account',
             'description' => 'Transfer via BNI Mobile, Internet Banking, atau ATM',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/bni.png',
             ],
 
         // Bank BCA
@@ -227,7 +227,7 @@ return [
             'bank' => 'BCA',
             'type' => 'virtual_account',
             'description' => 'Transfer via BCA Mobile, KlikBCA, atau ATM BCA',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/bca.png',
             ],
 
         // Bank Mandiri (Midtrans menggunakan key 'echannel' untuk Mandiri Bill)
@@ -236,7 +236,7 @@ return [
             'bank' => 'Mandiri',
             'type' => 'virtual_account',
             'description' => 'Transfer via Livin\' by Mandiri, Internet Banking, atau ATM',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/mandiri.png',
             ],
 
         // Bank BRI
@@ -245,25 +245,7 @@ return [
             'bank' => 'BRI',
             'type' => 'virtual_account',
             'description' => 'Transfer via aplikasi BRImo, Internet Banking, atau ATM',
-            'logo' => 'bni-logo.png',
-            ],
-
-        // Bank CIMB Niaga
-        'cimb_va' => [
-            'name' => 'CIMB Niaga Virtual Account',
-            'bank' => 'CIMB Niaga',
-            'type' => 'virtual_account',
-            'description' => 'Transfer via OCTO Mobile, OCTO Clicks, atau ATM',
-            'logo' => 'bni-logo.png',
-            ],
-
-        // Bank Permata
-        'permata_va' => [
-            'name' => 'Permata Virtual Account',
-            'bank' => 'Permata',
-            'type' => 'virtual_account',
-            'description' => 'Transfer via PermataMobile X atau ATM',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/bri.png',
             ],
 
         // Retail / Minimarket (Key sudah sesuai standar Midtrans)
@@ -272,14 +254,14 @@ return [
             'bank' => null,
             'type' => 'retail',
             'description' => 'Bayar tunai di gerai Indomaret terdekat',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/indomaret.png',
             ],
         'alfamart' => [
             'name' => 'Alfamart',
             'bank' => null,
             'type' => 'retail',
             'description' => 'Bayar tunai di gerai Alfamart terdekat',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/alfamart.png',
             ],
 
         // Opsional: E-Wallet (Sangat disarankan untuk ditambahkan)
@@ -288,21 +270,14 @@ return [
             'bank' => null,
             'type' => 'e_wallet',
             'description' => 'Bayar instan menggunakan saldo GoPay',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/gopay.png',
             ],
         'shopeepay' => [
             'name' => 'ShopeePay',
             'bank' => null,
             'type' => 'e_wallet',
             'description' => 'Bayar instan menggunakan saldo ShopeePay',
-            'logo' => 'bni-logo.png',
-            ],
-        'qris' => [
-            'name' => 'QRIS',
-            'bank' => null,
-            'type' => 'e_wallet',
-            'description' => 'Scan QR code menggunakan e-wallet atau m-banking apa saja',
-            'logo' => 'bni-logo.png',
+            'logo' => 'icons/spay.png',
             ],
     ],
 ];

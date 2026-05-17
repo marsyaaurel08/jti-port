@@ -25,7 +25,7 @@ class Order extends Model
         'subtotal',
         'discount_amount',
         'total_amount',
-        'status',            // Sebaiknya distandarisasi (misal: 'unpaid', 'paid', 'expired', 'failed')
+        'status',            // Sebaiknya distandarisasi (misal: 'pending', 'paid', 'cancelled')
         'payment_proof',
         'paid_at',
         'last_inquiry_at',
@@ -35,15 +35,15 @@ class Order extends Model
     protected function casts(): array
     {
         return [
-            'subtotal'        => 'decimal:2',
+            'subtotal' => 'decimal:2',
             'discount_amount' => 'decimal:2',
-            'total_amount'    => 'decimal:2',
-            'paid_at'         => 'datetime',
-            'va_expired_at'   => 'datetime',
+            'total_amount' => 'decimal:2',
+            'paid_at' => 'datetime',
+            'va_expired_at' => 'datetime',
             'last_inquiry_at' => 'datetime',
-            'deleted_at'      => 'datetime',
-            'is_fallback_va'  => 'boolean',
-            'inquiry_count'   => 'integer',
+            'deleted_at' => 'datetime',
+            'is_fallback_va' => 'boolean',
+            'inquiry_count' => 'integer',
         ];
     }
 
@@ -74,27 +74,62 @@ class Order extends Model
     |--------------------------------------------------------------------------
     */
 
-    public function getVaData(): ?array
-    {
-        // Midtrans mungkin memakai QRIS/GoPay yang tidak punya VA
-        if (!$this->va_number) {
-            return null;
-        }
+    // public function getVaData(): ?array
+    // {
+    //     // Midtrans mungkin memakai QRIS/GoPay yang tidak punya VA
+    //     if (!$this->va_number) {
+    //         return null;
+    //     }
 
+    //     return [
+    //         'va_number'      => $this->va_number,
+    //         'bank_code'      => $this->getBankCode(),
+    //         'bank_name'      => $this->getBankName(),
+    //         'account_holder' => $this->user->name,
+    //         'amount'         => $this->total_amount,
+    //         'expired_at'     => optional($this->va_expired_at)?->toIso8601String(),
+    //         'description'    => "Transfer untuk Invoice {$this->invoice_number}",
+    //         'status'         => $this->status,
+    //         'is_fallback_va' => $this->is_fallback_va,
+    //         'response_code'  => $this->is_fallback_va ? 'FALLBACK' : null,
+    //         'response_message' => $this->is_fallback_va
+    //             ? 'Menggunakan Virtual Account Backup - Verifikasi Manual Diperlukan'
+    //             : null,
+    //     ];
+    // }
+
+    /**
+     * Relasi ke log self-healing.
+     * Digunakan oleh SelfHealingService untuk menghitung attempt
+     * dan menentukan apakah order sudah due untuk di-cek ulang.
+     */
+    public function selfHealingLogs(): HasMany
+    {
+        return $this->hasMany(LogSelfHealing::class);
+    }
+
+    /**
+     * Relasi ke webhook yang masuk dari payment gateway.
+     * Digunakan oleh SelfHealingService sebagai sinyal bahwa
+     * webhook sudah pernah masuk — sehingga order tidak perlu di-heal.
+     */
+    public function paymentWebhooks(): HasMany
+    {
+        return $this->hasMany(PaymentWebhook::class, 'order_invoice_number', 'invoice_number');
+    }
+
+    /**
+     * Helper: kembalikan data VA untuk ditampilkan di UI.
+     * Dipanggil di Livewire component setelah createTransaction() BNI.
+     *
+     * @return array{va_number: string|null, va_expired_at: string|null, total_amount: string}
+     */
+    public function getVaData(): array
+    {
         return [
-            'va_number'      => $this->va_number,
-            'bank_code'      => $this->getBankCode(),
-            'bank_name'      => $this->getBankName(),
-            'account_holder' => $this->user->name,
-            'amount'         => $this->total_amount,
-            'expired_at'     => optional($this->va_expired_at)?->toIso8601String(),
-            'description'    => "Transfer untuk Invoice {$this->invoice_number}",
-            'status'         => $this->status,
-            'is_fallback_va' => $this->is_fallback_va,
-            'response_code'  => $this->is_fallback_va ? 'FALLBACK' : null,
-            'response_message' => $this->is_fallback_va
-                ? 'Menggunakan Virtual Account Backup - Verifikasi Manual Diperlukan'
-                : null,
+            'va_number' => $this->va_number,
+            'va_expired_at' => $this->va_expired_at?->format('d M Y H:i'),
+            'total_amount' => number_format($this->total_amount, 0, ',', '.'),
         ];
     }
 
