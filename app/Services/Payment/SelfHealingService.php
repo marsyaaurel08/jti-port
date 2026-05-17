@@ -18,9 +18,10 @@ class SelfHealingService
      *
      * Attempt 1 → cek setelah 5 menit
      * Attempt 2 → cek setelah 30 menit
-     * Attempt 3 → cek setelah 90 menit
-     * Attempt 4 → cek setelah 300 menit
-     * Attempt 5 → cek setelah 600 menit
+     * Attempt 3 → cek setelah 90 menit -> 1.5 jam
+     * Attempt 4 → cek setelah 300 menit -> 5 jam
+     * Attempt 5 → cek setelah 600 menit -> 10 jam
+     * Attempt 6 → cek setelah 1440 menit -> 24 jam
      */
     private const BACKOFF_MINUTES = [
         1 => 5,
@@ -28,9 +29,10 @@ class SelfHealingService
         3 => 90,
         4 => 300,
         5 => 600,
+        6 => 1440,
     ];
 
-    private const MAX_ATTEMPTS = 5;
+    private const MAX_ATTEMPTS = 6;
 
     // -------------------------------------------------------------------------
     // Entry Point — dipanggil oleh Scheduler
