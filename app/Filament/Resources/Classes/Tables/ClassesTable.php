@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Classes\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -31,7 +32,7 @@ class ClassesTable
 
                 TextColumn::make('category.name')
                     ->badge()
-                    ->color('info')
+                    ->color('primary')
                     ->sortable(),
 
                 TextColumn::make('instructor.name')
@@ -71,6 +72,25 @@ class ClassesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
+                ViewAction::make()
+                    ->label('Detail')
+                    ->icon('heroicon-o-eye'),
+                EditAction::make(),
+                DeleteAction::make()
+                    ->label('Hapus')
+                    ->icon('heroicon-o-trash'),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                ]),
             ]);
     }
 }

@@ -30,7 +30,7 @@ class ClassesForm
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(
-                                        fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null
+                                        fn(string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null
                                     ),
 
                                 TextInput::make('slug')
@@ -51,8 +51,7 @@ class ClassesForm
                                 FileUpload::make('thumbnail_url')
                                     ->label('Thumbnail Kelas')
                                     ->image()
-                                    ->directory('course-classes')
-                                    ->required(),
+                                    ->directory('course-classes'),
 
                                 Toggle::make('is_active')
                                     ->label('Aktifkan Kelas')
@@ -69,7 +68,8 @@ class ClassesForm
                                     ->relationship('course', 'title')
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->afterStateUpdated(fn($state, $set) => $set('category', \App\Models\Course::find($state)?->category?->name)),
 
                                 Select::make('instructor_id')
                                     ->relationship('instructor', 'name')
@@ -79,8 +79,12 @@ class ClassesForm
 
                                 TextInput::make('category')
                                     ->disabled()
-                                    ->afterStateUpdated(fn ($state, $set) => $set('category', CourseClass::find($state)?->course?->category?->name ?? 'N/A'))
-                                    ->required(),
+                                    ->dehydrated(false)
+                                    ->afterStateHydrated(function (TextInput $component, $state, $record) {
+                                        if ($record && $record->course) {
+                                            $component->state($record->course->category?->name);
+                                        }
+                                    }),
 
                                 Select::make('level')
                                     ->options([

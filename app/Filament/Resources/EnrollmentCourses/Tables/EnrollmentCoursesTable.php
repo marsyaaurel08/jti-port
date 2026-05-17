@@ -2,15 +2,9 @@
 
 namespace App\Filament\Resources\EnrollmentCourses\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\{BulkActionGroup, DeleteAction, DeleteBulkAction, ForceDeleteBulkAction, RestoreBulkAction, ViewAction};
+use Filament\Tables\Columns\{IconColumn, TextColumn};
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class EnrollmentCoursesTable
@@ -57,6 +51,7 @@ class EnrollmentCoursesTable
                     ->label('Filter Kursus'),
             ])
             ->recordActions([
+                ViewAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
