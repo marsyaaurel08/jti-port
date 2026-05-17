@@ -37,9 +37,8 @@ class StudentCart extends Component
 
         $cartItems =  UserCartModel::where('user_id', $userId)
             ->with([
-                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
-                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id'),
-                'course.category:id,name',
+                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id')->with('category:id,name'),
+                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'course_id')->with('course.category:id,name'),
             ])
             ->get();
 
@@ -99,8 +98,8 @@ class StudentCart extends Component
     {
         $items = UserCartModel::where('user_id', $userId)
             ->with([
-                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
-                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
+                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id')->with('category:id,name'),
+                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'course_id')->with('course.category:id,name'),
             ])
             ->get()
             ->map(function ($item) {
