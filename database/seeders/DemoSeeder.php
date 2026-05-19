@@ -266,6 +266,54 @@ class DemoSeeder extends Seeder
             ['key' => 'payment_gateway', 'value' => 'midtrans'],
         );
 
+        // =============================================
+        // Create Promos
+        // =============================================
+        $promo1 = \App\Models\Promo::create([
+            'code' => 'DISC50',
+            'name' => 'Diskon 50%',
+            'description' => 'Promo spesial 50%',
+            'type' => 'percentage',
+            'value' => 50.00,
+            'min_order' => 0.00,
+            'max_usage' => 100,
+            'max_usage_per_user' => 1,
+            'start_date' => now()->subDays(1),
+            'end_date' => now()->addDays(30),
+            'is_active' => true,
+            'for_all_products' => true,
+        ]);
+
+        $promo2 = \App\Models\Promo::create([
+            'code' => 'POTONGAN100K',
+            'name' => 'Potongan 100 Ribu',
+            'description' => 'Potongan langsung Rp100.000',
+            'type' => 'fixed',
+            'value' => 100000.00,
+            'min_order' => 150000.00,
+            'max_usage' => null,
+            'max_usage_per_user' => 1,
+            'start_date' => now()->subDays(1),
+            'end_date' => now()->addDays(30),
+            'is_active' => true,
+            'for_all_products' => false,
+        ]);
+
+        // Attach promo2 to specific products (Course & Class)
+        \App\Models\PromoProduct::create([
+            'promo_id' => $promo2->id,
+            'course_id' => $allCourses[0]->id,
+            'class_id' => $classCode->id,
+        ]);
+
+        // Record pseudo promo usage in UserPromo
+        \App\Models\UserPromo::create([
+            'user_id' => $users[3]->id,
+            'promo_id' => $promo1->id,
+            'order_id' => $order->id,
+            'discount_amount' => 100.00,
+        ]);
+
         $this->command->info('- Created 2 self-healing logs (1 course, 1 class)');
 
         $this->command->info('');
