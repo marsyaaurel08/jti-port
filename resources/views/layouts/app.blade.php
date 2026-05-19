@@ -7,7 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Jtiport - Learning Management System</title>
     <link rel="icon" href="{{ asset('img/logo-jti.png') }}" type="image/png">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/cart.js', 'resources/js/carousel.js', 'resources/js/toast.js'])
+    @livewireStyles
 </head>
 
 <body class="bg-white text-gray-900 -tracking-[0.02em]">
@@ -28,13 +29,14 @@
     @if (!isset($showFooter) || $showFooter)
         <x-layout.footer />
     @endif
+    @livewireScripts
     {{-- Load Snap.js — gunakan sandbox untuk development --}}
-    @if (config('midtrans.is_production'))
+    {{-- @if (config('midtrans.is_production'))
         <script src="https://app.midtrans.com/snap/snap.js" data-client-key="{{ config('payment.midtrans.client_key') }}"></script>
     @else
         <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('payment.midtrans.client_key') }}">
         </script>
-    @endif
+    @endif --}}
 </body>
 
 </html>
