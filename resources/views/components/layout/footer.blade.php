@@ -9,23 +9,28 @@
                         <div class="bg-white p-2 rounded-sm shadow-lg">
                             <img src="{{ asset('img/logo-jti.png') }}" class="h-9 w-auto object-contain" alt="Logo JTI">
                         </div>
-                        <span class="text-2xl font-bold tracking-tight">Jti<span class="text-jti-yellow">port</span></span>
+                        <span class="text-2xl font-bold tracking-tight">Jti<span
+                                class="text-jti-yellow">port</span></span>
                     </div>
                 </a>
                 <p class="text-gray-400 text-sm leading-relaxed">
                     Learning Management System resmi JTI Polinema sebagai
-                    <span class="text-jti-yellow font-semibold italic">Certiport Authorized Testing Center (CATC)</span>.
+                    <span class="text-jti-yellow font-semibold italic">Certiport Authorized Testing Center
+                        (CATC)</span>.
                     Membantu melatih mahasiswa untuk memperoleh sertifikasi internasional.
                 </p>
-                <div class="flex gap-3">
-                    <a href="#" class="w-9 h-9 rounded-sm bg-white/5 flex items-center justify-center hover:bg-jti-yellow hover:text-jti-primary transition-all duration-300">
-                        <i data-lucide="instagram" class="w-4 h-4"></i>
+                <div class="flex gap-3" wire:ignore>
+                    <a href="#"
+                        class="w-9 h-9 rounded-sm bg-white/5 flex items-center justify-center hover:bg-jti-yellow hover:text-jti-primary transition-all duration-300">
+                        <x-lucide-instagram class="w-4 h-4" />
                     </a>
-                    <a href="#" class="w-9 h-9 rounded-sm bg-white/5 flex items-center justify-center hover:bg-jti-yellow hover:text-jti-primary transition-all duration-300">
-                        <i data-lucide="youtube" class="w-4 h-4"></i>
+                    <a href="#"
+                        class="w-9 h-9 rounded-sm bg-white/5 flex items-center justify-center hover:bg-jti-yellow hover:text-jti-primary transition-all duration-300">
+                        <x-lucide-youtube class="w-4 h-4" />
                     </a>
-                    <a href="#" class="w-9 h-9 rounded-sm bg-white/5 flex items-center justify-center hover:bg-jti-yellow hover:text-jti-primary transition-all duration-300">
-                        <i data-lucide="facebook" class="w-4 h-4"></i>
+                    <a href="#"
+                        class="w-9 h-9 rounded-sm bg-white/5 flex items-center justify-center hover:bg-jti-yellow hover:text-jti-primary transition-all duration-300">
+                        <x-lucide-facebook class="w-4 h-4" />
                     </a>
                 </div>
             </div>
@@ -39,17 +44,20 @@
                 <ul class="space-y-4 text-sm text-gray-400">
                     <li><a href="https://polinema.ac.id" target="_blank"
                             class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
-                            <i data-lucide="chevron-right" class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"></i>
+                            <x-lucide-chevron-right
+                                class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
                             Politeknik Negeri Malang
                         </a></li>
                     <li><a href="https://jti.polinema.ac.id" target="_blank"
                             class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
-                            <i data-lucide="chevron-right" class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"></i>
+                            <x-lucide-chevron-right
+                                class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
                             Jurusan Teknologi Informasi
                         </a></li>
                     <li><a href="https://certiport.pearsonvue.com/" target="_blank"
                             class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
-                            <i data-lucide="chevron-right" class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"></i>
+                            <x-lucide-chevron-right
+                                class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
                             Certiport Global
                         </a></li>
                 </ul>
@@ -62,16 +70,22 @@
                     Navigasi
                 </h4>
                 <ul class="space-y-4 text-sm text-gray-400">
-                    <li><a href="/courses" class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
-                            <i data-lucide="chevron-right" class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"></i>
+                    <li><a href="/courses"
+                            class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
+                            <x-lucide-chevron-right
+                                class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
+
                             Katalog Kursus
                         </a></li>
-                    <li><a href="#classes-list" class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
-                            <i data-lucide="chevron-right" class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"></i>
+                    <li><a href="#classes-list"
+                            class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
+                            <x-lucide-chevron-right
+                                class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
                             Persiapan Sertifikasi
                         </a></li>
                     <li><a href="#" class="hover:text-jti-yellow transition-colors flex items-center gap-2 group">
-                            <i data-lucide="chevron-right" class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"></i>
+                            <x-lucide-chevron-right
+                                class="w-3 h-3 text-jti-yellow opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
                             Bantuan & FAQ
                         </a></li>
                 </ul>
@@ -86,7 +100,7 @@
                 <div class="space-y-5">
                     <div class="flex items-start gap-4">
                         <div class="bg-jti-yellow/10 p-2 rounded-sm text-jti-yellow">
-                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            <x-lucide-map-pin class="w-4 h-4"/>
                         </div>
                         <p class="text-sm text-gray-400 leading-relaxed">
                             Gedung Sipil Lt. 7-8, JTI Polinema. Malang, Jawa Timur 65141.
@@ -94,9 +108,10 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="bg-jti-yellow/10 p-2 rounded-sm text-jti-yellow">
-                            <i data-lucide="mail" class="w-4 h-4"></i>
+                            <x-lucide-mail class="w-4 h-4"/>
                         </div>
-                        <a href="mailto:jtiport@polinema.ac.id" class="text-sm text-gray-400 hover:text-jti-yellow transition-colors">
+                        <a href="mailto:jtiport@polinema.ac.id"
+                            class="text-sm text-gray-400 hover:text-jti-yellow transition-colors">
                             jtiport@polinema.ac.id
                         </a>
                     </div>
@@ -107,7 +122,8 @@
         {{-- Bottom Copyright --}}
         <div class="border-t border-white/5 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
             <p class="text-[11px] text-gray-500 tracking-wider uppercase">
-                © 2026 <span class="text-jti-yellow font-semibold">Jtiport Polinema</span>. Seluruh Hak Cipta Dilindungi.
+                © 2026 <span class="text-jti-yellow font-semibold">Jtiport Polinema</span>. Seluruh Hak Cipta
+                Dilindungi.
             </p>
             <div class="flex gap-8 text-[11px] text-gray-500 tracking-wider uppercase font-medium">
                 <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
