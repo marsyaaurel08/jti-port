@@ -103,7 +103,7 @@ jobs:
       - name: Smoke Test
         run: |
           sleep 3
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health || echo "000")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health || echo "000")
           if [ "$HTTP_STATUS" = "200" ]; then
             echo "Smoke test passed (HTTP $HTTP_STATUS)"
           else
