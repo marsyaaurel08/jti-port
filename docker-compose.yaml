@@ -12,7 +12,6 @@ services:
     volumes:
       - "./docker/nginx:/etc/nginx/conf.d"
       - "app_storage:/var/www/html/storage:ro"
-      - "app_build:/var/www/html/public:ro"
     networks:
       - jtiport_network
 
