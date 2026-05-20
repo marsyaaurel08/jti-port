@@ -154,46 +154,11 @@ done
 
 echo -e "${YELLOW}🔄 Updating Nginx config to point to $NEW_NAME...${NC}"
 
-# Generate config baru dengan backend yang aktif
-cat > "${NGINX_CONF_DIR}/default.conf" << EOF
-server {
-    listen 80;
-    server_name localhost;
-    root /var/www/html/public;
-    index index.php index.html;
+# Hanya ganti nama container aktif, config lain tidak disentuh
+sed -i "s/set \\\$backend \"${PROJECT_NAME}_[a-z]*:9000\";/set \$backend \"${NEW_NAME}:9000\";/" \
+    "${NGINX_CONF_DIR}/default.conf"
 
-    # Resolver DNS internal Docker — lazy resolve per request
-    # FIX: Dengan resolver + set \$backend, Nginx tidak crash saat
-    #      container belum ada. DNS di-resolve saat request masuk,
-    #      bukan saat Nginx startup.
-    resolver 127.0.0.11 valid=5s ipv6=off;
-
-    location /health {
-        access_log off;
-        return 200 "healthy\n";
-    }
-
-    location / {
-        try_files \$uri \$uri/ /index.php?\$query_string;
-    }
-
-    location ~ \.php\$ {
-        # FIX: Gunakan variable agar DNS resolve lazy (tidak saat startup).
-        # Tanpa ini, Nginx akan "host not found in upstream" jika container
-        # belum ada saat Nginx start.
-        set \$backend "${NEW_NAME}:9000";
-
-        fastcgi_pass \$backend;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_read_timeout 300;
-
-        # Pass real IP
-        fastcgi_param HTTP_X_REAL_IP \$remote_addr;
-    }
-}
-EOF
+echo -e "${GREEN}✓ Backend switched to $NEW_NAME${NC}"
 
 # FIX: Start Nginx SETELAH container app ready (first deployment),
 #      atau reload saja kalau Nginx sudah berjalan.
