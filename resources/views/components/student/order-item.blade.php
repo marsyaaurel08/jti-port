@@ -81,10 +81,10 @@
                 <div
                     class="flex flex-wrap gap-2 w-full sm:w-auto sm:flex-1 lg:flex-initial justify-start sm:justify-end lg:justify-start xl:justify-end">
                     <!-- Cek Gateway Pembayaran -->
-                    @if ($order->payment_gateway === 'midtrans' && $order->snap_token)
+                    @if ($order->payment_gateway === 'midtrans')
                         <!-- Tombol untuk Midtrans -->
                         <button
-                            wire:click="$dispatch('trigger-midtrans-snap', { token: '{{ $order->snap_token }}', orderId: {{ $order->id }} })"
+                            wire:click="openPaymentModal({{ $order->id }})"
                             class="flex-1 sm:flex-none px-4 py-2 bg-jti-yellow text-jti-primary font-bold text-xs rounded-xl hover:bg-jti-yellow/90 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
