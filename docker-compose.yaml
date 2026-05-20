@@ -7,10 +7,12 @@ services:
     container_name: jtiport_nginx
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "80:80"
+      - "443:443"
     volumes:
       - "./docker/nginx:/etc/nginx/conf.d"
       - "app_storage:/var/www/html/storage:ro"
+      - "app_build:/var/www/html/public:ro"
     networks:
       - jtiport_network
 
@@ -44,7 +46,7 @@ services:
   #         - Tuning buffer yang lebih aman untuk VPS kecil
   # ------------------------------------------------------------------
   db:
-    image: mariadb:11.4
+    image: yobasystems/alpine-mariadb
     container_name: jtiport_mysql
     restart: unless-stopped
     environment:
