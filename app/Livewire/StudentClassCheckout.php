@@ -262,6 +262,7 @@ class StudentClassCheckout extends Component
                 // Siapkan data untuk Custom Payment Modal
                 $this->paymentModalData = $gatewayResponse;
                 $this->paymentModalData['instructions'] = $this->getTransferInstructions();
+                $order->update(['payment_response' => $gatewayResponse]);
                 $this->externalId = $gatewayResponse['external_id'] ?? $order->invoice_number;
 
                 $this->showCustomPaymentModal = true;
