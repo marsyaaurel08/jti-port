@@ -35,7 +35,7 @@ class UserPanelProvider extends PanelProvider
             ->emailVerification()
             ->passwordReset()
             ->registration()
-            ->login()
+            ->login(\App\Filament\Pages\CustomLogin::class)
             ->homeUrl('/')
             ->brandName('jti-port')
             ->brandLogo(asset('img/logo-jti.png'))
