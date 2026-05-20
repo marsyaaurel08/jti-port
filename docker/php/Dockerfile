@@ -1,15 +1,5 @@
 # =====================================================================
-# STAGE 1: Node — build frontend assets
-# =====================================================================
-FROM node:20-alpine AS frontend
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# =====================================================================
-# STAGE 2: PHP — build composer + compile extensions
+# STAGE 1: Builder — composer + npm build (butuh vendor untuk filament)
 # =====================================================================
 FROM php:8.3-fpm-alpine AS builder
 WORKDIR /var/www/html
@@ -17,8 +7,10 @@ WORKDIR /var/www/html
 RUN apk add --no-cache \
     libpng-dev libjpeg-turbo-dev freetype-dev \
     icu-dev oniguruma-dev libzip-dev \
-    autoconf automake libtool make gcc g++ libc-dev
+    autoconf automake libtool make gcc g++ libc-dev \
+    nodejs npm
 
+# PHP extensions
 RUN pecl install redis \
     && docker-php-ext-enable redis \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -26,7 +18,10 @@ RUN pecl install redis \
         pdo_mysql mbstring exif pcntl bcmath gd intl zip \
     && docker-php-ext-enable opcache
 
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Install PHP dependencies dulu
 COPY composer.json composer.lock ./
 RUN composer install \
     --no-dev \
@@ -35,31 +30,35 @@ RUN composer install \
     --prefer-dist \
     --no-scripts
 
+# Install Node dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy semua file (vendor sudah ada, filament CSS bisa di-resolve)
+COPY . .
+
+# Build frontend — vendor/filament sudah tersedia
+RUN npm run build \
+    && rm -rf node_modules  # hapus setelah build
+
 # =====================================================================
-# STAGE 3: Final — runtime only, tidak ada build tools
+# STAGE 2: Final — runtime only
 # =====================================================================
 FROM php:8.3-fpm-alpine AS final
 WORKDIR /var/www/html
 
-# Hanya runtime dependencies
 RUN apk add --no-cache \
-    git curl zip unzip bash \
+    bash curl zip unzip \
     netcat-openbsd dcron \
     libpng libjpeg-turbo freetype \
     icu-libs oniguruma libzip
 
-# Copy PHP extensions dari builder (bukan compile ulang)
+# Copy PHP extensions dari builder
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 
-# Copy vendor dari builder
-COPY --from=builder /var/www/html/vendor ./vendor
-
-# Copy frontend assets dari stage node
-COPY --from=frontend /app/public/build ./public/build
-
-# Copy project (tanpa node_modules, tanpa build tools)
-COPY . .
+# Copy hasil build dari builder (vendor + public/build sudah ada)
+COPY --from=builder /var/www/html/ .
 
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
