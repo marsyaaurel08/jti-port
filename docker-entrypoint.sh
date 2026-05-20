@@ -108,12 +108,19 @@ touch /tmp/.entrypoint-ready
 # =====================================================================
 echo -e "${YELLOW}⏰ Setting up Laravel Scheduler (Cron)...${NC}"
 
-cat > /etc/cron.d/laravel-scheduler << EOF
-* * * * * www-data cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
+# Buat direktori cron
+mkdir -p /etc/crontabs
+
+# Auto detect PHP path + full path (perbaikan utama)
+PHP_PATH=$(which php || echo "/usr/local/bin/php")
+
+cat > /etc/crontabs/www-data << EOF
+* * * * * cd /var/www/html && ${PHP_PATH} artisan schedule:run >> /var/log/laravel-cron.log 2>&1
 EOF
 
-chmod 0644 /etc/cron.d/laravel-scheduler
-crontab -u www-data /etc/cron.d/laravel-scheduler
+chmod 0644 /etc/crontabs/www-data
+touch /var/log/laravel-cron.log /var/log/cron.log
+chmod 666 /var/log/laravel-cron.log /var/log/cron.log
 
 echo -e "${GREEN}✓ Laravel Scheduler cron installed${NC}"
 
@@ -123,5 +130,6 @@ echo -e "${GREEN}✓ Laravel Scheduler cron installed${NC}"
 echo -e "${GREEN}▶ Starting cron and $@${NC}"
 
 # Jalankan cron di background
-crond
+crond -b -L /var/log/cron.log
+
 exec "$@"
