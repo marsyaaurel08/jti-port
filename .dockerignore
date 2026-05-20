@@ -1,7 +1,5 @@
 # =====================================================================
 # .dockerignore - Jtiport
-# FIX: Hapus exclusion untuk docker/php/php.ini dan docker/php/www.conf
-#      karena keduanya perlu di-COPY ke dalam image oleh Dockerfile.
 # =====================================================================
 
 # --- Version control ---
@@ -18,9 +16,15 @@
 # --- Node / frontend build artifacts ---
 node_modules
 *.log
-/public/build
 
-# --- Laravel cache & storage (jangan masuk image) ---
+# JANGAN exclude /public/build di sini karena multi-stage build:
+# Stage frontend build assets ke /app/public/build,
+# lalu di-COPY ke final stage. Yang perlu di-exclude hanya
+# hasil build lokal agar tidak menimpa hasil build dari Docker.
+# Uncomment baris ini kalau tidak pakai multi-stage:
+# /public/build
+
+# --- Laravel cache & storage ---
 storage/logs/*
 storage/framework/cache/*
 storage/framework/sessions/*
@@ -35,7 +39,7 @@ phpunit.xml
 phpstan.neon
 psalm.xml
 
-# --- Docker files (tidak perlu masuk image, sudah dipakai di build context) ---
+# --- Docker files ---
 docker-compose*.yml
 deploy.sh
 rollback.sh
@@ -47,12 +51,12 @@ CHANGELOG*
 .DS_Store
 Thumbs.db
 
-# =====================================================================
-# PENTING: docker/php/php.ini dan docker/php/www.conf TIDAK di-exclude
-# di sini karena Dockerfile perlu meng-COPY keduanya ke dalam image.
-# Kalau sebelumnya ada baris:
-#   docker/php/php.ini
-#   docker/php/www.conf
-# -- hapus kedua baris tersebut.
-# =====================================================================
+# --- Vendor (di-install ulang oleh composer di builder stage) ---
 vendor
+
+# =====================================================================
+# TIDAK di-exclude:
+# - docker/php/php.ini     → di-COPY oleh Dockerfile ke final stage
+# - docker/php/www.conf    → di-COPY oleh Dockerfile ke final stage
+# - package-lock.json      → dibutuhkan npm ci di frontend stage
+# =====================================================================
