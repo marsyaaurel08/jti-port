@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\UserCart as UserCartModel;
+use App\Models\UserCart;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -35,14 +35,14 @@ class StudentCart extends Component
     {
         $userId = Auth::id();
 
-        $cartItems =  UserCartModel::where('user_id', $userId)
+        $cartItems = UserCart::where('user_id', $userId)
             ->with([
-                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id')->with('category:id,name'),
-                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'course_id')->with('course.category:id,name'),
+                'course' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id', 'deleted_at')->with('category:id,name')->withTrashed(),
+                'class' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'course_id', 'deleted_at')->with('course.category:id,name')->withTrashed(),
             ])
             ->get();
 
-        $this->cartItems = $cartItems->map(fn($item) => [
+        $this->cartItems = $cartItems->map(fn ($item) => [
             'id' => $item->id,
             'course_id' => $item->course_id,
             'class_id' => $item->class_id,
@@ -74,7 +74,7 @@ class StudentCart extends Component
     public function removeItem($id): void
     {
         try {
-            UserCartModel::destroy($id);
+            UserCart::destroy($id);
             $this->syncCartToSession(Auth::id());
             $this->loadCart();
             $this->dispatch('cart-updated', count: $this->cartCount);
@@ -96,10 +96,10 @@ class StudentCart extends Component
 
     private function syncCartToSession(int $userId): void
     {
-        $items = UserCartModel::where('user_id', $userId)
+        $items = UserCart::where('user_id', $userId)
             ->with([
-                'course' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id')->with('category:id,name'),
-                'class' => fn($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'course_id')->with('course.category:id,name'),
+                'course' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'category_id', 'deleted_at')->with('category:id,name')->withTrashed(),
+                'class' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'course_id', 'deleted_at')->with('course.category:id,name')->withTrashed(),
             ])
             ->get()
             ->map(function ($item) {

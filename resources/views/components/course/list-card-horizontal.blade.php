@@ -88,7 +88,7 @@
                 </div>
 
                 {{-- Minimalist Cart Button --}}
-                @auth
+                {{-- @auth
                     @if (!auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
                         <div x-data="{ isLoading: false }">
                             <button @click="addToCart({{ $course->id }}, () => { isLoading = false }); isLoading = true;"
@@ -118,7 +118,7 @@
                             </button>
                         </div>
                     @endif
-                @endauth
+                @endauth --}}
             </div>
         </div>
     </div>
