@@ -60,10 +60,12 @@ jobs:
   deploy-production:
     name: Deploy to Production
     needs: build-and-push
-    runs-on: [self-hosted, server-ihza]
+    runs-on: [self-hosted, "${{ matrix.server }}"]
     if: github.ref == 'refs/heads/main'
     environment: production
-
+    strategy:
+      matrix:
+        server: [server-ihza] # Nilai inilah yang diambil!
     steps:
       - name: Repair workspace permissions (self-hosted)
         run: |
@@ -96,7 +98,7 @@ jobs:
           LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           APP_ENV: production
-        run: ./deploy.sh ${{ github.sha }}
+        run: ./deploy.sh ${{ github.sha }} ${{ matrix.server }}
 
       - name: Smoke Test
         run: |
