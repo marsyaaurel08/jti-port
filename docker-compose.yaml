@@ -46,7 +46,7 @@ services:
   #         - Tuning buffer yang lebih aman untuk VPS kecil
   # ------------------------------------------------------------------
   db:
-    image: yobasystems/alpine-mariadb
+    image: mariadb:11.4
     container_name: jtiport_mysql
     restart: unless-stopped
     environment:
