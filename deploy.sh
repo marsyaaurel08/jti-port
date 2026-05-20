@@ -12,10 +12,15 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 IMAGE_TAG=${1:-latest}
+SERVER=${2:-server-ihza}
 DOCKER_IMAGE="${DOCKER_HUB_USERNAME}/jtiport:${IMAGE_TAG}"
 NETWORK_NAME="jtiport_network"
 PROJECT_NAME="jtiport"
-BACKUP_DIR="/home/dika/backups/jtiport"
+if [ "$SERVER" = "server-ihza" ]; then
+    BACKUP_DIR="$HOME/backups/jtiport"
+else
+    BACKUP_DIR="/home/dika/backups/jtiport"
+fi
 STATE_FILE="$BACKUP_DIR/deployment.state"
 NGINX_CONF_DIR="./docker/nginx"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -259,13 +264,13 @@ if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A $TEMP_PUBLIC_DIR 2>/dev/null)" ]; the
     # Remove old public in nginx and recreate
     docker exec jtiport_nginx rm -rf /var/www/html/public 2>/dev/null || true
     docker exec jtiport_nginx mkdir -p /var/www/html/public
-    
+
     # Copy from host to nginx container
     docker cp $TEMP_PUBLIC_DIR/. jtiport_nginx:/var/www/html/public/
-    
+
     # Cleanup temp directory
     rm -rf $TEMP_PUBLIC_DIR
-    
+
     # Verify copy succeeded
     if docker exec jtiport_nginx test -f /var/www/html/public/index.php; then
         echo -e "${GREEN}✓ Public assets copied to nginx${NC}"
