@@ -17,8 +17,8 @@
 
 # --- Node / frontend build artifacts ---
 node_modules
-npm-debug.log
-yarn-error.log
+*.log
+/public/build
 
 # --- Laravel cache & storage (jangan masuk image) ---
 storage/logs/*
@@ -29,6 +29,7 @@ bootstrap/cache/*
 
 # --- Test & dev tools ---
 tests
+.phpunit*
 phpunit.xml
 .phpunit.result.cache
 phpstan.neon
