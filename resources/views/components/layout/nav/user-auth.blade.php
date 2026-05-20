@@ -18,7 +18,7 @@
             </div>
         </button>
         {{-- Isi Dropdown (Sesuai kode Anda sebelumnya) --}}
-        <div x-show="openProfile" x-transition
+        <div x-show="openProfile" x-transition x-cloak style="display: none;"
             class="absolute right-0 mt-2 w-72 bg-white border border-gray-100 shadow-2xl z-50 rounded-xl overflow-hidden">
             <a href="{{ route('student.index') }}"
                 class="px-5 py-4 flex items-center gap-3 border-b border-gray-50 hover:bg-gray-50/50 group transition-colors">

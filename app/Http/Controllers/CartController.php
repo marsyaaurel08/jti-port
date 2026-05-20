@@ -97,8 +97,8 @@ class CartController extends Controller
     {
         $items = UserCart::where('user_id', $userId)
             ->with([
-                'course' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
-                'class' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug'),
+                'course' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'deleted_at')->withTrashed(),
+                'class' => fn ($q) => $q->select('id', 'title', 'price', 'thumbnail_url', 'slug', 'deleted_at')->withTrashed(),
             ])
             ->get()
             ->map(fn ($item) => $this->formatCartItem($item))
@@ -113,7 +113,7 @@ class CartController extends Controller
     {
         $type = $item->course ? 'course' : ($item->class ? 'class' : null);
 
-        if (!$type) return null;
+        if (! $type) return null;
 
         $data = $item->{$type};
 

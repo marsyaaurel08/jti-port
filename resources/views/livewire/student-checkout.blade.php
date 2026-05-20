@@ -17,7 +17,7 @@
                 <div
                     class="px-4 py-4 sm:px-8 sm:py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                     <h2 class="text-base sm:text-lg font-bold text-jti-primary flex items-center gap-2">
-                        <i data-lucide="shopping-bag" class="w-5 h-5 text-jti-yellow"></i>
+                        <x-lucide-shopping-bag class="w-5 h-5 text-jti-yellow" />
                         Ringkasan pesanan
                     </h2>
                 </div>
@@ -50,11 +50,11 @@
                                 <div
                                     class="grid grid-cols-2 gap-4 text-xs text-slate-500 max-w-xs mx-auto sm:mx-0 mb-3 sm:mb-0">
                                     <div class="flex items-center justify-center sm:justify-start gap-2">
-                                        <i data-lucide="calendar" class="w-4 h-4 text-jti-yellow"></i>
+                                        <x-lucide-calendar class="w-4 h-4 text-jti-yellow" />
                                         <span>{{ $product->start_date->format('d M Y') }}</span>
                                     </div>
                                     <div class="flex items-center justify-center sm:justify-start gap-2">
-                                        <i data-lucide="users" class="w-4 h-4 text-jti-yellow"></i>
+                                        <x-lucide-users class="w-4 h-4 text-jti-yellow" />
                                         <span>{{ $product->current_enrolled }}/{{ $product->max_capacity }}
                                             peserta</span>
                                     </div>
@@ -85,7 +85,7 @@
             <section class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                 <div class="px-4 py-4 sm:px-8 sm:py-5 border-b border-slate-100 bg-slate-50/50">
                     <h2 class="text-base sm:text-lg font-bold text-jti-primary flex items-center gap-2">
-                        <i data-lucide="user-check" class="w-5 h-5 text-jti-yellow"></i>
+                        <x-lucide-user-check class="w-5 h-5 text-jti-yellow" />
                         Data diri anda
                     </h2>
                 </div>
@@ -132,13 +132,7 @@
                             pembayaran.</p>
                         @error('phoneNumber')
                             <div class="flex items-start gap-2 mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <line x1="12" x2="12" y1="8" y2="12" />
-                                    <line x1="12" x2="12.01" y1="16" y2="16" />
-                                </svg>
+                                <x-lucide-alert-circle class="w-4 h-4 text-red-500 shrink-0" />
                                 <p class="text-red-600 text-xs font-medium">Nomor HP tidak valid</p>
                             </div>
                         @enderror
@@ -151,37 +145,53 @@
                 <div
                     class="px-4 py-4 sm:px-8 sm:py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <h2 class="text-base font-bold text-jti-primary flex items-center gap-2">
-                        <i data-lucide="ticket" class="w-5 h-5 text-jti-yellow"></i>
+                        <x-lucide-tag class="w-5 h-5 text-jti-yellow" />
                         Gunakan kode promo
                     </h2>
                 </div>
                 <div class="p-4 sm:p-8 text-sm">
                     @if (!$promoApplied)
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <input type="text" wire:model="promoCode"
-                                placeholder="Punya kode promo? Masukkan di sini"
-                                class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-jti-yellow outline-none transition placeholder:text-slate-400 text-sm">
-                            <button wire:click="applyPromoCode"
-                                class="w-full sm:w-auto px-6 py-3 bg-jti-primary text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-sm active:scale-95 text-sm shrink-0">
-                                Terapkan
-                            </button>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input type="text" wire:model.defer="promoCode"
+                                    placeholder="Punya kode promo? Masukkan di sini"
+                                    class="flex-1 px-4 py-3 bg-slate-50 border @if ($promoMessage && !$promoApplied) border-red-300 @else border-slate-200 @endif rounded-xl focus:ring-2 focus:ring-jti-yellow outline-none transition placeholder:text-slate-400 text-sm">
+                                <button wire:click="applyPromoCode" wire:loading.attr="disabled"
+                                    class="w-full sm:w-auto px-6 py-3 bg-jti-primary text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-sm active:scale-95 text-sm shrink-0 flex items-center justify-center gap-2 disabled:opacity-75 tracking-wide">
+                                    <span wire:loading.remove wire:target="applyPromoCode">Terapkan</span>
+                                    <span wire:loading wire:target="applyPromoCode">Memeriksa...</span>
+                                </button>
+                            </div>
+                            @if ($promoMessage)
+                                <div
+                                    class="flex items-start gap-1 flex-row text-xs font-semibold text-red-500 mt-1 bg-red-50 px-3 py-2 rounded-lg border border-red-100">
+                                    <x-lucide-info class="w-4 h-4 shrink-0 text-red-400" />
+                                    <p>{{ $promoMessage }}</p>
+                                </div>
+                            @endif
                         </div>
                     @else
-                        <div
-                            class="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-xl p-4 gap-3">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-emerald-500 rounded-full p-1 text-white shrink-0">
-                                    <i data-lucide="check" class="w-4 h-4"></i>
+                        <div class="flex flex-col gap-2">
+                            <div
+                                class="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl p-4 gap-3 shadow-inner">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="bg-linear-to-br from-emerald-400 to-emerald-500 rounded-full p-1.5 text-white shrink-0 shadow-sm border border-emerald-300/50">
+                                        <x-lucide-check class="w-4 h-4 text-white" />
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-emerald-900 leading-none mb-1 text-sm tracking-wide">
+                                            {{ $promoCode }}</p>
+                                        <p class="text-xs text-emerald-700 font-medium">{{ $promoMessage }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-emerald-900 leading-none mb-1">{{ $promoCode }}</p>
-                                    <p class="text-xs text-emerald-600 font-medium">{{ $promoMessage }}</p>
-                                </div>
+                                <button wire:click="removePromoCode" type="button" wire:loading.attr="disabled"
+                                    wire:target="removePromoCode"
+                                    class="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <x-lucide-trash-2 wire:loading.remove wire:target="removePromoCode" class="w-5 h-5 " />
+                                    <x-lucide-loader-2 wire:loading wire:target="removePromoCode" class="animate-spin w-5 h-5 text-red-500" />
+                                </button>
                             </div>
-                            <button wire:click="removePromoCode" type="button"
-                                class="text-emerald-400 hover:text-red-500 transition shrink-0">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            </button>
                         </div>
                     @endif
                 </div>
@@ -191,7 +201,7 @@
             <section class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                 <div class="px-4 py-4 sm:px-8 sm:py-5 border-b border-slate-100 bg-slate-50/50">
                     <h2 class="text-base sm:text-lg font-bold text-jti-primary flex items-center gap-2">
-                        <i data-lucide="credit-card" class="w-5 h-5 text-jti-yellow"></i>
+                        <x-lucide-credit-card class="w-5 h-5 text-jti-yellow" />
                         Pilih metode pembayaran
                     </h2>
                 </div>
@@ -203,7 +213,7 @@
                                 class="group relative rounded-2xl transition-all duration-300 {{ $transferMethod === $key ? 'ring-2 ring-jti-yellow border-transparent bg-yellow-50/30 shadow-md' : 'border border-slate-200 bg-white hover:border-jti-yellow hover:bg-slate-50' }}">
                                 <label class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 cursor-pointer w-full">
                                     <!-- Radio Button -->
-                                    <div class="flex-shrink-0 flex items-center">
+                                    <div class="shrink-0 flex items-center">
                                         <input type="radio" name="transferMethod" wire:model.live="transferMethod"
                                             value="{{ $key }}"
                                             class="w-5 h-5 text-jti-yellow border-slate-300 focus:ring-jti-yellow cursor-pointer transition-colors">
@@ -211,7 +221,7 @@
 
                                     <!-- Logo Container -->
                                     <div
-                                        class="flex-shrink-0 w-14 h-10 sm:w-16 sm:h-12 bg-white border border-slate-100 rounded-lg flex items-center justify-center p-1 sm:p-1.5 shadow-sm overflow-hidden">
+                                        class="shrink-0 w-14 h-10 sm:w-16 sm:h-12 bg-white border border-slate-100 rounded-lg flex items-center justify-center p-1 sm:p-1.5 shadow-sm overflow-hidden">
                                         <img src="{{ asset($method['logo']) }}" alt="{{ $method['name'] }}"
                                             class="max-w-full max-h-full object-contain mix-blend-multiply"
                                             onerror="this.style.display='none'">
@@ -233,13 +243,7 @@
                     </div>
                     @error('transferMethod')
                         <div class="flex items-start gap-2 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="12" x2="12" y1="8" y2="12" />
-                                <line x1="12" x2="12.01" y1="16" y2="16" />
-                            </svg>
+                            <x-lucide-alert-circle class="w-4 h-4 text-red-500 shrink-0" />
                             <p class="text-red-600 text-xs font-medium">Silakan pilih metode pembayaran terlebih dahulu.
                             </p>
                         </div>
@@ -274,7 +278,7 @@
                     @if ($discountAmount > 0)
                         <div class="flex justify-between items-center bg-white/10 p-3 rounded-xl">
                             <span class="text-xs sm:text-sm text-emerald-300 flex items-center gap-2 font-medium">
-                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                <x-lucide-sparkles class="w-4 h-4" />
                                 Potongan harga
                             </span>
                             <span
@@ -295,53 +299,13 @@
                         <span wire:loading wire:target="processPayment" class="flex items-center gap-2">
                             Memproses...
                         </span>
-                        <i data-lucide="arrow-right" class="w-5 h-5" wire:loading.remove
-                            wire:target="processPayment"></i>
+                        <x-lucide-loader-2 wire:loading wire:target="processPayment" class="animate-spin w-5 h-5 text-jti-primary" />
                     </button>
                 </div>
             </div>
         </div>
 
-        <style>
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-8px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .animate-fadeIn {
-                animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            }
-        </style>
-
-        {{-- VA Instructions Modal --}}
-        @if ($showVAInstructions && !empty($vaData))
-            <x-checkout.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$transferMethod]['name'] ?? 'Transfer'" :instructions="$transferInstructions[$transferMethod] ?? []"
-                :redirectRoute="$redirectRoute" />
-        @endif
-
+        <x-checkout.payment-modal :showCustomPaymentModal="$showCustomPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$this->getTotalAmount()" :isPaid="$isPaid"
+            :successCountdown="$successCountdown" />
     </div>
-
-    @script
-        <script>
-            $wire.on('trigger-midtrans-snap', (event) => {
-                window.snap.pay(event.token, {
-                    onSuccess: function(result) {
-                        window.location.href = '/student/transactions';
-                    },
-                    onPending: function(result) {
-                        window.location.href = '/student/orders';
-                    },
-                    onError: function(result) {
-                        alert("Pembayaran gagal!");
-                    }
-                });
-            });
-        </script>
-    @endscript
+</div>

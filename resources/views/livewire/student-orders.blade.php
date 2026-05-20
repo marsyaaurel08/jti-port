@@ -11,13 +11,7 @@
                 {{-- Subtle Glow Kuning --}}
                 <div class="absolute inset-0 bg-jti-yellow/20 rounded-full blur-2xl"></div>
                 <div class="relative w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                        stroke-linejoin="round" class="w-10 h-10">
-                        <path d="M9 10h.01" />
-                        <path d="M15 10h.01" />
-                        <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z" />
-                    </svg>
+                    <x-lucide-ghost class="w-10 h-10 text-gray-400" />
                 </div>
             </div>
             <h3 class="text-xl font-semibold text-slate-900 mb-2">Semua beres!</h3>
@@ -27,12 +21,7 @@
             <a href="{{ route('courses.index') }}"
                 class="inline-flex items-center gap-2 px-6 py-3 bg-jti-primary text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-jti-primary/20 transition-all active:scale-95 group">
                 Cari Kursus
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="w-4 h-4 group-hover:translate-x-1 transition-transform">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                </svg>
+                <x-lucide-arrow-right class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
         </div>
     @else
@@ -63,9 +52,9 @@
     {{-- Modal: Upload Bukti Pembayaran --}}
     <x-student.proof-upload-modal :show="$showProofUpload" :selectedOrder="$selectedOrder" :paymentProof="$paymentProof" />
 
-    {{-- Modal: VA Instructions --}}
-    <x-order.va-instructions-modal :show="$showVAInstructions" :vaData="$vaData" :transferMethodName="$transferMethods[$selectedOrder?->payment_method] ?? 'Transfer'" :instructions="$transferInstructions[$selectedOrder?->payment_method] ?? []" />
-
+    {{-- Modal: Custom Payment --}}
+    <x-order.payment-modal :showCustomPaymentModal="$showCustomPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$totalAmount" :isPaid="$isPaid"
+        :successCountdown="$successCountdown" />
     {{-- Modal: Lihat Bukti Pembayaran --}}
     @if ($showProofView && $selectedOrder)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -76,12 +65,7 @@
                     <h3 class="text-lg font-bold text-slate-900">Bukti Pembayaran</h3>
                     <button wire:click="closeProofView()"
                         class="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-5 h-5">
-                            <path d="M18 6 6 18" />
-                            <path d="m6 6 12 12" />
-                        </svg>
+                        <x-lucide-x class="w-5 h-5" />
                     </button>
                 </div>
 

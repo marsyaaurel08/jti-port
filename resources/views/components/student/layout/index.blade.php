@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jtiport - Learning Management System</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/cart.js', 'resources/js/carousel.js', 'resources/js/toast.js'])
+    @livewireStyles
 </head>
 
 <body>
@@ -19,7 +20,7 @@
             </div>
         </div>
     </div>
-
+    @livewireScripts
 </body>
 
 </html>

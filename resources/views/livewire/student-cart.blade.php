@@ -10,17 +10,7 @@
                 {{-- Subtle Glow Kuning --}}
                 <div class="absolute inset-0 bg-jti-yellow/20 rounded-full blur-2xl"></div>
                 <div class="relative w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                        stroke-linejoin="round" class="w-10 h-10">
-                        <path d="m15 11-1 9" />
-                        <path d="m19 11-4-7" />
-                        <path d="M2 11h20" />
-                        <path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4" />
-                        <path d="M4.5 15.5h15" />
-                        <path d="m5 11 4-7" />
-                        <path d="m9 11 1 9" />
-                    </svg>
+                    <x-lucide-shopping-cart class="absolute w-6 h-6 text-jti-yellow" />
                 </div>
             </div>
             <h3 class="text-xl font-semibold text-slate-900 mb-2">Keranjang belanja anda masih kosong</h3>
@@ -30,12 +20,7 @@
             <a href="{{ route('courses.index') }}"
                 class="inline-flex items-center gap-2 px-6 py-3 bg-jti-primary text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-jti-primary/20 transition-all active:scale-95 group">
                 Jelajahi kursus
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="w-4 h-4 group-hover:translate-x-1 transition-transform">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                </svg>
+                <x-lucide-arrow-right class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
         </div>
     @else
@@ -54,6 +39,7 @@
                             $courseOrClass = $isClass ? $item['class'] : $item['course'];
                             $slug = $courseOrClass['slug'] ?? '';
                             $routeName = $isClass ? 'checkout.class' : 'checkout.course';
+                            $isDeleted = isset($courseOrClass['deleted_at']) && !is_null($courseOrClass['deleted_at']);
                         @endphp
 
                         <div wire:key="{{ $item['id'] }}"
@@ -103,35 +89,25 @@
                                     class="flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90">
 
                                     <div wire:loading.remove wire:target="removeItem({{ $item['id'] }})">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                                            <path d="M10 11v6" />
-                                            <path d="M14 11v6" />
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                            <path d="M3 6h18" />
-                                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                        </svg>
+                                        <x-lucide-trash class="w-5 h-5" />
                                     </div>
                                     <div wire:loading wire:target="removeItem({{ $item['id'] }})">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 animate-spin">
-                                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                                        </svg>
+                                        <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
                                     </div>
                                 </button>
 
                                 {{-- Tombol Checkout: Lebih menonjol --}}
-                                <a href="{{ route("student.$routeName", $slug) }}"
-                                    class="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-3.5 bg-jti-yellow text-jti-primary font-bold rounded-2xl hover:bg-jti-yellow/90 hover:shadow-xl hover:shadow-jti-yellow/20 transition-all active:scale-95 whitespace-nowrap">
-                                    <span>Bayar Sekarang</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                                        <path d="m9 18 6-6-6-6" />
-                                    </svg>
-                                </a>
+                                @if ($isDeleted)
+                                    <span
+                                        class="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-3.5 bg-slate-100 text-jti-primary font-bold rounded-2xl  transition-all active:scale-95 whitespace-nowrap">
+                                        Tidak Tersedia
+                                    </span>
+                                @else
+                                    <a href="{{ route("student.$routeName", $slug) }}"
+                                        class="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-3.5 bg-jti-yellow text-jti-primary font-bold rounded-2xl hover:bg-jti-yellow/90 hover:shadow-xl hover:shadow-jti-yellow/20 transition-all active:scale-95 whitespace-nowrap">
+                                        <span>Bayar Sekarang</span>
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     @endforeach

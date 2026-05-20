@@ -2,12 +2,12 @@
     <div x-data="{ open: true }" x-show="open" x-transition class="fixed top-20 right-4 z-50 max-w-sm">
         <div class="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg">
             <div class="flex items-start gap-3">
-                <i data-lucide="circle-check" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"></i>
+                <x-lucide-circle-check class="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                 <div class="flex-1">
                     <p class="font-semibold text-green-800">{{ $message }}</p>
                 </div>
                 <button @click="open = false" class="text-green-600 hover:text-green-800">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                    <x-lucide-x class="w-5 h-5" />
                 </button>
             </div>
         </div>
@@ -18,12 +18,12 @@
     <div x-data="{ open: true }" x-show="open" x-transition class="fixed top-20 right-4 z-50 max-w-sm">
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg">
             <div class="flex items-start gap-3">
-                <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                <x-lucide-info class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                 <div class="flex-1">
                     <p class="font-semibold text-blue-800">{{ $message }}</p>
                 </div>
                 <button @click="open = false" class="text-blue-600 hover:text-blue-800">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                    <x-lucide-x class="w-5 h-5" />
                 </button>
             </div>
         </div>
@@ -34,12 +34,12 @@
     <div x-data="{ open: true }" x-show="open" x-transition class="fixed top-20 right-4 z-50 max-w-sm">
         <div class="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
             <div class="flex items-start gap-3">
-                <i data-lucide="circle-alert" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <x-lucide-circle-alert class="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                 <div class="flex-1">
                     <p class="font-semibold text-red-800">{{ $message }}</p>
                 </div>
                 <button @click="open = false" class="text-red-600 hover:text-red-800">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                    <x-lucide-x class="w-5 h-5" />
                 </button>
             </div>
         </div>
@@ -65,8 +65,8 @@
 
         // Icon Lucide berdasarkan type
         const iconName = type === 'success' ? 'circle-check' :
-                         type === 'info'    ? 'info' :
-                         'circle-alert';  // default error
+            type === 'info' ? 'info' :
+            'circle-alert'; // default error
 
         const toast = document.createElement('div');
         toast.id = toastId;
@@ -76,12 +76,12 @@
         toast.setAttribute('data-aos-easing', 'ease-out');
         toast.innerHTML = `
             <div class="flex items-start gap-3">
-                <i data-lucide="${iconName}" class="w-5 h-5 ${iconColor} flex-shrink-0 mt-0.5"></i>
+                <x-lucide-${iconName} class="w-5 h-5 ${iconColor} shrink-0 mt-0.5" />
                 <div class="flex-1">
                     <p class="font-semibold ${textColor}">${message}</p>
                 </div>
                 <button onclick="document.getElementById('${toastId}').remove()" class="${buttonColor}">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                    <x-lucide-x class="w-5 h-5" />
                 </button>
             </div>
         `;

@@ -60,7 +60,7 @@ jobs:
   deploy-production:
     name: Deploy to Production
     needs: build-and-push
-    runs-on: self-hosted
+    runs-on: [self-hosted, server-ihza]
     if: github.ref == 'refs/heads/main'
     environment: production
 

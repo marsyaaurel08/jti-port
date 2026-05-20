@@ -1,7 +1,7 @@
 {{-- resources/views/components/navbar/mobile-menu.blade.php --}}
 @props(['user', 'cartCount' => 0])
 
-<div x-show="mobileMenu" class="fixed inset-0 z-[9999] md:hidden" style="display: none;">
+<div x-show="mobileMenu" class="fixed inset-0 z-9999 md:hidden" style="display: none;">
     {{-- Overlay: Blur lebih intens untuk fokus --}}
     <div x-show="mobileMenu"
         x-transition:enter="transition opacity-ease-out duration-300"
@@ -21,7 +21,7 @@
         x-transition:leave="transition ease-in duration-200 transform"
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="-translate-x-full"
-        class="relative bg-white w-[85%] max-w-[320px] h-full shadow-2xl flex flex-col overflow-hidden rounded-r-[2rem]">
+        class="relative bg-white w-[85%] max-w-[320px] h-full shadow-2xl flex flex-col overflow-hidden rounded-r-4xl">
 
         {{-- LAYER 1: Menu Utama --}}
         <div class="flex flex-col h-full transition-transform duration-500"
@@ -42,9 +42,9 @@
                             <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-jti-primary rounded-full"></div>
                         </div>
                         <div>
-                            <p class="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-1">Selamat Datang,</p>
+                            <p class="text-white text-[10px] font-bold capitalize tracking-widest mb-1">Selamat Datang 👋</p>
                             <h2 class="text-white text-xl font-bold leading-tight">
-                                {{ explode(' ', Auth::user()->name)[0] }}
+                                {{  Auth::user()->name }}
                             </h2>
                         </div>
                     </div>
@@ -120,7 +120,7 @@
 
                 <div class="py-6 grow overflow-y-auto px-4">
                     {{-- User Identity Card --}}
-                    <div class="px-5 py-6 bg-gradient-to-br from-jti-primary to-jti-primary/80 rounded-[2rem] mb-6 shadow-xl shadow-jti-primary/20">
+                    <div class="px-5 py-6 bg-linear-to-br from-jti-primary to-jti-primary/80 rounded-4xl mb-6 shadow-xl shadow-jti-primary/20">
                         <p class="text-white text-lg font-bold truncate">{{ Auth::user()->name }}</p>
                         <p class="text-white/60 text-xs truncate mt-1 font-medium">{{ Auth::user()->email }}</p>
                     </div>
@@ -128,11 +128,12 @@
                     <div class="space-y-1">
                         @php
                             $userMenus = [
-                                ['route' => 'student.my-courses', 'label' => 'Course Saya', 'icon' => 'book-open'],
-                                ['route' => 'student.my-classes', 'label' => 'Kelas Saya', 'icon' => 'academic-cap'],
-                                ['route' => 'student.cart', 'label' => 'Keranjang', 'count' => true, 'icon' => 'shopping-cart'],
-                                ['route' => 'student.transactions', 'label' => 'Riwayat Transaksi', 'icon' => 'credit-card'],
-                                ['route' => 'student.profile', 'label' => 'Pengaturan Profil', 'icon' => 'cog'],
+                                ['route' => 'student.my-courses', 'label' => 'Course Saya'],
+                                ['route' => 'student.my-classes', 'label' => 'Kelas Saya'],
+                                ['route' => 'student.cart', 'label' => 'Keranjang Saya', 'count' => true],
+                                ['route' => 'student.orders', 'label' => 'Pesanan Saya', 'count' => true],
+                                ['route' => 'student.transactions', 'label' => 'Riwayat Transaksi'],
+                                ['route' => 'student.profile', 'label' => 'Pengaturan Profil'],
                             ];
                         @endphp
 
@@ -160,11 +161,9 @@
                     <form method="POST" action="{{ route('filament.admin.auth.logout') }}">
                         @csrf
                         <button type="submit"
-                            class="w-full flex items-center justify-center gap-3 px-4 py-4 text-xs text-red-500 font-black uppercase tracking-[0.2em] rounded-2xl bg-red-50 hover:bg-red-100 transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M17 16l4-4m0 0l-4-4m4-4H7m6 4v1h8M7 4H4v16h3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            Keluar Aplikasi
+                            class="w-full flex items-center justify-center gap-3 px-4 py-4 text-xs text-red-500 font-black uppercase tracking-widest rounded-2xl bg-red-50 hover:bg-red-100 transition-all">
+                            Keluar
+                            <x-lucide-log-out class="w-4 h-4" />
                         </button>
                     </form>
                 </div>

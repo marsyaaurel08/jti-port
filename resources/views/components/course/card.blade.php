@@ -64,7 +64,7 @@
                     <div class="grid grid-cols-5 gap-2">
 
                         <!-- Tombol Tambah ke Keranjang: hanya muncul jika sudah login & bukan admin/pengajar -->
-                        @auth
+                        {{-- @auth
                             @if (!auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar']))
                                 <button type="button" x-data="{ isLoading: false }"
                                     @click="addToCart({{ $course->id }}, () => { isLoading = false }); isLoading = true;"
@@ -89,17 +89,11 @@
                                     </svg>
                                 </button>
                             @endif
-                        @endauth
+                        @endauth --}}
 
                         <!-- Tombol Lihat Detail: otomatis full jika cart tidak muncul -->
                         <a href="{{ route('courses.show', $course->slug) }}"
-                            class="relative
-                  {{ (auth()->check() &&
-                      auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar'])) ||
-                  !auth()->check()
-                      ? 'col-span-5'
-                      : 'col-span-4' }}
-                  group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary py-2.5 rounded-sm transition-all duration-500 hover:shadow-lg active:scale-95 text-sm font-bold tracking-wider">
+                            class="relative col-span-5 group/btn overflow-hidden flex items-center justify-center bg-jti-yellow text-jti-primary py-2.5 rounded-sm transition-all duration-500 hover:shadow-lg active:scale-95 text-sm font-bold tracking-wider">
                             <div
                                 class="absolute inset-0 w-full h-full bg-jti-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500">
                             </div>

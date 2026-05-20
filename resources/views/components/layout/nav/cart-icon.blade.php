@@ -7,8 +7,7 @@
             class="relative flex items-center justify-center p-2.5 rounded-xl transition-all duration-300 group hover:bg-jti-primary/10 text-jti-primary hover:text-jti-maroon"
             wire:navigate>
 
-            <i data-lucide="shopping-cart"
-                class="w-6 h-6 transform transition-transform duration-300 group-hover:scale-110"></i>
+            <x-lucide-shopping-cart class="w-6 h-6 transform transition-transform duration-300 group-hover:scale-110" />
 
             <template x-if="cartCount > 0">
                 <span x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-50"
