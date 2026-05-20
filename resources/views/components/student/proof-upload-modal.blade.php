@@ -2,7 +2,7 @@
 
 {{-- Modal: Upload Bukti Pembayaran --}}
 @if ($show && $selectedOrder)
-    <div class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-md"
+    <div class="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
         x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
         @click.self="show = false; $wire.closeProofUpload()">
