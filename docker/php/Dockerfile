@@ -1,31 +1,42 @@
+# ==============================================================================
+# STAGE 1: FRONTEND BUILDER (Node.js)
+# Hanya bertugas melakukan npm install & build, setelah itu dibuang.
+# ==============================================================================
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app
+
+# Copy file konfigurasi npm terlebih dahulu (optimasi cache)
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Copy seluruh source code dan lakukan build (Vite/Mix)
+COPY . .
+RUN npm run build
+
+
+# ==============================================================================
+# STAGE 2: PRODUCTION RUNTIME (PHP-FPM)
+# Image final yang sangat ringan, tanpa Node.js dan tanpa C++ Compiler
+# ==============================================================================
 FROM php:8.3-fpm-alpine
 
 WORKDIR /var/www/html
 
-# =========================
-# System dependencies
-# FIX: Tambah netcat-openbsd (nc) untuk health check DB di entrypoint.
-#      Tanpa ini, `nc -z db 3306` di entrypoint akan gagal.
-# =========================
+# 1. Instal dependencies sistem dasar
 RUN apk add --no-cache \
-    git curl zip unzip \
-    libpng-dev libjpeg-turbo-dev freetype-dev \
-    icu-dev oniguruma-dev libzip-dev \
-    bash \
-    netcat-openbsd \
-    dcron \
-    autoconf automake libtool make gcc g++ libc-dev \
-    nodejs npm
-
-# =========================
-# PHP extensions
-# =========================
-RUN pecl install redis \
+    git curl zip unzip bash netcat-openbsd dcron \
+    libpng-dev libjpeg-turbo-dev freetype-dev icu-dev oniguruma-dev libzip-dev \
+    # 2. Instal compiler di dalam "virtual package" bernama .build-deps
+    && apk add --no-cache --virtual .build-deps \
+       autoconf automake libtool make gcc g++ libc-dev \
+    # 3. Lakukan compile PECL dan ekstensi PHP
+    && pecl install redis \
     && docker-php-ext-enable redis \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install \
-        pdo_mysql mbstring exif pcntl bcmath gd intl zip \
-    && docker-php-ext-enable opcache
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip \
+    && docker-php-ext-enable opcache \
+    # 4. HAPUS seluruh compiler dari sistem setelah selesai digunakan! (Penting)
+    && apk del .build-deps
 
 # =========================
 # PHP-FPM & OPcache config
@@ -38,32 +49,18 @@ COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 # =========================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# =========================
-# Install dependencies dulu (cache layer optimization)
-# =========================
+# Install dependencies backend
 COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
-RUN composer install \
-    --no-dev \
-    --optimize-autoloader \
-    --no-interaction \
-    --prefer-dist \
-    --no-scripts
-
-# =========================
-# Copy seluruh project
-# =========================
+# Copy seluruh code Jtiport
 COPY . .
 
 # =========================
-# Build frontend assets (cache npm dependencies)
+# Injeksi Aset Frontend dari STAGE 1
 # =========================
-RUN npm install && npm run build
-
-# =========================
-# Clean up node_modules to reduce image size
-# =========================
-RUN rm -rf node_modules
+# Kita hanya mengambil folder public (hasil build CSS/JS) dari kontainer Node
+COPY --from=frontend-builder /app/public ./public
 
 # =========================
 # Permissions
@@ -72,10 +69,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 # =========================
-# Entrypoint
-# FIX: sed strip \r (CRLF -> LF) agar shebang terbaca benar di Linux.
-# "exec format error" hampir selalu berarti file punya Windows line
-# endings sehingga kernel membaca "#!/bin/bash\r" yang tidak dikenal.
+# Entrypoint (Fix CRLF ke LF)
 # =========================
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN sed -i 's/\r//' /usr/local/bin/docker-entrypoint.sh \

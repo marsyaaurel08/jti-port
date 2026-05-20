@@ -19,7 +19,7 @@
         {{-- Actions Group (Now align right for compact look) --}}
         <div class="flex items-center gap-2">
             {{-- Add to Cart Button (Secondary, Compact) --}}
-            <button type="button"
+            <button type="button" x-data="{ isLoading: false }"
                 @click="addToCartClass({{ $class->id }}, () => { isLoading = false }); isLoading = true;"
                 :disabled="isLoading" title="Tambah ke Keranjang"
                 class="flex items-center justify-center p-3.5 bg-slate-50 text-slate-700 rounded-xl transition-all duration-300 active:scale-90 border border-slate-100 hover:bg-slate-100"

@@ -221,7 +221,6 @@ class StudentOrders extends Component
         if ($status['is_expired'] ?? false || $status['is_cancelled'] ?? false) {
             $this->showCustomPaymentModal = false;
             session()->flash('error', 'Pembayaran kedaluwarsa atau dibatalkan.');
-            $this->redirect(route('student.orders'), navigate: true);
         }
     }
 
@@ -231,7 +230,6 @@ class StudentOrders extends Component
         // Jika countdown masih ada, jalankan redirect setelah jeda waktu habis
         if ($this->successCountdown <= 0) {
             $this->showCustomPaymentModal = false;
-            $this->redirect(route('student.orders'), navigate: true);
             return;
         }
 
@@ -243,7 +241,6 @@ class StudentOrders extends Component
     {
         $this->showCustomPaymentModal = false;
         $this->reset(['paymentModalData', 'isPaid', 'successCountdown']);
-        $this->redirect(route('student.orders'), navigate: true);
     }
 
     public function viewProof($orderId): void

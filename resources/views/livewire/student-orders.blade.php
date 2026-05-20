@@ -1,4 +1,23 @@
 <x-layouts.user :user="$this->user">
+    {{-- SUCCESS TOAST --}}
+    @if (session('success'))
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4500)" x-show="show"
+            x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 translate-x-0"
+            x-transition:leave-end="opacity-0 translate-x-3/4"
+            class="fixed top-6 right-6 z-[9999] bg-green-50 text-green-800 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px] animate-slide-in-right">
+            <p class="font-medium">{{ session('success') }}</p>
+        </div>
+    @endif
+
+    {{-- ERROR TOAST --}}
+    @if (session('error'))
+        <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show"
+            x-transition:leave="transition ease-in duration-400" x-transition:leave-start="opacity-100 translate-x-0"
+            x-transition:leave-end="opacity-0 translate-x-3/4"
+            class="fixed top-6 right-6 z-[9999] bg-red-50 text-red-800 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px] animate-slide-in-right">
+            <p class="font-medium">{{ session('error') }}</p>
+        </div>
+    @endif
     @if ($orders->isEmpty())
         {{-- Empty State: Dibuat konsisten dengan Cart --}}
         <div class="mb-8">
@@ -46,15 +65,14 @@
                     <x-student.order-item :order="$order" />
                 @endforeach
             </div>
+            {{-- Modal: Upload Bukti Pembayaran --}}
+            <x-student.proof-upload-modal :show="$showProofUpload" :selectedOrder="$selectedOrder" :paymentProof="$paymentProof" />
+            {{-- Modal: Custom Payment --}}
+            <x-order.payment-modal :showCustomPaymentModal="$showCustomPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$totalAmount" :isPaid="$isPaid"
+                :successCountdown="$successCountdown" />
         </div>
     @endif
 
-    {{-- Modal: Upload Bukti Pembayaran --}}
-    <x-student.proof-upload-modal :show="$showProofUpload" :selectedOrder="$selectedOrder" :paymentProof="$paymentProof" />
-
-    {{-- Modal: Custom Payment --}}
-    <x-order.payment-modal :showCustomPaymentModal="$showCustomPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$totalAmount" :isPaid="$isPaid"
-        :successCountdown="$successCountdown" />
     {{-- Modal: Lihat Bukti Pembayaran --}}
     @if ($showProofView && $selectedOrder)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
