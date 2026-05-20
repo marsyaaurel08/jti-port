@@ -9,7 +9,6 @@
         {{-- Animated Icon Container --}}
         <div
             class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-xl shadow-slate-200/50 mb-6 group transition-transform duration-500 hover:scale-110">
-            <div class="absolute inset-0 bg-gradient-to-br from-jti-primary/10 to-transparent rounded-2xl"></div>
             <svg class="w-10 h-10 text-slate-300 group-hover:text-jti-primary transition-colors duration-300"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -25,17 +24,5 @@
             Kami tidak dapat menemukan kelas yang sesuai dengan kata kunci atau filter Anda. Coba gunakan istilah yang
             lebih umum.
         </p>
-
-        {{-- Action Button (Optional) --}}
-        <div class="mt-8">
-            <button onclick="window.location.reload()"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-50 hover:border-jti-primary/30 hover:text-jti-primary transition-all duration-300 shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Reset Pencarian
-            </button>
-        </div>
     </div>
 </div>

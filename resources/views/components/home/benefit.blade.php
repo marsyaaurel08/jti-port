@@ -22,7 +22,7 @@
                  data-aos="zoom-in-up"
                  data-aos-delay="400">
                 <div class="w-20 h-20 bg-jti-light rounded-full flex items-center justify-center mx-auto mb-8 text-jti-yellow group-hover:bg-jti-yellow group-hover:text-jti-primary transition-colors">
-                    <i data-lucide="graduation-cap" class="w-10 h-10"></i>
+                    <x-lucide-graduation-cap class="w-10 h-10" />
                 </div>
                 <h3 class="text-xl font-bold text-jti-primary mb-4 uppercase tracking-wider">Expert Faculty</h3>
                 <p class="text-gray-500 text-sm leading-relaxed">
@@ -35,7 +35,7 @@
                  data-aos="zoom-in-up"
                  data-aos-delay="600">
                 <div class="w-20 h-20 bg-jti-light rounded-full flex items-center justify-center mx-auto mb-8 text-jti-yellow group-hover:bg-jti-yellow group-hover:text-jti-primary transition-colors">
-                    <i data-lucide="building-2" class="w-10 h-10"></i>
+                    <x-lucide-building-2 class="w-10 h-10" />
                 </div>
                 <h3 class="text-xl font-bold text-jti-primary mb-4 uppercase tracking-wider">Modern Facilities</h3>
                 <p class="text-gray-500 text-sm leading-relaxed">
@@ -48,7 +48,7 @@
                  data-aos="zoom-in-up"
                  data-aos-delay="800">
                 <div class="w-20 h-20 bg-jti-light rounded-full flex items-center justify-center mx-auto mb-8 text-jti-yellow group-hover:bg-jti-yellow group-hover:text-jti-primary transition-colors">
-                    <i data-lucide="network" class="w-10 h-10"></i>
+                    <x-lucide-network class="w-10 h-10" />
                 </div>
                 <h3 class="text-xl font-bold text-jti-primary mb-4 uppercase tracking-wider">Industry Connections</h3>
                 <p class="text-gray-500 text-sm leading-relaxed">

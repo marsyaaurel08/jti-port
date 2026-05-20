@@ -5,7 +5,9 @@ namespace App\Livewire;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -33,6 +35,14 @@ class StudentOrders extends Component
     public array $transferMethods;
 
     public array $transferInstructions;
+
+    // Untuk custom payment modal
+    public bool $showCustomPaymentModal = false;
+    public ?array $paymentModalData = null;
+    public bool $isPaid = false;
+    public ?string $externalId = null;
+    public int $successCountdown = 0;
+    public float $totalAmount = 0;
 
     // Cache configuration
     private const CACHE_TTL_MINUTES = 10; // sesuaikan kebutuhan (5-15 menit biasanya cukup)
@@ -68,11 +78,11 @@ class StudentOrders extends Component
             ->get();
     }
 
-    public function getTransferInstructions(?string $transferMethod = null): array
+    public function getTransferInstructions(string $transferMethod): array
     {
-        $method = $transferMethod ?? 'bni_mobile';
+        $instructions = $this->transferInstructions;
 
-        return $this->transferInstructions[$method] ?? [];
+        return $instructions[$transferMethod] ?? [];
     }
 
     // public function viewVAInstructions($orderId): void
@@ -138,7 +148,7 @@ class StudentOrders extends Component
         $this->validate();
 
         try {
-            $filename = 'proof_'.$this->selectedOrder->id.'_'.now()->timestamp.'.'.$this->paymentProof->extension();
+            $filename = 'proof_' . $this->selectedOrder->id . '_' . now()->timestamp . '.' . $this->paymentProof->extension();
 
             $path = $this->paymentProof->storeAs('payments/proof', $filename, 'public');
 
@@ -148,7 +158,7 @@ class StudentOrders extends Component
 
             $this->closeProofUpload();
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal mengupload bukti pembayaran: '.$e->getMessage());
+            session()->flash('error', 'Gagal mengupload bukti pembayaran: ' . $e->getMessage());
         }
     }
 
@@ -171,8 +181,69 @@ class StudentOrders extends Component
 
             session()->flash('success', 'Order berhasil dibatalkan');
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal membatalkan order: '.$e->getMessage());
+            session()->flash('error', 'Gagal membatalkan order: ' . $e->getMessage());
         }
+    }
+    public function openPaymentModal($orderId): void
+    {
+        $order = Order::findOrFail($orderId);
+        $this->paymentModalData = is_string($order->payment_response)
+            ? json_decode($order->payment_response, true)
+            : $order->payment_response;
+        $this->totalAmount = $order->subtotal;
+        $this->paymentModalData['instructions'] = $this->getTransferInstructions($order->payment_method);
+        $this->externalId = $order->external_id;
+
+        Log::info('Opening payment modal for order ID: ' . $orderId, ['payment_response' => $this->paymentModalData]);
+
+        $this->showCustomPaymentModal = true;
+    }
+    public function checkPaymentStatus(): void
+    {
+        if (empty($this->externalId)) return;
+
+        $service = new \App\Services\Payment\MidtransService();
+        $status = $service->checkTransactionStatus($this->externalId);
+
+        // === PEMBAYARAN BERHASIL ===
+        if ($status['is_paid'] ?? false) {
+            $this->isPaid = true;
+
+            // Mulai countdown sebelum redirect
+            $this->successCountdown = 5;        // Detik (bisa diubah)
+            $this->dispatch('payment-success-countdown');
+
+            // Tidak langsung close modal, biarkan countdown berjalan
+            return;
+        }
+
+        // === KEDALUWARSA / DIBATALKAN ===
+        if ($status['is_expired'] ?? false || $status['is_cancelled'] ?? false) {
+            $this->showCustomPaymentModal = false;
+            session()->flash('error', 'Pembayaran kedaluwarsa atau dibatalkan.');
+            $this->redirect(route('student.orders'), navigate: true);
+        }
+    }
+
+    #[On('payment-success-countdown')]
+    public function startSuccessCountdown(): void
+    {
+        // Jika countdown masih ada, jalankan redirect setelah jeda waktu habis
+        if ($this->successCountdown <= 0) {
+            $this->showCustomPaymentModal = false;
+            $this->redirect(route('student.orders'), navigate: true);
+            return;
+        }
+
+        // Kurangi 1 detik setiap kali di-poll oleh Blade
+        $this->successCountdown--;
+    }
+
+    public function closePaymentModal(): void
+    {
+        $this->showCustomPaymentModal = false;
+        $this->reset(['paymentModalData', 'isPaid', 'successCountdown']);
+        $this->redirect(route('student.orders'), navigate: true);
     }
 
     public function viewProof($orderId): void
@@ -195,7 +266,7 @@ class StudentOrders extends Component
             $this->selectedOrder = $order;
             $this->showProofView = true;
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal membuka bukti pembayaran: '.$e->getMessage());
+            session()->flash('error', 'Gagal membuka bukti pembayaran: ' . $e->getMessage());
         }
     }
 
@@ -216,11 +287,10 @@ class StudentOrders extends Component
         $order->refresh();
 
         if (in_array($order->status, ['paid', 'success', 'settlement'])) {
-            session()->flash('success', 'Terima kasih! Pembayaran untuk Invoice '.$order->invoice_number.' telah berhasil dikonfirmasi.');
+            session()->flash('success', 'Terima kasih! Pembayaran untuk Invoice ' . $order->invoice_number . ' telah berhasil dikonfirmasi.');
         } else {
             session()->flash('info', 'Sistem sedang memverifikasi pembayaran Anda. Status akan diperbarui secara otomatis dalam beberapa saat.');
         }
-
     }
 
     public function render()

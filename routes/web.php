@@ -1,10 +1,21 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialiteController;
-use App\Http\Controllers\{CartController, ClassesController, CourseController, EnrollmentController, HomeController, PaymentController, StudentController};
-use App\Http\Controllers\Payment\WebhookController;
-use App\Livewire\{StudentCart, StudentLesson, StudentOrders, StudentClassCheckout, StudentClassLesson, StudentCourseCheckout, StudentProfile, StudentTransactions};
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\ClassesController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PaymentStatusController;
+use App\Http\Controllers\StudentController;
+use App\Livewire\StudentCart;
+use App\Livewire\StudentClassCheckout;
+use App\Livewire\StudentClassLesson;
+use App\Livewire\StudentCourseCheckout;
+use App\Livewire\StudentLesson;
+use App\Livewire\StudentOrders;
+use App\Livewire\StudentProfile;
+use App\Livewire\StudentTransactions;
 use Illuminate\Support\Facades\Route;
 
 // --- Public Routes ---
@@ -70,7 +81,7 @@ Route::middleware(['auth', 'verified', 'non-admin'])->prefix('student')->name('s
     // Transaksi
     Route::get('/transactions', StudentTransactions::class)->name('transactions');
 
-    //Quiz Attempt
+    // Quiz Attempt
     Route::get('/quiz/attempt/{id}', function ($id) {
         return view('pages.quiz-attempt-page', ['quizId' => $id]);
     })->name('quiz.attempt');
@@ -84,13 +95,16 @@ Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect']
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('socialite.callback');
 Route::delete('/auth/{provider}/unlink', [SocialiteController::class, 'unlink'])->middleware('auth')->name('socialite.unlink');
 
-
 // ============================================================
 // Midtrans Finish / Error / Unfinish (Redirect dari Snap)
 // ============================================================
 
 Route::prefix('payment')->name('payment.')->group(function () {
-    Route::get('/finish',   fn () => redirect()->route('student.orders'))->name('finish');
+    Route::get('/finish', fn () => redirect()->route('student.orders'))->name('finish');
     Route::get('/unfinish', fn () => redirect()->route('student.orders'))->name('unfinish');
-    Route::get('/error',    fn () => redirect()->route('student.orders'))->name('error');
+    Route::get('/error', fn () => redirect()->route('student.orders'))->name('error');
 });
+
+Route::get('/payment/check-status/{externalId}', [PaymentStatusController::class, 'check'])
+    ->middleware('auth')
+    ->name('payment.check-status');

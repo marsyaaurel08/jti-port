@@ -14,192 +14,179 @@ return [
     */
 
     'instructions' => [
-        // ==================== BNI ====================
-        'bni_mobile' => [
-            '1. Buka aplikasi BNI Mobile Banking',
-            '2. Masuk dengan nomor rekening dan password',
-            '3. Pilih menu "Transfer" > "Ke Bank Lain"',
-            '4. Masukkan nomor VA dan nominal yang tertera',
-            '5. Verifikasi data transfer',
-            '6. Masukkan PIN atau biometric untuk konfirmasi',
-            '7. Transfer berhasil, cek status akun Anda',
-        ],
-        'bni_atm' => [
-            '1. Masukkan kartu ATM BNI ke mesin ATM',
-            '2. Masukkan PIN ATM Anda',
-            '3. Pilih menu "Transfer"',
-            '4. Pilih "Transfer ke Bank Lain"',
-            '5. Masukkan kode bank tujuan dan nomor VA',
-            '6. Masukkan nominal sesuai yang ditampilkan',
-            '7. Verifikasi dan konfirmkan transaksi',
-            '8. Ambil bukti transfer (struk)',
-        ],
-        'bni_internet' => [
-            '1. Buka website https://ibank.bni.co.id',
-            '2. Login dengan user ID dan password',
-            '3. Masuk ke menu "Transfer" > "Domestic"',
-            '4. Pilih "To Other Bank"',
-            '5. Isi nomor VA dan nominal pembayaran',
-            '6. Review data transfer dengan teliti',
-            '7. Verifikasi dengan token BNI atau mPIN',
-            '8. Proses transfer selesai',
-        ],
-
-        // ==================== BCA ====================
-        'bca_mobile' => [
-            '1. Buka aplikasi BCA Mobile atau M-BCA',
-            '2. Login dengan username dan password',
-            '3. Tap menu "m-Transfer"',
-            '4. Pilih "Ke Bank Lain"',
-            '5. Masukkan nomor VA penerima',
-            '6. Verifikasi data, masukkan nominal',
-            '7. Review rincian transfer',
-            '8. Masukkan PIN atau gunakan biometric',
-            '9. Transfer berhasil',
-        ],
-        'bca_atm' => [
-            '1. Masukkan kartu ATM BCA ke mesin',
-            '2. Pilih bahasa yang diinginkan',
-            '3. Masukkan PIN ATM Anda',
-            '4. Pilih "Transaksi Lain"',
-            '5. Pilih "Transfer ke Bank Lain"',
-            '6. Pilih "Input Rekening Tujuan"',
-            '7. Masukkan nomor VA dan nominal',
-            '8. Konfirmasi dan selesaikan transaksi',
-        ],
-        'bca_internet' => [
-            '1. Buka website https://www.klikbca.com',
-            '2. Login dengan user ID dan password',
-            '3. Pilih "Pembayaran" > "Transfer Dana"',
-            '4. Pilih "Ke Bank Lain (RTGS/SKN)"',
-            '5. Input nomor VA dan data transfer',
-            '6. Masukkan nominal sesuai yang ditampilkan',
-            '7. Review kembali data transfer',
-            '8. Verifikasi dengan Challenge dari SMS',
-            '9. Transaksi berhasil',
+        // Bank BNI
+        'bni_va' => [
+            'ATM' => [
+                'Pilih menu lainnya pada menu utama.',
+                'Pilih transfer.',
+                'Pilih ke rekening BNI.',
+                'Masukkan nomor Virtual Account.',
+                'Masukkan nominal pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ],
+            'Internet Banking' => [
+                'Pilih transaksi, lalu info administrasi transfer.',
+                'Pilih atur rekening tujuan.',
+                'Masukkan info rekening, lalu Konfirmasi.',
+                'Pilih transfer, lalu transfer ke rekening BNI.',
+                'Masukkan detail pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ],
+            'Mobile Banking' => [
+                'Pilih transfer.',
+                'Pilih tagihan Virtual Account.',
+                'Pilih rekening debit yang ingin Anda gunakan.',
+                'Masukkan nomor Virtual Account, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ],
+            'Melalui bank lain' => [
+                'Pilih bank & saluran pembayaran pilihan Anda (ATM/internet/mobile banking).',
+                'Pilih transfer ke bank lain.',
+                'Masukkan nomor Virtual Account BNI.',
+                'Masukkan nominal pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ]
         ],
 
-        // ==================== MANDIRI ====================
-        'mandiri_mobile' => [
-            '1. Buka aplikasi Livin\' Mandiri',
-            '2. Login dengan user ID dan password',
-            '3. Navigasi ke "Transfer"',
-            '4. Pilih "Transfer ke Bank Lain"',
-            '5. Masukkan nomor VA dan nominal',
-            '6. Verifikasi penerima dana',
-            '7. Masukkan 6 digit PIN Livin\'',
-            '8. Konfirmasi final transfer',
-            '9. Transfer selesai, cek status transaksi',
-        ],
-        'mandiri_atm' => [
-            '1. Masukkan kartu ATM Mandiri ke mesin',
-            '2. Masukkan PIN ATM Anda',
-            '3. Pilih "Transaksi Lainnya"',
-            '4. Pilih "Transfer"',
-            '5. Pilih "Ke Bank Lain"',
-            '6. Input nomor rekening tujuan (VA)',
-            '7. Masukkan jumlah transfer',
-            '8. Konfirmasi dan masukkan PIN',
-            '9. Transaksi berhasil',
-        ],
-
-        // ==================== BRI ====================
-        'bri_mobile' => [
-            '1. Buka aplikasi BRImo',
-            '2. Login dengan username dan PIN',
-            '3. Pilih "Transfer"',
-            '4. Pilih "Transfer ke Rekening Bank Lain"',
-            '5. Masukkan nomor VA penerima',
-            '6. Masukkan nominal transfer',
-            '7. Verifikasi detail transaksi',
-            '8. Masukkan PIN BRImo Anda',
-            '9. Transfer berhasil',
-        ],
-        'bri_atm' => [
-            '1. Masukkan kartu ATM BRI ke mesin',
-            '2. Masukkan PIN ATM Anda',
-            '3. Pilih "MENU UTAMA"',
-            '4. Pilih "TRANSFER"',
-            '5. Pilih "Ke Bank Lain"',
-            '6. Masukkan nomor VA dan nominal',
-            '7. Konfirmasi data transfer',
-            '8. Masukkan PIN untuk final',
-            '9. Ambil struk bukti transfer',
+        // Bank BCA
+        'bca_va' => [
+            'ATM' => [
+                'Pilih Transaksi Lainnya pada menu utama.',
+                'Pilih Transfer.',
+                'Pilih ke Rekening BCA Virtual Account.',
+                'Masukkan nomor Virtual Account.',
+                'Masukkan nominal pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ],
+            'Internet Banking (KlikBCA)' => [
+                'Pilih Transfer Dana.',
+                'Pilih Transfer ke BCA Virtual Account.',
+                'Masukkan nomor Virtual Account.',
+                'Masukkan nominal pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ],
+            'Mobile Banking (BCA Mobile)' => [
+                'Pilih m-Transfer.',
+                'Pilih BCA Virtual Account.',
+                'Masukkan nomor Virtual Account, lalu konfirmasi.',
+                'Masukkan PIN m-BCA Anda.',
+                'Pembayaran selesai.'
+            ],
+            'Melalui bank lain' => [
+                'Pilih bank & saluran pembayaran pilihan Anda (ATM/internet/mobile banking).',
+                'Pilih transfer ke bank lain.',
+                'Masukkan nomor Virtual Account BCA.',
+                'Masukkan nominal pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ]
         ],
 
-        // ==================== CIMB Niaga ====================
-        'cimb_mobile' => [
-            '1. Buka aplikasi CIMB Niaga Mobile atau OCTO Mobile',
-            '2. Login dengan user ID dan PIN',
-            '3. Pilih menu "Transfer"',
-            '4. Pilih "Transfer ke Bank Lain"',
-            '5. Masukkan nomor VA tujuan',
-            '6. Masukkan nominal pembayaran',
-            '7. Verifikasi data transfer',
-            '8. Masukkan PIN atau biometric',
-            '9. Transfer berhasil',
-        ],
-        'cimb_atm' => [
-            '1. Masukkan kartu ATM CIMB Niaga ke mesin',
-            '2. Masukkan PIN ATM',
-            '3. Pilih "Transfer"',
-            '4. Pilih "Ke Bank Lain"',
-            '5. Masukkan nomor VA',
-            '6. Masukkan nominal',
-            '7. Konfirmasi dan selesaikan',
-        ],
-
-        // ==================== DANAMON ====================
-        'danamon_mobile' => [
-            '1. Buka aplikasi D-Mobile',
-            '2. Login dengan user ID dan password',
-            '3. Pilih menu "Transfer"',
-            '4. Pilih "Transfer ke Bank Lain"',
-            '5. Masukkan nomor VA',
-            '6. Masukkan nominal transfer',
-            '7. Verifikasi dan konfirmasi',
-            '8. Masukkan PIN transaksi',
-            '9. Transfer selesai',
-        ],
-
-        // ==================== PERMATA ====================
-        'permata_mobile' => [
-            '1. Buka aplikasi PermataMobile X',
-            '2. Login dengan PIN',
-            '3. Pilih "Transfer"',
-            '4. Pilih "Transfer ke Bank Lain"',
-            '5. Masukkan nomor VA',
-            '6. Masukkan nominal',
-            '7. Konfirmasi transaksi',
-            '8. Masukkan mPIN',
-            '9. Transfer berhasil',
+        // Bank Mandiri (E-Channel) - Menggunakan Biller Code & Bill Key
+        'echannel' => [
+            'ATM' => [
+                'Pilih Bayar/Beli pada menu utama.',
+                'Pilih Lainnya, lalu pilih Multi Payment.',
+                'Masukkan Kode Perusahaan (Biller Code).',
+                'Masukkan No. VA (Bill Key).',
+                'Konfirmasi pembayaran.',
+                'Pembayaran selesai.'
+            ],
+            'Internet Banking' => [
+                'Login ke Internet Banking Mandiri.',
+                'Pilih menu Bayar, lalu pilih Multi Payment.',
+                'Pilih penyedia jasa dan masukkan No. VA (Bill Key).',
+                'Konfirmasi detail pembayaran.',
+                'Pembayaran selesai.'
+            ],
+            'Mobile Banking (Livin\')' => [
+                'Login ke aplikasi Livin\' by Mandiri.',
+                'Pilih menu Bayar.',
+                'Cari penyedia jasa (Biller Code) atau pilih Multi Payment.',
+                'Masukkan No. VA (Bill Key) dan nominal.',
+                'Konfirmasi dengan PIN Anda.',
+                'Pembayaran selesai.'
+            ],
+            'Melalui bank lain' => [
+                'Pilih bank & saluran pembayaran pilihan Anda.',
+                'Pilih transfer ke bank lain (Mandiri).',
+                'Masukkan nomor Virtual Account Mandiri.',
+                'Masukkan nominal pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ]
         ],
 
-        // ==================== INDOMARET (Over the Counter) ====================
+        // Bank BRI
+        'bri_va' => [
+            'ATM' => [
+                'Pilih Transaksi Lain pada menu utama.',
+                'Pilih Pembayaran, lalu pilih Lainnya.',
+                'Pilih BRIVA.',
+                'Masukkan nomor BRIVA (Virtual Account).',
+                'Konfirmasi pembayaran Anda.',
+                'Pembayaran selesai.'
+            ],
+            'Internet Banking' => [
+                'Login ke Internet Banking BRI.',
+                'Pilih menu Pembayaran & Pembelian.',
+                'Pilih BRIVA.',
+                'Masukkan nomor BRIVA, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ],
+            'Mobile Banking (BRImo)' => [
+                'Login ke aplikasi BRImo.',
+                'Pilih menu BRIVA.',
+                'Masukkan nomor BRIVA (Virtual Account).',
+                'Konfirmasi detail dan masukkan PIN Anda.',
+                'Pembayaran selesai.'
+            ],
+            'Melalui bank lain' => [
+                'Pilih bank & saluran pembayaran pilihan Anda.',
+                'Pilih transfer ke bank lain (BRI).',
+                'Masukkan nomor Virtual Account BRI.',
+                'Masukkan nominal pembayaran, lalu konfirmasi.',
+                'Pembayaran selesai.'
+            ]
+        ],
+
+        // Retail: Indomaret
         'indomaret' => [
-            '1. Datang ke gerai Indomaret terdekat',
-            '2. Sampaikan kepada kasir bahwa Anda ingin membayar tagihan / pesanan online',
-            '3. Sebutkan kode pembayaran / nomor VA yang tertera di halaman ini',
-            '4. Kasir akan memasukkan kode pembayaran ke sistem',
-            '5. Kasir akan menyebutkan nominal yang harus dibayar',
-            '6. Lakukan pembayaran tunai sesuai nominal',
-            '7. Kasir akan memproses pembayaran dan memberikan struk',
-            '8. Simpan struk sebagai bukti pembayaran',
-            '9. Upload bukti pembayaran (foto struk) ke halaman ini',
+            'Ketuk "Unduh info ini" atau simpan kode pembayaran Anda.',
+            'Kunjungi gerai Indomaret terdekat dan tunjukkan kode pembayaran/barcode Anda kepada kasir.',
+            'Kasir akan mengonfirmasi detail transaksi Anda.',
+            'Lakukan pembayaran tunai atau non-tunai kepada kasir.',
+            'Setelah transaksi berhasil, Anda akan menerima email/notifikasi konfirmasi pembayaran.',
+            'Harap simpan struk pembayaran Anda sebagai bukti jika memerlukan bantuan lebih lanjut.'
         ],
 
-        // ==================== ALFAMART ====================
+        // Retail: Alfamart
         'alfamart' => [
-            '1. Datang ke gerai Alfamart terdekat',
-            '2. Sampaikan ke kasir bahwa ingin membayar pesanan online',
-            '3. Berikan kode pembayaran / nomor VA yang tertera',
-            '4. Kasir akan memindai atau memasukkan kode',
-            '5. Konfirmasi nominal pembayaran ke kasir',
-            '6. Lakukan pembayaran tunai',
-            '7. Kasir akan memberikan struk setelah pembayaran berhasil',
-            '8. Pastikan status pada struk "LUNAS" atau "SUCCESS"',
-            '9. Upload foto struk sebagai bukti pembayaran',
+            'Ketuk "Unduh info ini" atau simpan kode pembayaran Anda.',
+            'Kunjungi gerai Alfamart terdekat dan tunjukkan kode pembayaran/barcode Anda kepada kasir.',
+            'Kasir akan mengonfirmasi detail transaksi Anda.',
+            'Lakukan pembayaran tunai atau non-tunai kepada kasir.',
+            'Setelah transaksi berhasil, Anda akan menerima email/notifikasi konfirmasi pembayaran.',
+            'Harap simpan struk pembayaran Anda sebagai bukti jika memerlukan bantuan lebih lanjut.'
         ],
+
+        // E-Wallet: GoPay
+        'gopay' => [
+            'Buka aplikasi Gojek atau aplikasi e-wallet pendukung lainnya.',
+            'Pilih menu Bayar / Scan.',
+            'Scan QRIS yang muncul pada layar monitor Anda atau gunakan deeplink jika dari ponsel.',
+            'Periksa kembali nominal pembayaran pada aplikasi.',
+            'Konfirmasi pembayaran dengan PIN GoPay Anda.',
+            'Pembayaran selesai.'
+        ],
+
+        // E-Wallet: ShopeePay
+        'shopeepay' => [
+            'Buka aplikasi Shopee.',
+            'Pilih ikon scan/bayar pada menu ShopeePay.',
+            'Scan QRIS yang muncul pada layar monitor Anda atau gunakan deeplink jika dari ponsel.',
+            'Periksa kembali nominal pembayaran pada aplikasi.',
+            'Konfirmasi pembayaran dengan PIN ShopeePay Anda.',
+            'Pembayaran selesai.'
+        ]
     ],
 
     /*
@@ -219,7 +206,7 @@ return [
             'type' => 'virtual_account',
             'description' => 'Transfer via BNI Mobile, Internet Banking, atau ATM',
             'logo' => 'icons/bni.png',
-            ],
+        ],
 
         // Bank BCA
         'bca_va' => [
@@ -228,7 +215,7 @@ return [
             'type' => 'virtual_account',
             'description' => 'Transfer via BCA Mobile, KlikBCA, atau ATM BCA',
             'logo' => 'icons/bca.png',
-            ],
+        ],
 
         // Bank Mandiri (Midtrans menggunakan key 'echannel' untuk Mandiri Bill)
         'echannel' => [
@@ -237,7 +224,7 @@ return [
             'type' => 'virtual_account',
             'description' => 'Transfer via Livin\' by Mandiri, Internet Banking, atau ATM',
             'logo' => 'icons/mandiri.png',
-            ],
+        ],
 
         // Bank BRI
         'bri_va' => [
@@ -246,7 +233,7 @@ return [
             'type' => 'virtual_account',
             'description' => 'Transfer via aplikasi BRImo, Internet Banking, atau ATM',
             'logo' => 'icons/bri.png',
-            ],
+        ],
 
         // Retail / Minimarket (Key sudah sesuai standar Midtrans)
         'indomaret' => [
@@ -255,14 +242,14 @@ return [
             'type' => 'retail',
             'description' => 'Bayar tunai di gerai Indomaret terdekat',
             'logo' => 'icons/indomaret.png',
-            ],
+        ],
         'alfamart' => [
             'name' => 'Alfamart',
             'bank' => null,
             'type' => 'retail',
             'description' => 'Bayar tunai di gerai Alfamart terdekat',
             'logo' => 'icons/alfamart.png',
-            ],
+        ],
 
         // Opsional: E-Wallet (Sangat disarankan untuk ditambahkan)
         'gopay' => [
@@ -271,13 +258,13 @@ return [
             'type' => 'e_wallet',
             'description' => 'Bayar instan menggunakan saldo GoPay',
             'logo' => 'icons/gopay.png',
-            ],
+        ],
         'shopeepay' => [
             'name' => 'ShopeePay',
             'bank' => null,
             'type' => 'e_wallet',
             'description' => 'Bayar instan menggunakan saldo ShopeePay',
             'logo' => 'icons/spay.png',
-            ],
+        ],
     ],
 ];

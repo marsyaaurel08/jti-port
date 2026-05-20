@@ -15,10 +15,10 @@ html {
         "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system,
         BlinkMacSystemFont;
 
-    --color-jti-primary: #0B1B43; /* Navy / Dark Navy Blue */
-    --color-jti-maroon: #9A3733; /* Maroon / Dark Maroon / Merah Bata Tua */
-    --color-jti-orange: #F05424; /* Orange / Bright Coral / Merah Jeruk Terang */
-    --color-jti-yellow: #FEC115; /* Yellow / Amber / Kuning Emas (Bootstrap warning) */
+    --color-jti-primary: #0b1b43; /* Navy / Dark Navy Blue */
+    --color-jti-maroon: #9a3733; /* Maroon / Dark Maroon / Merah Bata Tua */
+    --color-jti-orange: #f05424; /* Orange / Bright Coral / Merah Jeruk Terang */
+    --color-jti-yellow: #fec115; /* Yellow / Amber / Kuning Emas (Bootstrap warning) */
     --color-jti-light: #f8f9fa; /* Light Gray / Off-White / Abu-abu sangat terang */
 }
 @layer base {
@@ -39,4 +39,19 @@ html {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

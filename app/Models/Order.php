@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
@@ -30,6 +31,7 @@ class Order extends Model
         'paid_at',
         'last_inquiry_at',
         'inquiry_count',
+        'payment_response',
     ];
 
     protected function casts(): array
@@ -174,5 +176,23 @@ class Order extends Model
         }
 
         return null;
+    }
+
+    // ... existing code ...
+
+    /**
+     * Get all items for this order
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Optional: untuk akses item pertama (karena ini single course checkout)
+     */
+    public function item(): HasOne
+    {
+        return $this->hasOne(OrderItem::class);
     }
 }
