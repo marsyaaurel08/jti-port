@@ -382,9 +382,10 @@ class StudentClassCheckout extends Component
             // Buat Order Item
             OrderItem::create([
                 'order_id'          => $order->id,
-                'course_id'         => $this->course->id,
+                'course_id'         => $this->class->course_id,
+                'class_id'          => $this->class->id,
                 'price_at_purchase' => $this->getTotalAmount(),
-                'item_name'         => $this->course->title,
+                'item_name'         => $this->class->title,
             ]);
 
             DB::commit();
