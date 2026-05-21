@@ -197,7 +197,6 @@ docker compose up -d worker
 
 # =====================================================================
 # 6. SYNC PUBLIC ASSETS KE SHARED VOLUME
-# Ganti cp via host (rapuh) → sync langsung ke volume app_public
 # =====================================================================
 
 echo -e "${YELLOW}📦 Copying public assets to nginx...${NC}"
@@ -207,15 +206,29 @@ TEMP_PUBLIC_DIR="/tmp/jtiport_public_$TIMESTAMP"
 # --entrypoint sh agar tidak trigger wait-for-db
 docker run --rm \
     --entrypoint sh \
-    -v $TEMP_PUBLIC_DIR:/target \
-    $DOCKER_IMAGE \
+    -v "$TEMP_PUBLIC_DIR:/target" \
+    "$DOCKER_IMAGE" \
     -c "cp -a /var/www/html/public/. /target/ && chown -R $(id -u):$(id -g) /target/"
 
-if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A $TEMP_PUBLIC_DIR)" ]; then
-    docker exec ${PROJECT_NAME}_nginx rm -rf /var/www/html/public
+if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A "$TEMP_PUBLIC_DIR")" ]; then
+
+    # 1. Hapus symlink 'storage' dari temp folder agar tidak ikut tercopy
+    # dan menimpa symlink storage yang sudah ada di Nginx
+    rm -rf "$TEMP_PUBLIC_DIR/storage"
+
     docker exec ${PROJECT_NAME}_nginx mkdir -p /var/www/html/public
-    docker cp $TEMP_PUBLIC_DIR/. ${PROJECT_NAME}_nginx:/var/www/html/public/
-    rm -rf $TEMP_PUBLIC_DIR
+
+    # 2. Hapus isi folder public lama di Nginx KECUALI folder/symlink 'storage'.
+    # Ini mencegah error "Read-only file system" yang terjadi akibat menghapus isi Docker Volume.
+    docker exec ${PROJECT_NAME}_nginx sh -c 'cd /var/www/html/public && ls -A | grep -v "^storage$" | xargs -r rm -rf'
+
+    # 3. Copy asset yang baru (js, css, index.php, dll) ke Nginx
+    docker cp "$TEMP_PUBLIC_DIR/." "${PROJECT_NAME}_nginx:/var/www/html/public/"
+
+    # 4. Pastikan symlink storage tetap ada dan terhubung dengan benar
+    docker exec ${PROJECT_NAME}_nginx sh -c '[ ! -e /var/www/html/public/storage ] && ln -s /var/www/html/storage/app/public /var/www/html/public/storage || true'
+
+    rm -rf "$TEMP_PUBLIC_DIR"
 
     if docker exec ${PROJECT_NAME}_nginx test -f /var/www/html/public/index.php; then
         echo -e "${GREEN}✓ Public assets copied to nginx${NC}"
@@ -230,7 +243,6 @@ fi
 
 docker exec ${PROJECT_NAME}_nginx nginx -s reload 2>/dev/null || true
 echo -e "${GREEN}✓ Nginx reloaded${NC}"
-
 # =====================================================================
 # 7. CLEANUP OLD IMAGES
 # =====================================================================
