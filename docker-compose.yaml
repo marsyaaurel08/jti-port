@@ -78,3 +78,4 @@ volumes:
     name: jtiport_app_storage
   app_public:
     name: jtiport_app_public
+    external: true 
