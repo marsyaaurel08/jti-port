@@ -31,7 +31,7 @@ class StudentProfile extends Component
 
     public $password = '';
 
-    public $passwordConfirmation = '';
+    public $password_confirmation = '';
 
     public function mount(): void
     {
@@ -46,7 +46,7 @@ class StudentProfile extends Component
     {
         $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.Auth::id()],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::id()],
             'bio' => ['nullable', 'string', 'max:500'],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'avatar' => ['nullable', 'image', 'max:2048'],
@@ -73,19 +73,28 @@ class StudentProfile extends Component
 
     public function updatePassword(): void
     {
+        // 1. Validasi awal untuk input wajib dan password saat ini
         $this->validate([
             'currentPassword' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => ['required', Password::defaults()],
         ], [
             'currentPassword.current_password' => 'Password saat ini tidak sesuai.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
+        // 2. Pengecekan Manual Konfirmasi Password (Aman & Akurat)
+        // Kita bandingkan langsung properti $password dengan $password_confirmation
+        if ($this->password !== $this->password_confirmation) {
+            $this->addError('password', 'Konfirmasi password tidak cocok.');
+            return; // Hentikan proses jika tidak sama
+        }
+
+        // 3. Jika lolos semua pengecekan, lakukan update ke database
         $this->user->update([
-            'password' => bcrypt($this->password),
+            'password' => bcrypt($this->password), // Tetap menggunakan bcrypt aman
         ]);
 
-        $this->reset(['currentPassword', 'password', 'passwordConfirmation']);
+        // 4. Reset form dan beri notifikasi sukses
+        $this->reset(['currentPassword', 'password', 'password_confirmation']);
         session()->flash('success', 'Password berhasil diubah!');
     }
 
