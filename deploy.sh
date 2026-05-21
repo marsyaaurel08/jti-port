@@ -59,7 +59,7 @@ fi
 # Start DB dan Redis saja — nginx menyusul setelah container app siap
 if ! docker ps | grep -q "${PROJECT_NAME}_mysql"; then
     echo -e "${YELLOW}🏗️ Starting infrastructure (DB, Redis)...${NC}"
-    docker-compose up -d db redis
+    docker compose up -d db redis
     echo -e "${YELLOW}⏳ Waiting for DB to be ready...${NC}"
     sleep 10
 fi
@@ -175,7 +175,7 @@ else
     echo -e "${YELLOW}🚀 Starting Nginx for the first time...${NC}"
     # FIX: Nginx baru start di sini setelah container app sudah ready,
     #      sehingga DNS untuk $NEW_NAME sudah bisa di-resolve.
-    docker-compose up -d nginx
+    docker compose up -d nginx
 
     # Tunggu sampai state container benar-benar running untuk hindari false negative
     for i in $(seq 1 15); do
@@ -210,7 +210,7 @@ fi
 
 # Restart/Update worker
 echo -e "${YELLOW}⚙️ Starting/Updating queue worker...${NC}"
-docker-compose up -d worker
+docker compose up -d worker
 
 # =====================================================================
 # 6. COPY PUBLIC ASSETS TO NGINX
