@@ -209,7 +209,7 @@ docker run --rm \
     --entrypoint sh \
     -v $TEMP_PUBLIC_DIR:/target \
     $DOCKER_IMAGE \
-    -c "cp -a /var/www/html/public/. /target/"
+    -c "cp -a /var/www/html/public/. /target/ && chown -R $(id -u):$(id -g) /target/"
 
 if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A $TEMP_PUBLIC_DIR)" ]; then
     docker exec ${PROJECT_NAME}_nginx rm -rf /var/www/html/public

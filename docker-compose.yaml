@@ -12,6 +12,8 @@ services:
     volumes:
       - "./docker/nginx:/etc/nginx/conf.d"
       - "app_storage:/var/www/html/storage:ro"
+      - "/etc/letsencrypt:/etc/letsencrypt:ro"      # ← SSL dari host
+      - "/var/www/certbot:/var/www/certbot:ro"       # ← certbot challenge
     networks:
       - jtiport_network
 
