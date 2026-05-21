@@ -46,24 +46,19 @@ echo -e "${BLUE}═════════════════════�
 
 # =====================================================================
 # 0. PRE-FLIGHT: NETWORK & INFRA (DB + REDIS ONLY)
-# FIX: Nginx TIDAK distart di sini karena container app belum ada.
-#      Nginx di-start setelah container app pertama ready.
 # =====================================================================
 
-# Pastikan network ada
 if ! docker network inspect $NETWORK_NAME >/dev/null 2>&1; then
     echo -e "${YELLOW}🌐 Creating network: $NETWORK_NAME...${NC}"
     docker network create $NETWORK_NAME
 fi
 
-# Start DB dan Redis saja — nginx menyusul setelah container app siap
 if ! docker ps | grep -q "${PROJECT_NAME}_mysql"; then
     echo -e "${YELLOW}🏗️ Starting infrastructure (DB, Redis)...${NC}"
     docker compose up -d db redis
     echo -e "${YELLOW}⏳ Waiting for DB to be ready...${NC}"
     sleep 10
 fi
-
 
 # =====================================================================
 # 1. DETECT TARGET (STATE TRACKING)
@@ -105,7 +100,6 @@ echo -e "${YELLOW}🧹 Removing old $NEW_NAME if exists...${NC}"
 docker rm -f $NEW_NAME 2>/dev/null || true
 
 echo -e "${YELLOW}⚙️ Starting $NEW_NAME...${NC}"
-# Default to .env file if it exists, otherwise pass minimal vars
 ENV_OPTS=""
 if [ -f ".env" ]; then
     ENV_OPTS="--env-file .env"
@@ -121,8 +115,11 @@ docker run -d \
   $ENV_OPTS \
   -v app_storage:/var/www/html/storage \
   $DOCKER_IMAGE
+# CATATAN: app_public TIDAK di-mount ke container app (blue/green)
+# karena public/ sudah ada di dalam image. Volume hanya dipakai
+# nginx untuk serve static files — diisi di Step 6.
 
-# Tunggu entrypoint selesai (cek marker file, tanpa spawn PHP process)
+# Tunggu entrypoint selesai
 echo -e "${YELLOW}⏳ Waiting for $NEW_NAME to be ready...${NC}"
 for i in $(seq 1 60); do
     if docker exec $NEW_NAME test -f /tmp/.entrypoint-ready 2>/dev/null; then
@@ -131,7 +128,6 @@ for i in $(seq 1 60); do
     fi
     if [ $i -eq 60 ]; then
         echo -e "${RED}❌ Container $NEW_NAME failed to start in time${NC}"
-        echo -e "${RED}   Container logs:${NC}"
         docker logs $NEW_NAME --tail 20
         exit 1
     fi
@@ -142,26 +138,19 @@ done
 # 3. LARAVEL OPTIMIZATION
 # =====================================================================
 
-# Laravel commands sudah dijalankan di entrypoint (migrate, cache, storage:link).
-# Tidak perlu jalankan ulang untuk hemat RAM di VPS 1GB.
+# Sudah dijalankan di entrypoint (migrate, cache, storage:link).
 
 # =====================================================================
 # 4. NGINX CONFIG & TRAFFIC SWITCH
-# FIX: Gunakan set $backend variable (lazy DNS resolve) agar Nginx
-#      tidak crash saat container belum ada.
-#      Config digenerate ulang setiap deploy, bukan di-sed toggle.
 # =====================================================================
 
 echo -e "${YELLOW}🔄 Updating Nginx config to point to $NEW_NAME...${NC}"
 
-# Hanya ganti nama container aktif, config lain tidak disentuh
 sed -i "s/set \\\$backend \"${PROJECT_NAME}_[a-z]*:9000\";/set \$backend \"${NEW_NAME}:9000\";/" \
     "${NGINX_CONF_DIR}/default.conf"
 
 echo -e "${GREEN}✓ Backend switched to $NEW_NAME${NC}"
 
-# FIX: Start Nginx SETELAH container app ready (first deployment),
-#      atau reload saja kalau Nginx sudah berjalan.
 if is_container_running "${PROJECT_NAME}_nginx"; then
     echo -e "${YELLOW}🔄 Nginx sudah running, test & reload config...${NC}"
     if docker exec ${PROJECT_NAME}_nginx nginx -t >/dev/null 2>&1; then
@@ -173,23 +162,17 @@ if is_container_running "${PROJECT_NAME}_nginx"; then
     fi
 else
     echo -e "${YELLOW}🚀 Starting Nginx for the first time...${NC}"
-    # FIX: Nginx baru start di sini setelah container app sudah ready,
-    #      sehingga DNS untuk $NEW_NAME sudah bisa di-resolve.
     docker compose up -d nginx
-
-    # Tunggu sampai state container benar-benar running untuk hindari false negative
     for i in $(seq 1 15); do
         if is_container_running "${PROJECT_NAME}_nginx"; then
             echo -e "${GREEN}✅ Nginx started. Traffic is on $NEW_NAME${NC}"
             break
         fi
-
         if [ $i -eq 15 ]; then
             echo -e "${RED}❌ Nginx failed to start${NC}"
             docker ps -a --filter "name=${PROJECT_NAME}_nginx"
             exit 1
         fi
-
         sleep 1
     done
 fi
@@ -213,41 +196,43 @@ echo -e "${YELLOW}⚙️ Starting/Updating queue worker...${NC}"
 docker compose up -d worker
 
 # =====================================================================
-# 6. COPY PUBLIC ASSETS TO NGINX
+# 6. SYNC PUBLIC ASSETS KE SHARED VOLUME
+# Ganti cp via host (rapuh) → sync langsung ke volume app_public
 # =====================================================================
 
-echo -e "${YELLOW}📦 Copying public assets to nginx...${NC}"
+echo -e "${YELLOW}📦 Syncing public assets to shared volume...${NC}"
 
-# Create temp directory on host
-TEMP_PUBLIC_DIR="/tmp/jtiport_public_$TIMESTAMP"
-mkdir -p $TEMP_PUBLIC_DIR
+docker run --rm \
+    --volumes-from $NEW_NAME \
+    -v jtiport_app_public:/target \
+    alpine sh -c "cp -a /var/www/html/public/. /target/"
 
-# Copy entire public directory from app container to host
-docker cp $NEW_NAME:/var/www/html/public/. $TEMP_PUBLIC_DIR/ 2>/dev/null || true
-
-if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A $TEMP_PUBLIC_DIR 2>/dev/null)" ]; then
-    # Remove old public in nginx and recreate
-    docker exec jtiport_nginx rm -rf /var/www/html/public 2>/dev/null || true
-    docker exec jtiport_nginx mkdir -p /var/www/html/public
-
-    # Copy from host to nginx container
-    docker cp $TEMP_PUBLIC_DIR/. jtiport_nginx:/var/www/html/public/
-
-    # Cleanup temp directory
-    rm -rf $TEMP_PUBLIC_DIR
-
-    # Verify copy succeeded
-    if docker exec jtiport_nginx test -f /var/www/html/public/index.php; then
-        echo -e "${GREEN}✓ Public assets copied to nginx${NC}"
-        # Reload nginx to pick up new assets
-        docker exec jtiport_nginx nginx -s reload 2>/dev/null || true
-    else
-        echo -e "${RED}❌ Failed to copy public assets to nginx${NC}"
-    fi
+if docker run --rm \
+    -v jtiport_app_public:/check \
+    alpine test -f /check/index.php; then
+    echo -e "${GREEN}✓ Public assets synced to volume${NC}"
 else
-    echo -e "${RED}❌ Failed to copy public directory from $NEW_NAME${NC}"
-    rm -rf $TEMP_PUBLIC_DIR 2>/dev/null || true
+    echo -e "${RED}❌ Failed to sync public assets to volume${NC}"
+    exit 1
 fi
+
+# Reload nginx agar static file terbaru langsung terserve
+docker exec ${PROJECT_NAME}_nginx nginx -s reload 2>/dev/null || true
+echo -e "${GREEN}✓ Nginx reloaded with new assets${NC}"
+
+# =====================================================================
+# 7. CLEANUP OLD IMAGES
+# =====================================================================
+
+echo -e "${YELLOW}🧹 Cleaning up old images...${NC}"
+docker image prune -f
+docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | \
+    grep "${DOCKER_HUB_USERNAME}/jtiport" | \
+    grep -v "$IMAGE_TAG" | \
+    grep -v "latest" | \
+    awk '{print $2}' | \
+    xargs -r docker rmi || true
+echo -e "${GREEN}✓ Old images removed${NC}"
 
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✅ DEPLOYMENT SUCCESSFUL: $NEW_NAME IS ACTIVE${NC}"
