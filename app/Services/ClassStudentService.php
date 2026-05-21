@@ -42,7 +42,7 @@ class ClassStudentService implements ClassStudentContract
             ->where('user_id', $userId)
             ->whereNotNull('class_id')
             ->get();
-            
+
 
         $classes = $enrollments->map(function ($enrollment) {
             return $this->getClassDetailsWithTrashed($enrollment);
@@ -156,11 +156,18 @@ class ClassStudentService implements ClassStudentContract
 
     public function calculateClassProgress(Enrollment $enrollment): int
     {
-        if (! $enrollment->is_completed) {
+        $course = $enrollment->course;
+
+        // Handle case where course might be null
+        if ($course === null) {
             return 0;
         }
 
-        return 100;
+        // Using actual_completed_lesson_count which counts from CourseProgress records (single source of truth)
+        $totalLessons = $course->total_lessons ?? 0;
+        $completedLessons = $enrollment->actual_completed_lesson_count ?? 0;
+
+        return $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
     }
 
     public function getClassStatus(Enrollment $enrollment): string

@@ -66,13 +66,12 @@
 
                 <a href="{{ route($menu['route']) }}"
                     class="group/item flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300
-                   {{ $isActive ? 'bg-jti-yellow/10 text-jti-primary' : 'text-slate-500 hover:bg-slate-50 hover:text-jti-primary' }}">
+       {{ $isActive ? 'bg-jti-yellow/10 text-jti-primary' : 'text-slate-500 hover:bg-slate-50 hover:text-jti-primary' }}">
 
                     <div class="flex items-center gap-3">
-                        {{-- Icon dengan aksen kuning saat aktif --}}
+                        {{-- Menggunakan @svg untuk memanggil komponen secara dinamis tanpa merusak tag HTML --}}
                         <div class="flex items-center justify-center transition-colors">
-                            <i data-lucide="{{ $menu['icon'] }}"
-                                class="w-5 h-5 {{ $isActive ? 'text-jti-yellow fill-jti-yellow/20' : 'text-slate-400 group-hover/item:text-jti-primary' }}"></i>
+                            @svg('lucide-' . $menu['icon'], 'w-5 h-5 ' . ($isActive ? 'text-jti-yellow fill-jti-yellow/20' : 'text-slate-400 group-hover/item:text-jti-primary'))
                         </div>
                         <span class="text-[13.5px] font-medium tracking-tight">{{ $menu['label'] }}</span>
                     </div>

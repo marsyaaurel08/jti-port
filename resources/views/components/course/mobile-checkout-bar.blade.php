@@ -43,7 +43,7 @@
             </button>
 
             {{-- Checkout Button (Primary, Fixed Compact Width) --}}
-            <a href="{{ auth()->check() ? route('student.checkout.class', $course->slug) : route('filament.user.auth.login') }}"
+            <a href="{{ auth()->check() ? route('student.checkout.course', $course->slug) : route('filament.user.auth.login') }}"
                 class="inline-flex items-center justify-center py-3.5 px-6 bg-slate-900 text-white rounded-xl font-bold text-sm transition-all duration-300 active:scale-95 shadow-lg shadow-slate-200 whitespace-nowrap min-w-[140px]">
                 Daftar Sekarang
             </a>
