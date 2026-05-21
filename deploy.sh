@@ -200,25 +200,36 @@ docker compose up -d worker
 # Ganti cp via host (rapuh) → sync langsung ke volume app_public
 # =====================================================================
 
-echo -e "${YELLOW}📦 Syncing public assets to shared volume...${NC}"
+echo -e "${YELLOW}📦 Copying public assets to nginx...${NC}"
 
+TEMP_PUBLIC_DIR="/tmp/jtiport_public_$TIMESTAMP"
+
+# --entrypoint sh agar tidak trigger wait-for-db
 docker run --rm \
-    --volumes-from $NEW_NAME \
-    -v jtiport_app_public:/target \
-    alpine sh -c "cp -a /var/www/html/public/. /target/"
+    --entrypoint sh \
+    -v $TEMP_PUBLIC_DIR:/target \
+    $DOCKER_IMAGE \
+    -c "cp -a /var/www/html/public/. /target/"
 
-if docker run --rm \
-    -v jtiport_app_public:/check \
-    alpine test -f /check/index.php; then
-    echo -e "${GREEN}✓ Public assets synced to volume${NC}"
+if [ -d "$TEMP_PUBLIC_DIR" ] && [ "$(ls -A $TEMP_PUBLIC_DIR)" ]; then
+    docker exec ${PROJECT_NAME}_nginx rm -rf /var/www/html/public
+    docker exec ${PROJECT_NAME}_nginx mkdir -p /var/www/html/public
+    docker cp $TEMP_PUBLIC_DIR/. ${PROJECT_NAME}_nginx:/var/www/html/public/
+    rm -rf $TEMP_PUBLIC_DIR
+
+    if docker exec ${PROJECT_NAME}_nginx test -f /var/www/html/public/index.php; then
+        echo -e "${GREEN}✓ Public assets copied to nginx${NC}"
+    else
+        echo -e "${RED}❌ Failed to copy public assets${NC}"
+        exit 1
+    fi
 else
-    echo -e "${RED}❌ Failed to sync public assets to volume${NC}"
+    echo -e "${RED}❌ Failed to extract public assets from image${NC}"
     exit 1
 fi
 
-# Reload nginx agar static file terbaru langsung terserve
 docker exec ${PROJECT_NAME}_nginx nginx -s reload 2>/dev/null || true
-echo -e "${GREEN}✓ Nginx reloaded with new assets${NC}"
+echo -e "${GREEN}✓ Nginx reloaded${NC}"
 
 # =====================================================================
 # 7. CLEANUP OLD IMAGES
