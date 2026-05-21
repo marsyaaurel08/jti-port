@@ -38,7 +38,7 @@ class Promo extends Model
         ];
     }
 
-    public function products(): HasMany
+    public function promoProducts(): HasMany
     {
         return $this->hasMany(PromoProduct::class);
     }

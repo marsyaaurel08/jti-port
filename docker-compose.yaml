@@ -12,7 +12,8 @@ services:
     volumes:
       - "./docker/nginx:/etc/nginx/conf.d"
       - "app_storage:/var/www/html/storage:ro"
-      - "app_public:/var/www/html/public:ro"
+      - "/etc/letsencrypt:/etc/letsencrypt:ro"      # ← SSL dari host
+      - "/var/www/certbot:/var/www/certbot:ro"       # ← certbot challenge
     networks:
       - jtiport_network
 
@@ -25,7 +26,6 @@ services:
       - .env
     volumes:
       - "app_storage:/var/www/html/storage"
-      - "app_public:/var/www/html/public"
     networks:
       - jtiport_network
     depends_on:
@@ -76,5 +76,3 @@ volumes:
     name: jtiport_dbdata
   app_storage:
     name: jtiport_app_storage
-  app_public:
-    name: jtiport_app_public
