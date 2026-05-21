@@ -13,11 +13,11 @@
                 <div class="space-y-6">
                     <div class="inline-flex items-center gap-2" data-aos="fade-right" data-aos-delay="200">
                         <span class="w-8 h-[2px] bg-jti-yellow"></span>
-                        <span class="text-jti-yellow font-bold text-xs uppercase tracking-[0.3em]">Official JTIPORT</span>
+                        <span class="text-jti-yellow font-bold text-xs uppercase tracking-[0.3em]">{{ setting('cta_badge_text') }}</span>
                     </div>
                     <h2 class="text-4xl md:text-5xl font-black text-white leading-[1.1] uppercase tracking-tighter"
                         data-aos="fade-up" data-aos-delay="400">
-                        Your Future <br> Starts <span class="text-jti-yellow">Here.</span>
+                        {{ setting('cta_title_line_1') }} <br> {{ setting('cta_title_line_2') }} <span class="text-jti-yellow">{{ setting('cta_title_highlight') }}</span>
                     </h2>
                 </div>
 
@@ -27,7 +27,7 @@
                         <path id="ctaCirclePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
                             fill="transparent" />
                         <text class="text-[10px] font-bold uppercase tracking-[2px]">
-                            <textPath xlink:href="#ctaCirclePath">• Jtiport Certification • Join Now •</textPath>
+                            <textPath xlink:href="#ctaCirclePath">{{ setting('cta_rotating_text') }}</textPath>
                         </text>
                     </svg>
                 </div>
@@ -39,23 +39,22 @@
                 <div class="max-w-xl">
                     <h3 class="text-2xl md:text-3xl font-extrabold text-jti-primary mb-6 leading-tight"
                         data-aos="fade-up" data-aos-delay="400">
-                        Siap untuk memulai pelatihan pertama Anda?
+                        {{ setting('cta_heading') }}
                     </h3>
                     <p class="text-gray-500 text-lg leading-relaxed mb-10" data-aos="fade-up" data-aos-delay="500">
-                        Jangan biarkan peluang karir global terlewatkan. Bergabunglah dengan ribuan mahasiswa lainnya di
-                        platform **Jtiport** dan akses materi persiapan ujian terbaik dari instruktur ahli Polinema.
+                        {{ setting('cta_description') }}
                     </p>
 
                     <div class="flex flex-col sm:flex-row gap-4" data-aos="fade-up" data-aos-delay="600">
-                        <a href="/register"
+                        <a href="{{ setting('cta_primary_button_link') }}"
                             class="inline-flex items-center justify-center gap-3 bg-jti-yellow text-jti-primary px-10 py-5 rounded-sm font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-jti-primary hover:text-white transition-all duration-500 shadow-lg shadow-jti-yellow/20 group">
-                            Daftar Akun Baru
+                            {{ setting('cta_primary_button_text') }}
                             <i data-lucide="user-plus" class="w-4 h-4 transition-transform group-hover:scale-110"></i>
                         </a>
 
-                        <a href="https://wa.me/your-number"
+                        <a href="https://wa.me/{{ setting('cta_whatsapp_number') }}"
                             class="inline-flex items-center justify-center gap-3 bg-white border-2 border-gray-200 text-jti-primary px-10 py-5 rounded-sm font-bold uppercase text-[11px] tracking-[0.2em] hover:border-jti-yellow transition-all duration-300">
-                            Konsultasi Program
+                            {{ setting('cta_secondary_button_text') }}
                             <i data-lucide="message-circle" class="w-4 h-4 text-jti-yellow"></i>
                         </a>
                     </div>
@@ -68,8 +67,8 @@
                             <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-300"></div>
                             <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-400"></div>
                         </div>
-                        <p class="text-xs text-gray-400 font-medium">Bergabung dengan <span
-                                class="text-jti-primary font-bold">2,000+</span> mahasiswa bersertifikasi.</p>
+                        <p class="text-xs text-gray-400 font-medium">{{ setting('cta_footer_text') }} <span
+                                class="text-jti-primary font-bold">{{ setting('cta_footer_highlight') }}</span> {{ setting('cta_footer_suffix') }}</p>
                     </div>
                 </div>
             </div>
