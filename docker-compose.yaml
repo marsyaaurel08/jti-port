@@ -24,7 +24,6 @@ services:
       - .env
     volumes:
       - "app_storage:/var/www/html/storage"
-      - "app_public:/var/www/html/public"
     networks:
       - jtiport_network
     depends_on:
