@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
@@ -26,17 +27,19 @@ class ClassesTable
                     ->circular(),
 
                 TextColumn::make('title')
+                    ->label('Judul')
                     ->searchable()
                     ->sortable()
                     ->description(fn($record) => $record->slug),
 
                 TextColumn::make('category.name')
+                    ->label('Kategori')
                     ->badge()
                     ->color('primary')
                     ->sortable(),
 
                 TextColumn::make('instructor.name')
-                    ->label('Instructor')
+                    ->label('Instruktur')
                     ->sortable(),
 
                 TextColumn::make('level')
@@ -49,11 +52,12 @@ class ClassesTable
                     }),
 
                 TextColumn::make('price')
+                    ->label('Harga')
                     ->money('idr') // Sesuaikan kode mata uang jika bukan Rupiah
                     ->sortable(),
 
                 TextColumn::make('capacity')
-                    ->label('Enrolled/Max')
+                    ->label('Kapasitas')
                     ->state(function ($record): string {
                         return "{$record->current_enrolled} / {$record->max_capacity}";
                     })
@@ -84,6 +88,8 @@ class ClassesTable
                 DeleteAction::make()
                     ->label('Hapus')
                     ->icon('heroicon-o-trash'),
+                RestoreAction::make(), // Ditambahkan agar bisa restore per baris dari tong sampah
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -5,15 +5,14 @@
         <div class="max-w-3xl mx-auto mb-8 space-y-4">
             <h2 class="text-3xl md:text-5xl font-bold text-jti-primary leading-tight tracking-tight" data-aos="fade-up"
                 data-aos-duration="1000">
-                Learn from <br>
+                {{ setting('instructors_title_line_1') }} <br>
                 <span class="relative inline-block">
-                    Experienced Instructor
+                    {{ setting('instructors_title_highlight') }}
                     <span class="absolute bottom-2 left-0 w-full h-3 bg-jti-yellow/30 -z-10"></span>
                 </span>
             </h2>
             <p class="text-gray-500 text-sm md:text-base max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="300">
-                Kelas di Jtiport dibina langsung oleh para pengajar ahli dari Jurusan Teknologi Informasi Polinema yang
-                memiliki sertifikasi industri internasional.
+                {{ setting('instructors_description') }}
             </p>
         </div>
 
@@ -28,33 +27,8 @@
                     <ul class="splide__list">
 
                         @php
-                            $instructors = [
-                                [
-                                    'name' => 'Dr. Eng. Rosa',
-                                    'role' => 'Web Expert',
-                                    'img' => 'https://placehold.co/400x500/14213d/FFFFFF?text=Instruktur+1',
-                                ],
-                                [
-                                    'name' => 'M. Fachruddin, M.T',
-                                    'role' => 'Data Science',
-                                    'img' => 'https://placehold.co/400x500/14213d/FFFFFF?text=Instruktur+2',
-                                ],
-                                [
-                                    'name' => 'Indra Ridwan, Ph.D',
-                                    'role' => 'Cloud Architect',
-                                    'img' => 'https://placehold.co/400x500/14213d/FFFFFF?text=Instruktur+3',
-                                ],
-                                [
-                                    'name' => 'Siska Juwita, M.Kom',
-                                    'role' => 'UI/UX Expert',
-                                    'img' => 'https://placehold.co/400x500/14213d/FFFFFF?text=Instruktur+4',
-                                ],
-                                [
-                                    'name' => 'Budi Raharjo, ST',
-                                    'role' => 'Cyber Security',
-                                    'img' => 'https://placehold.co/400x500/14213d/FFFFFF?text=Instruktur+5',
-                                ],
-                            ];
+                            use App\Models\HomeInstructor;
+                            $instructors = HomeInstructor::active()->orderBy('sort_order')->get();
                         @endphp
 
                         @foreach ($instructors as $instructor)
@@ -64,7 +38,7 @@
 
                                     {{-- Image --}}
                                     <div class="relative aspect-[4/5] overflow-hidden bg-jti-primary">
-                                        <img src="{{ $instructor['img'] }}" alt="{{ $instructor['name'] }}"
+                                        <img src="{{ $instructor['image']}}" alt="{{ $instructor['name'] }}"
                                             class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                             loading="lazy">
 
@@ -102,9 +76,9 @@
         {{-- CTA --}}
         <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6" data-aos="zoom-in"
             data-aos-delay="1200">
-            <a href="#classes-list"
+            <a href="{{ setting('instructors_button_link') }}"
                 class="inline-flex items-center gap-3 bg-jti-yellow text-jti-primary px-10 py-4 rounded-sm font-bold text-xs uppercase tracking-widest hover:bg-jti-primary hover:text-white transition-all duration-300 shadow-xl shadow-jti-yellow/20 group">
-                Lihat Kelas Kami
+                {{ setting('instructors_button_text') }}
                 <i data-lucide="book-open" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
             </a>
         </div>

@@ -3,15 +3,15 @@
         <div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
             <div class="w-full md:w-1/2 space-y-4" data-aos="fade-right">
                 <h2 class="text-3xl md:text-5xl font-bold text-jti-primary leading-tight">
-                    The Reasons <br>
-                    to Choose <span class="text-jti-yellow">Jtiport</span>
+                    {{ setting('benefit_title_line_1') }} <br>
+                    to Choose <span class="text-jti-yellow">{{ setting('benefit_title_highlight') }}</span>
                 </h2>
                 <div class="w-20 h-1.5 bg-jti-yellow" data-aos="stretch-right" data-aos-delay="300"></div>
             </div>
 
             <div class="w-full md:w-1/3 pb-2" data-aos="fade-left" data-aos-delay="200">
                 <p class="text-gray-500 text-sm md:text-base leading-relaxed">
-                    Kami berdedikasi untuk memberikan pengalaman belajar terbaik dengan fasilitas modern dan jaringan industri yang luas bagi seluruh peserta.
+                    {{ setting('benefit_description') }}
                 </p>
             </div>
         </div>
