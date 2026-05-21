@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Settings\Pages;
 use App\Filament\Resources\Settings\SettingResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Cache;
 
 class EditSetting extends EditRecord
 {
@@ -15,5 +16,10 @@ class EditSetting extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        Cache::forget("setting_{$this->record->key}");
     }
 }

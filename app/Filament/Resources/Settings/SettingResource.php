@@ -17,9 +17,9 @@ class SettingResource extends Resource
 {
     protected static ?string $model = Setting::class;
     protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
-    protected static ?string $navigationLabel = 'Pengaturan';
-    protected static ?string $pluralLabel = 'Pengaturan';
-    protected static ?string $modelLabel = 'Pengaturan';
+    protected static ?string $navigationLabel = 'Pengaturan Situs';
+    protected static ?string $pluralLabel = 'Pengaturan Situs';
+    protected static ?string $modelLabel = 'Pengaturan Situs';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Cog6Tooth;
 
