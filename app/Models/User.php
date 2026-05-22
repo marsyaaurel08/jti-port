@@ -24,7 +24,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles, Impersonate, InteractsWithMedia, LogsActivity, Notifiable, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasRoles, Impersonate, InteractsWithMedia, LogsActivity, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -39,6 +39,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
         'bio',
         'role',
         'phone_number',
+        'email_verified_at',
     ];
 
     /**

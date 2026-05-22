@@ -113,7 +113,7 @@ docker run -d \
   --restart unless-stopped \
   -e IS_FIRST_DEPLOYMENT=$IS_FIRST_DEPLOYMENT \
   $ENV_OPTS \
-  -v app_storage:/var/www/html/storage \
+  -v jtiport_app_storage:/var/www/html/storage \
   $DOCKER_IMAGE
 # CATATAN: app_public TIDAK di-mount ke container app (blue/green)
 # karena public/ sudah ada di dalam image. Volume hanya dipakai
