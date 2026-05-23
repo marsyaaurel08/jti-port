@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
+use App\Models\CourseProgress;
+use App\Models\Enrollment;
 use App\Models\Order;
 use App\Models\PaymentWebhook;
-use App\Models\Enrollment;
-use App\Models\CourseProgress;
-use App\Services\Payment\MidtransService;
 use App\Services\Payment\BNIService;
-use App\Services\Payment\Exceptions\PaymentException;
+use App\Services\Payment\MidtransService;
+use App\Services\Payment\SelfHealingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +17,58 @@ use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
+    protected $selfHealingService;
+
+    public function __construct(SelfHealingService $selfHealingService)
+    {
+        $this->selfHealingService = $selfHealingService;
+    }
+
+    /**
+     * API Trigger Self Healing (untuk testing & load testing)
+     */
+    public function selfHealing(Request $request)
+    {
+        // Keamanan: Tidak boleh dijalankan di production
+        if (app()->environment('production')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Self healing trigger tidak diizinkan di production',
+            ], 403);
+        }
+
+        $startTime = microtime(true);
+        $force = $request->boolean('force', false);   // Ambil parameter force
+
+        try {
+            Log::info('[SelfHealing API] Self healing dipanggil via API', [
+                'force_mode' => $force,
+            ]);
+
+            // ← PERBAIKAN: Kirim parameter $force ke service
+            $result = $this->selfHealingService->run($force);
+
+            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
+
+            return response()->json([
+                'success' => true,
+                'force_mode' => $force,
+                'message' => 'Self Healing berhasil dijalankan',
+                'execution_time_ms' => $executionTime,
+                'processed' => $result['processed'] ?? 0,
+                'success_count' => $result['success'] ?? 0,
+                'failed_count' => $result['failed'] ?? 0,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[SelfHealing API] Error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi error saat menjalankan self healing',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
     // -------------------------------------------------------------------------
     // Midtrans Webhook
     // -------------------------------------------------------------------------
@@ -63,7 +115,7 @@ class WebhookController extends Controller
         } catch (\Throwable $e) {
             Log::error('[Webhook][Midtrans] Gagal memproses webhook.', [
                 'order_id' => $payload['order_id'] ?? null,
-                'error'    => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             $this->markWebhookFailed($webhook, $e->getMessage());
@@ -145,6 +197,7 @@ class WebhookController extends Controller
                 Log::warning('[Webhook] Order tidak ditemukan.', [
                     'invoice_number' => $invoiceNumber,
                 ]);
+
                 return;
             }
 
@@ -152,21 +205,22 @@ class WebhookController extends Controller
             if (in_array($order->status, ['paid', 'cancelled'], true)) {
                 Log::info('[Webhook] Order sudah final, skip.', [
                     'invoice_number' => $invoiceNumber,
-                    'status'         => $order->status,
+                    'status' => $order->status,
                 ]);
+
                 return;
             }
 
             if ($normalized['is_paid']) {
                 $order->update([
-                    'status'         => 'paid',
-                    'paid_at'        => $normalized['paid_at'] ?? now(),
+                    'status' => 'paid',
+                    'paid_at' => $normalized['paid_at'] ?? now(),
                     'payment_method' => $normalized['payment_type'] ?? $order->payment_method,
                 ]);
 
                 Log::info('[Webhook] Order berhasil dibayar.', [
                     'invoice_number' => $invoiceNumber,
-                    'payment_type'   => $normalized['payment_type'] ?? '-',
+                    'payment_type' => $normalized['payment_type'] ?? '-',
                 ]);
 
                 // Daftarkan user ke enrollments dan buat course progress untuk setiap order item
@@ -214,17 +268,17 @@ class WebhookController extends Controller
     // -------------------------------------------------------------------------
 
     private function recordWebhook(
-        string  $gateway,
+        string $gateway,
         ?string $invoiceNumber,
         ?string $externalId,
-        array   $payload,
+        array $payload,
     ): PaymentWebhook {
         return PaymentWebhook::create([
-            'payment_gateway'      => $gateway,
+            'payment_gateway' => $gateway,
             'order_invoice_number' => $invoiceNumber,
-            'external_id'          => $externalId,
-            'payload'              => $payload,
-            'status'               => 'pending',
+            'external_id' => $externalId,
+            'payload' => $payload,
+            'status' => 'pending',
         ]);
     }
 
@@ -236,7 +290,7 @@ class WebhookController extends Controller
     private function markWebhookFailed(PaymentWebhook $webhook, string $errorMessage): void
     {
         $webhook->update([
-            'status'        => 'failed',
+            'status' => 'failed',
             'error_message' => $errorMessage,
         ]);
     }

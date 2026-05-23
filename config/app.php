@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'midtrans_mock_mode' => env('MIDTRANS_MOCK_MODE', false),
 ];
