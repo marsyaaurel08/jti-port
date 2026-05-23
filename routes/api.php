@@ -31,17 +31,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/testing/class/checkout', [PaymentController::class, 'checkoutClass'])->name('checkoutClass');
 });
 
-// --- Kursus & Kelas (Katalog Publik) ---
-Route::prefix('api.courses')->name('api.courses.')->group(function () {
-    Route::get('/', [CourseController::class, 'index'])->name('index');
-    Route::get('/{slug}', [CourseController::class, 'show'])->name('show');
-});
-
-Route::prefix('api.classes')->name('api.classes.')->group(function () {
-    Route::get('/', [ClassesController::class, 'index'])->name('index');
-    Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
-});
-
 // Route untuk trigger self-healing (load testing saja, tidak dipakai di production)
 // Endpoint ini bisa dipanggil secara manual untuk simulasi
 // Params di body: { force: boolean }

@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\{CourseClass, Course, Order, OrderItem, Promo, UserCart, UserPromo};
 use App\Services\Payment\Exceptions\PaymentException;
 use App\Services\Payment\PaymentFactory;
-use Illuminate\Support\Facades\{Auth, DB, Log};
+use Illuminate\Support\Facades\{Auth, Cache, DB, Log};
 use Livewire\Attributes\{Layout, On, Validate};
 use Livewire\Component;
 
@@ -64,8 +64,10 @@ class StudentClassCheckout extends Component
 
     public function mount(string $slug): void
     {
-        $this->class = CourseClass::where('slug', $slug)->firstOrFail();
-
+        $cacheKey = "class_checkout:{$slug}";
+        $this->class = Cache::remember($cacheKey, 3600, function () use ($slug) {
+            return CourseClass::where('slug', $slug)->firstOrFail();
+        });
         // Pre-fill user info if authenticated
         if (Auth::check()) {
             $user = Auth::user();

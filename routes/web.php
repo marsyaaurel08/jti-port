@@ -17,6 +17,7 @@ use App\Livewire\StudentOrders;
 use App\Livewire\StudentProfile;
 use App\Livewire\StudentTransactions;
 use Illuminate\Support\Facades\Route;
+use Laravel\Mcp\Request;
 
 // --- Public Routes ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -108,3 +109,9 @@ Route::prefix('payment')->name('payment.')->group(function () {
 Route::get('/payment/check-status/{externalId}', [PaymentStatusController::class, 'check'])
     ->middleware('auth')
     ->name('payment.check-status');
+
+// routes/web.php (pakai middleware web agar bisa akses session login)
+Route::middleware('auth')->post('/api/tokens/create', function (Request $request) {
+    $token = $request->user()->createToken('k6-load-tester');
+    return response()->json(['token' => $token->plainTextToken]);
+});
