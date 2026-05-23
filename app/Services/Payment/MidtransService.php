@@ -64,7 +64,7 @@ class MidtransService implements PaymentServiceInterface
             ]);
 
             throw new PaymentException(
-                message: 'Gagal membuat transaksi Midtrans: ' . $e->getMessage(),
+                message: 'Gagal membuat transaksi Midtrans: '.$e->getMessage(),
                 gatewayName: 'midtrans',
                 rawResponse: $e,
                 previous: $e,
@@ -77,6 +77,28 @@ class MidtransService implements PaymentServiceInterface
      */
     public function checkTransactionStatus(string $externalId): array
     {
+        // === MOCK MODE UNTUK LOAD TESTING ===
+        if (config('app.midtrans_mock_mode', false) === true) {
+            Log::info('[MidtransService] MOCK MODE AKTIF - Return settlement', [
+                'external_id' => $externalId,
+            ]);
+
+            // Data mock yang sudah sesuai format Midtrans
+            $mockData = [
+                'transaction_status' => 'settlement',     // ini yang penting
+                'status_code' => '200',
+                'status_message' => 'Mock settlement for load testing',
+                'order_id' => $externalId,
+                'transaction_id' => 'mock-trx-'.time().'-'.rand(1000, 9999),
+                'gross_amount' => '150000',         // sesuaikan jika perlu
+                'payment_type' => 'bank_transfer',
+                'fraud_status' => 'accept',
+                'settlement_time' => now()->toDateTimeString(),
+                'transaction_time' => now()->toDateTimeString(),
+            ];
+
+            return $this->normalizeTransactionStatus($mockData);
+        }
         try {
             $status = Transaction::status($externalId);
 
@@ -93,7 +115,7 @@ class MidtransService implements PaymentServiceInterface
             ]);
 
             throw new PaymentException(
-                message: 'Gagal memeriksa status transaksi Midtrans: ' . $e->getMessage(),
+                message: 'Gagal memeriksa status transaksi Midtrans: '.$e->getMessage(),
                 gatewayName: 'midtrans',
                 rawResponse: $e,
                 previous: $e,
@@ -151,7 +173,7 @@ class MidtransService implements PaymentServiceInterface
         $incomingSignature = $payload['signature_key'] ?? '';
 
         $serverKey = config('payment.midtrans.server_key');
-        $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $expectedSignature = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
 
         return hash_equals($expectedSignature, $incomingSignature);
     }
@@ -209,7 +231,7 @@ class MidtransService implements PaymentServiceInterface
 
         // Jika Order memiliki relasi items, gunakan data relasi
         if ($order->relationLoaded('items') && $order->items->isNotEmpty()) {
-            return $order->items->map(fn($item) => [
+            return $order->items->map(fn ($item) => [
                 'id' => (string) $item->id,
                 'name' => mb_substr($item->item_name, 0, 50), // Midtrans membatasi panjang nama item maksimal 50 karakter
                 'price' => (int) $item->price_at_purchase,
@@ -220,7 +242,7 @@ class MidtransService implements PaymentServiceInterface
         // Fallback: 1 item summary dari Order
         $items = [[
             'id' => $order->invoice_number,
-            'name' => 'Pembayaran ' . $order->invoice_number,
+            'name' => 'Pembayaran '.$order->invoice_number,
             'price' => (int) $order->subtotal,
             'quantity' => 1,
         ]];
@@ -271,6 +293,7 @@ class MidtransService implements PaymentServiceInterface
 
         return $transactionStatus === 'settlement';
     }
+
     /**
      * Core API dengan mapping payment method (mirip logic di initiateCustomPayment)
      */
@@ -281,15 +304,15 @@ class MidtransService implements PaymentServiceInterface
         }
 
         $methodMap = [
-            'bni_va'     => ['payment_type' => 'bank_transfer', 'data' => ['bank_transfer' => ['bank' => 'bni']]],
-            'bca_va'     => ['payment_type' => 'bank_transfer', 'data' => ['bank_transfer' => ['bank' => 'bca']]],
-            'bri_va'     => ['payment_type' => 'bank_transfer', 'data' => ['bank_transfer' => ['bank' => 'bri']]],
+            'bni_va' => ['payment_type' => 'bank_transfer', 'data' => ['bank_transfer' => ['bank' => 'bni']]],
+            'bca_va' => ['payment_type' => 'bank_transfer', 'data' => ['bank_transfer' => ['bank' => 'bca']]],
+            'bri_va' => ['payment_type' => 'bank_transfer', 'data' => ['bank_transfer' => ['bank' => 'bri']]],
             'permata_va' => ['payment_type' => 'bank_transfer', 'data' => ['bank_transfer' => ['bank' => 'permata']]],
-            'echannel'   => ['payment_type' => 'echannel', 'data' => ['echannel' => ['bill_info1' => 'Pembayaran', 'bill_info2' => 'Kursus']]],
-            'gopay'      => ['payment_type' => 'qris', 'data' => ['qris' => ['acquirer' => 'gopay']]],
-            'shopeepay'  => ['payment_type' => 'qris', 'data' => ['qris' => ['acquirer' => 'airpay shopee']]],
-            'indomaret'  => ['payment_type' => 'cstore', 'data' => ['cstore' => ['store' => 'indomaret', 'message' => 'Pembayaran Kursus']]],
-            'alfamart'   => ['payment_type' => 'cstore', 'data' => ['cstore' => ['store' => 'alfamart', 'message' => 'Pembayaran Kursus']]],
+            'echannel' => ['payment_type' => 'echannel', 'data' => ['echannel' => ['bill_info1' => 'Pembayaran', 'bill_info2' => 'Kursus']]],
+            'gopay' => ['payment_type' => 'qris', 'data' => ['qris' => ['acquirer' => 'gopay']]],
+            'shopeepay' => ['payment_type' => 'qris', 'data' => ['qris' => ['acquirer' => 'airpay shopee']]],
+            'indomaret' => ['payment_type' => 'cstore', 'data' => ['cstore' => ['store' => 'indomaret', 'message' => 'Pembayaran Kursus']]],
+            'alfamart' => ['payment_type' => 'cstore', 'data' => ['cstore' => ['store' => 'alfamart', 'message' => 'Pembayaran Kursus']]],
         ];
 
         $config = $methodMap[$preferredMethod] ?? $methodMap['bni_va'];
@@ -300,6 +323,7 @@ class MidtransService implements PaymentServiceInterface
             paymentData: $config['data']
         );
     }
+
     /**
      * Buat transaksi via Core API (bukan Snap).
      * Digunakan untuk custom modal dengan full control UI.
@@ -329,7 +353,7 @@ class MidtransService implements PaymentServiceInterface
             ]);
 
             throw new PaymentException(
-                message: 'Gagal membuat transaksi Core API: ' . $e->getMessage(),
+                message: 'Gagal membuat transaksi Core API: '.$e->getMessage(),
                 gatewayName: 'midtrans',
                 rawResponse: $e,
                 previous: $e,
@@ -345,13 +369,13 @@ class MidtransService implements PaymentServiceInterface
         $base = [
             'payment_type' => $paymentType,
             'transaction_details' => [
-                'order_id'     => $order->invoice_number,
+                'order_id' => $order->invoice_number,
                 'gross_amount' => (int) $order->total_amount,
             ],
             'customer_details' => [
                 'first_name' => $order->user->name ?? 'Pelanggan',
-                'email'      => $order->user->email ?? '',
-                'phone'      => $order->user->phone ?? '',
+                'email' => $order->user->email ?? '',
+                'phone' => $order->user->phone ?? '',
             ],
             'item_details' => $this->buildItemDetails($order),
         ];
@@ -370,33 +394,33 @@ class MidtransService implements PaymentServiceInterface
             $response = json_decode(json_encode($response), true);
         }
 
-        if (!is_array($response)) {
+        if (! is_array($response)) {
             $response = [];
         }
 
         $normalized = [
-            'payment_type'   => $paymentType,
-            'external_id'    => $response['order_id'] ?? null,
+            'payment_type' => $paymentType,
+            'external_id' => $response['order_id'] ?? null,
             'transaction_id' => $response['transaction_id'] ?? null,
-            'status'         => $response['transaction_status'] ?? null,
-            'expiry'         => $response['expiry_time'] ?? null,
+            'status' => $response['transaction_status'] ?? null,
+            'expiry' => $response['expiry_time'] ?? null,
 
             // QR
             'qr_string' => null,
-            'qr_url'    => null,
-            'acquirer'  => null,
+            'qr_url' => null,
+            'acquirer' => null,
 
             // Virtual Account
             'va_number' => null,
-            'bank'      => null,
+            'bank' => null,
 
             // Echannel (Mandiri)
-            'bill_key'    => null,
+            'bill_key' => null,
             'biller_code' => null,
 
             // Convenience Store
             'payment_code' => null,
-            'store'        => null,
+            'store' => null,
 
             // E-Wallet
             'deeplink_url' => null,
@@ -405,8 +429,8 @@ class MidtransService implements PaymentServiceInterface
         switch ($paymentType) {
 
             case 'qris':
-                $normalized['acquirer']   = $response['acquirer'] ?? null;
-                $normalized['qr_string']  = $response['qr_string'] ?? null;
+                $normalized['acquirer'] = $response['acquirer'] ?? null;
+                $normalized['qr_string'] = $response['qr_string'] ?? null;
 
                 $actions = $response['actions'] ?? [];
 
@@ -416,7 +440,7 @@ class MidtransService implements PaymentServiceInterface
                 }
 
                 // Jika actions bukan array, jadikan array kosong
-                if (!is_array($actions)) {
+                if (! is_array($actions)) {
                     $actions = [];
                 }
 
@@ -426,7 +450,9 @@ class MidtransService implements PaymentServiceInterface
                         $action = json_decode(json_encode($action), true);
                     }
 
-                    if (!is_array($action)) continue;
+                    if (! is_array($action)) {
+                        continue;
+                    }
 
                     $actionName = $action['name'] ?? '';
 
@@ -438,7 +464,7 @@ class MidtransService implements PaymentServiceInterface
                 }
 
                 // Fallback: Jika masih null, coba cari di root response (kadang Midtrans menaruh langsung)
-                if (empty($normalized['qr_url']) && !empty($response['qr_url'])) {
+                if (empty($normalized['qr_url']) && ! empty($response['qr_url'])) {
                     $normalized['qr_url'] = $response['qr_url'];
                 }
 
@@ -451,31 +477,31 @@ class MidtransService implements PaymentServiceInterface
                     $vaNumbers = json_decode(json_encode($vaNumbers), true);
                 }
 
-                if (!empty($vaNumbers) && is_array($vaNumbers)) {
+                if (! empty($vaNumbers) && is_array($vaNumbers)) {
                     $firstVa = $vaNumbers[0] ?? [];
                     if (is_object($firstVa)) {
                         $firstVa = json_decode(json_encode($firstVa), true);
                     }
 
                     $normalized['va_number'] = $firstVa['va_number'] ?? null;
-                    $normalized['bank']      = strtoupper($firstVa['bank'] ?? '');
+                    $normalized['bank'] = strtoupper($firstVa['bank'] ?? '');
                 }
 
                 // Permata VA fallback
                 if (empty($normalized['va_number']) && isset($response['permata_va_number'])) {
                     $normalized['va_number'] = $response['permata_va_number'];
-                    $normalized['bank']      = 'PERMATA';
+                    $normalized['bank'] = 'PERMATA';
                 }
                 break;
 
             case 'echannel':
-                $normalized['bill_key']    = $response['bill_key'] ?? null;
+                $normalized['bill_key'] = $response['bill_key'] ?? null;
                 $normalized['biller_code'] = $response['biller_code'] ?? null;
                 break;
 
             case 'cstore':
                 $normalized['payment_code'] = $response['payment_code'] ?? null;
-                $normalized['store']        = strtoupper($response['store'] ?? '');
+                $normalized['store'] = strtoupper($response['store'] ?? '');
                 break;
         }
 

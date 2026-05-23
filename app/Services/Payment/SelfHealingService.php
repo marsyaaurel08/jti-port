@@ -44,23 +44,45 @@ class SelfHealingService
      * 2. Proses tiap candidate ke gateway
      * 3. Catat hasilnya di logs_self_healing
      */
-    public function run(): void
+    public function run(bool $force = false): array
     {
-        $candidates = $this->detectCandidates();
+        Log::info('Memulai Self Healing'.($force ? ' [FORCE MODE]' : ''));
+
+        $candidates = $this->detectCandidates($force);
 
         if ($candidates->isEmpty()) {
             Log::info('[SelfHealing] Tidak ada kandidat yang perlu diproses.');
 
-            return;
+            return [
+                'processed' => 0,
+                'success' => 0,
+                'failed' => 0,
+            ];
         }
 
         Log::info('[SelfHealing] Memulai siklus.', ['total' => $candidates->count()]);
 
+        $successCount = 0;
+        $failedCount = 0;
+
         foreach ($candidates as $order) {
-            $this->reconcile($order);
+            if ($this->reconcile($order)) {
+                $successCount++;
+            } else {
+                $failedCount++;
+            }
         }
 
-        Log::info('[SelfHealing] Siklus selesai.');
+        Log::info('[SelfHealing] Siklus selesai.', [
+            'success' => $successCount,
+            'failed' => $failedCount,
+        ]);
+
+        return [
+            'processed' => $candidates->count(),
+            'success' => $successCount,
+            'failed' => $failedCount,
+        ];
     }
 
     // -------------------------------------------------------------------------
@@ -73,36 +95,47 @@ class SelfHealingService
      * - Status masih 'pending'
      * - Menggunakan gateway otomatis (bni / midtrans), bukan manual
      * - Tidak menggunakan fallback VA
-     * - Sudah melewati minimal 10 menit sejak dibuat (attempt 1)
+     * - Sudah melewati minimal 5 menit sejak dibuat (attempt 1)
      * - Belum melewati batas maksimum attempt
      * - Belum ada log attempt pada interval yang sedang berjalan
      */
-    private function detectCandidates(): Collection
+    /**
+     * Mengambil order yang memenuhi semua kriteria self-healing
+     *
+     * @param  bool  $force  Jika true, abaikan aturan umur minimal 5 menit
+     */
+    private function detectCandidates(bool $force = false): Collection
     {
-        // Waktu minimum: order harus sudah berumur > 10 menit
-        $minAge = now()->subMinutes(self::BACKOFF_MINUTES[1]);
-
-        // Waktu maksimum: order yang sudah > 8 jam + buffer dianggap expired
-        $maxAge = now()->subMinutes(self::BACKOFF_MINUTES[self::MAX_ATTEMPTS])->subHour();
-
-        return Order::query()
+        $query = Order::query()
             ->where('status', 'pending')
             ->whereIn('payment_gateway', ['bni', 'midtrans'])
             ->where('is_fallback_va', false)
-            ->where('created_at', '<=', $minAge)     // minimal sudah 10 menit
-            ->where('created_at', '>=', $maxAge)     // jangan proses yang terlalu lama
-            ->whereDoesntHave('paymentWebhooks')     // belum ada webhook masuk
-            ->where(function ($q) {
-                // Belum pernah di-attempt, ATAU attempt terakhirnya sudah lewat window berikutnya
-                $q->whereDoesntHave('selfHealingLogs')
-                    ->orWhereHas('selfHealingLogs', function ($sub) {
-                        $sub->where('attempt', '<', self::MAX_ATTEMPTS)
-                            ->where('result', '!=', 'paid');
-                    });
-            })
+            ->whereDoesntHave('paymentWebhooks');     // belum ada webhook masuk
+
+        // === Aturan Umur Order ===
+        if (! $force) {
+            // Normal mode: terapkan aturan 5 menit
+            $minAge = now()->subMinutes(self::BACKOFF_MINUTES[1]);
+            $maxAge = now()->subMinutes(self::BACKOFF_MINUTES[self::MAX_ATTEMPTS])->subHour();
+
+            $query->where('created_at', '<=', $minAge)     // minimal sudah 5 menit
+                ->where('created_at', '>=', $maxAge);    // jangan proses yang terlalu lama
+        }
+        // else: Force mode → tidak ada batasan umur (bisa proses order baru)
+
+        $query->where(function ($q) {
+            // Belum pernah di-attempt, ATAU attempt terakhirnya sudah lewat window berikutnya
+            $q->whereDoesntHave('selfHealingLogs')
+                ->orWhereHas('selfHealingLogs', function ($sub) {
+                    $sub->where('attempt', '<', self::MAX_ATTEMPTS)
+                        ->where('result', '!=', 'paid');
+                });
+        });
+
+        return $query
             ->with(['user', 'selfHealingLogs'])
             ->get()
-            ->filter(fn(Order $order) => $this->isDueForAttempt($order));
+            ->filter(fn (Order $order) => $force || $this->isDueForAttempt($order));
     }
 
     /**
