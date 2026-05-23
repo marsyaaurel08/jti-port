@@ -21,17 +21,21 @@ class ClassesController extends Controller
                 $query->where('user_id', $user_id);
             })->exists() : false;
 
-        $courseClass = CourseClass::withTrashed()
-            ->where('slug', $slug)
-            ->with([
-                'course' => function ($query) {
-                    $query->withTrashed();
-                },
-                'course.chapters.lessons',
-                'course.category',
-                'instructor'
-            ])
-            ->firstOrFail();
+        // Load course class from Redis cache first, fallback to database
+        $cacheKey = "class_detail:{$slug}";
+        $courseClass = cache()->remember($cacheKey, 3600, function () use ($slug) {
+            return CourseClass::withTrashed()
+                ->where('slug', $slug)
+                ->with([
+                    'course' => function ($query) {
+                        $query->withTrashed();
+                    },
+                    'course.chapters.lessons',
+                    'course.category',
+                    'instructor'
+                ])
+                ->firstOrFail();
+        });
 
         return view('pages.classes.show', ['class' => $courseClass, 'is_user_enrolled' => $is_user_enrolled]);
     }

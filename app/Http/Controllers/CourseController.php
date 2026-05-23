@@ -17,17 +17,22 @@ class CourseController extends Controller
         $is_user_enrolled = $user_id ? Course::where('slug', $slug)->whereHas('enrollments', function ($query) use ($user_id) {
             $query->where('user_id', $user_id);
         })->exists() : false;
-        $course = Course::where('slug', $slug)
-            ->with([
-                'category',
-                'chapters' => function ($query) {
-                    $query->orderBy('id', 'asc'); // Urutkan bab
-                },
-                'chapters.lessons', // Ambil materi di setiap bab
-                'reviews.user'      // Ambil review beserta nama pemberinya
-            ])
-            ->withCount('enrollments') // Hitung jumlah peserta
-            ->firstOrFail();
+
+        // Load course from Redis cache first, fallback to database
+        $cacheKey = "course_detail:{$slug}";
+        $course = cache()->remember($cacheKey, 3600, function () use ($slug) {
+            return Course::where('slug', $slug)
+                ->with([
+                    'category',
+                    'chapters' => function ($query) {
+                        $query->orderBy('id', 'asc'); // Urutkan bab
+                    },
+                    'chapters.lessons', // Ambil materi di setiap bab
+                    'reviews.user'      // Ambil review beserta nama pemberinya
+                ])
+                ->withCount('enrollments') // Hitung jumlah peserta
+                ->firstOrFail();
+        });
 
         return view('pages.courses.show', compact('course', 'is_user_enrolled'));
     }
