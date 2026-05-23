@@ -145,7 +145,13 @@ class PaymentController extends Controller
      */
     private function generateInvoiceNumber(int $userId): string
     {
-        return 'INV-LOADTEST-' . date('YmdHis') . '-' . $userId;
+        $micro = sprintf('%06d', (int)((microtime(true) - floor(microtime(true))) * 1000000));
+
+        return 'INV-LOADTEST-' .
+            date('YmdHis') .
+            $micro .
+            '-' .
+            $userId;
     }
 
     /**

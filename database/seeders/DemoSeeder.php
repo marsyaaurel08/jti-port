@@ -302,16 +302,8 @@ class DemoSeeder extends Seeder
         // Attach promo2 to specific products (Course & Class)
         \App\Models\PromoProduct::create([
             'promo_id' => $promo2->id,
-            'course_id' => $allCourses[0]->id,
-            'class_id' => $classCode->id,
-        ]);
-
-        // Record pseudo promo usage in UserPromo
-        \App\Models\UserPromo::create([
-            'user_id' => $users[3]->id,
-            'promo_id' => $promo1->id,
-            'order_id' => $order->id,
-            'discount_amount' => 100.00,
+            'product_id' => $allCourses[0]->id,
+            'type_product' => 'course',
         ]);
 
         $this->command->info('- Created 2 self-healing logs (1 course, 1 class)');
