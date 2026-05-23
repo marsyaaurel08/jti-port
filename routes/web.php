@@ -16,8 +16,8 @@ use App\Livewire\StudentLesson;
 use App\Livewire\StudentOrders;
 use App\Livewire\StudentProfile;
 use App\Livewire\StudentTransactions;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Laravel\Mcp\Request;
 
 // --- Public Routes ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
