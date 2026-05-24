@@ -8,17 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Model LogSelfHealing
  *
- * Model ini digunakan untuk mencatat aktivitas self-healing pada sistem,
- * terutama untuk reconciliation logs antara BNI dan Midtrans.
+ * Model ini digunakan untuk mencatat log self-healing/reconciliation payment
+ * untuk tracking percobaan verifikasi pembayaran dari payment gateway.
  *
  * @property int $id
  * @property int $order_id
- * @property string $gateway
- * @property string $action
- * @property array|null $request_payload
- * @property array|null $response_payload
- * @property string $status
- * @property string|null $notes
+ * @property string $invoice_number
+ * @property string $payment_gateway 'bni' | 'midtrans'
+ * @property int $attempt Nomor percobaan ke-N
+ * @property string $result 'paid' | 'pending' | 'error' | 'skipped'
+ * @property string|null $error_message Pesan error jika result = error
+ * @property array|null $raw_response Raw response dari gateway
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read \App\Models\Order $order

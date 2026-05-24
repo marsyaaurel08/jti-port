@@ -21,47 +21,39 @@ class LogSelfHealingsTable
                     ->label('Order ID')
                     ->searchable(),
 
-                TextColumn::make('gateway')
-                    ->label('Gateway')
+                TextColumn::make('invoice_number')
+                    ->label('Invoice')
+                    ->searchable(),
+
+                TextColumn::make('attempt')
+                    ->label('Percobaan ke')
+                    ->sortable(),
+
+                TextColumn::make('result')
+                    ->label('Hasil')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'bni' => 'info',
-                        'midtrans' => 'warning',
+                        'paid' => 'success',
+                        'pending' => 'info',
+                        'error' => 'danger',
+                        'skipped' => 'gray',
                         default => 'gray',
                     }),
 
-                TextColumn::make('action')
-                    ->label('Aksi'),
-
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'success' => 'success',
-                        'failed' => 'danger',
-                        'unresolved' => 'warning',
-                        default => 'gray',
-                    }),
-
-                TextColumn::make('notes')
-                    ->label('Catatan')
-                    ->limit(50),
+                TextColumn::make('error_message')
+                    ->label('Pesan Error')
+                    ->limit(50)
+                    ->tooltip(fn ($record) => $record->error_message),
             ])
             ->filters([
-                SelectFilter::make('gateway')
-                    ->label('Gateway')
+                SelectFilter::make('result')
+                    ->label('Hasil')
                     ->searchable()
                     ->options([
-                        'bni' => 'BNI',
-                        'midtrans' => 'Midtrans',
-                    ]),
-                SelectFilter::make('status')
-                    ->label('Status')
-                    ->searchable()
-                    ->options([
-                        'success' => 'Success',
-                        'failed' => 'Failed',
-                        'unresolved' => 'Unresolved',
+                        'paid' => 'Paid',
+                        'pending' => 'Pending',
+                        'error' => 'Error',
+                        'skipped' => 'Skipped',
                     ]),
             ])
             ->recordActions([])
