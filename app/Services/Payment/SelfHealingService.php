@@ -46,7 +46,7 @@ class SelfHealingService
      */
     public function run(bool $force = false): array
     {
-        Log::info('Memulai Self Healing'.($force ? ' [FORCE MODE]' : ''));
+        Log::info('Memulai Self Healing' . ($force ? ' [FORCE MODE]' : ''));
 
         $candidates = $this->detectCandidates($force);
 
@@ -135,7 +135,7 @@ class SelfHealingService
         return $query
             ->with(['user', 'selfHealingLogs'])
             ->get()
-            ->filter(fn (Order $order) => $force || $this->isDueForAttempt($order));
+            ->filter(fn(Order $order) => $force || $this->isDueForAttempt($order));
     }
 
     /**
@@ -175,11 +175,17 @@ class SelfHealingService
         // Guard: skip jika order sudah final (mungkin diproses bersamaan oleh webhook)
         $order->refresh();
         if (in_array($order->status, ['paid', 'cancelled'], true)) {
+            // update inquiry metadata even jika skipped
+            $order->increment('inquiry_count');
+            $order->update(['last_inquiry_at' => now()]);
+
             $this->log($order, $attempt, 'skipped', gateway: $gateway);
 
             return;
         }
-
+        // Catat bahwa kita melakukan inquiry sekarang (untuk monitoring)
+        $order->increment('inquiry_count');
+        $order->update(['last_inquiry_at' => now()]);
         try {
             $paymentService = PaymentFactory::make($gateway);
             $externalId = $order->external_id ?? $order->invoice_number;
