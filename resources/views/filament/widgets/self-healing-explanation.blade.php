@@ -19,10 +19,13 @@
                     Apa itu Self-Healing?
                 </h4>
                 <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                    <strong>Self-Healing</strong> adalah kemampuan sistem untuk mendeteksi gangguan secara otomatis.
-                    Jika transaksi mengalami error fatal atau berhenti mendadak karena kesalahan jaringan,maka
-                    <span class="text-primary-600 dark:text-primary-400 font-medium">sistem secara otomatis memulihkan transaksi tersebut</span>
-                    agar data transaksi user dan sistem sesuai dan tanpa perlu campur tangan manual dari tim IT.
+                    <strong>Self-Healing</strong> pada JTIport adalah kemampuan sistem untuk mendeteksi gangguan
+                    transaksi.
+                    Jika transaksi mengalami <i>error</i> fatal atau terputus mendadak seperti akibat kendala jaringan, maka
+                    <span class="text-primary-600 dark:text-primary-400 font-medium">sistem akan memulihkan transaksi
+                        tersebut secara mandiri</span>.
+                    Hal ini memastikan data transaksi user selalu aman dan sinkron dengan sistem, tanpa memerlukan
+                    perbaikan manual dari tim IT.
                 </p>
             </div>
 
@@ -54,7 +57,8 @@
                 <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Status Proteksi Jtiport</span>
                 <div class="flex items-center gap-2 px-3 py-1 bg-success-50 dark:bg-success-500/10 rounded-full">
                     <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-success-500"></span>
                     </span>
                     <span class="text-xs font-bold text-success-700 dark:text-success-400">AKTIF</span>
