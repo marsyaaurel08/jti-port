@@ -9,6 +9,7 @@ use App\Filament\Resources\LogSelfHealings\Pages\ViewLogSelfHealing;
 use App\Filament\Resources\LogSelfHealings\Schemas\LogSelfHealingForm;
 use App\Filament\Resources\LogSelfHealings\Schemas\LogSelfHealingInfolist;
 use App\Filament\Resources\LogSelfHealings\Tables\LogSelfHealingsTable;
+use App\Filament\Resources\SelfHealings\SelfHealingResource;
 use App\Models\LogSelfHealing;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -20,7 +21,10 @@ use UnitEnum;
 class LogSelfHealingResource extends Resource
 {
     protected static ?string $model = LogSelfHealing::class;
+
     protected static ?string $pluralLabel = 'Log Self Healing';
+    protected static bool $isGloballySearchable = false;
+    protected static bool $shouldRegisterNavigation = false;
     protected static string|UnitEnum|null $navigationGroup = 'Transactions';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
@@ -51,9 +55,9 @@ class LogSelfHealingResource extends Resource
     {
         return [
             'index' => ListLogSelfHealings::route('/'),
-            'create' => CreateLogSelfHealing::route('/create'),
+            // 'create' => CreateLogSelfHealing::route('/create'),
             'view' => ViewLogSelfHealing::route('/{record}'),
-            'edit' => EditLogSelfHealing::route('/{record}/edit'),
+            // 'edit' => EditLogSelfHealing::route('/{record}/edit'),
         ];
     }
 }
