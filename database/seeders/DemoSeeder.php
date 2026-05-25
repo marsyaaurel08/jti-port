@@ -79,7 +79,7 @@ class DemoSeeder extends Seeder
                 'title' => $title,
                 'slug' => strtolower(str_replace(' ', '-', $title)),
                 'description' => "Learn the basics of {$title}",
-                'price' => 99.99 + ($index * 10), // Increment price for variety
+                'price' => 300000 + ($index * 10), // Increment price for variety
                 'level' => 'beginner',
                 'thumbnail_url' => "https://picsum.photos/400/200?random={$randomId}",
                 'status' => 'published',
@@ -135,7 +135,7 @@ class DemoSeeder extends Seeder
                 'level' => $course->level,
                 'slug' => strtolower(str_replace(' ', '-', $course->title)),
                 'title' => $course->title,
-                'price' => $course->price,
+                'price' => 300000 + ($index * 20), // Increment price for variety
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'max_capacity' => rand(20, 50),
@@ -149,7 +149,7 @@ class DemoSeeder extends Seeder
         $orderedCourses = array_slice($allCourses, 0, 6);
 
         // Calculate total amount
-        $totalAmount = count($orderedCourses) * 99.99;
+        $totalAmount = count($orderedCourses) * 300000;
 
         // Create 1 order for user ID 3
         $order = Order::create([
@@ -204,7 +204,7 @@ class DemoSeeder extends Seeder
             'slug' => 'laravel-fundamentals-advanced-batch',
             'description' => 'Advanced batch for Laravel fundamentals',
             'level' => 'intermediate',
-            'price' => 149.99,
+            'price' => 300000.00,
             'thumbnail_url' => 'https://picsum.photos/400/200?random=100',
             'start_date' => now(),
             'end_date' => now()->addMonths(3),
@@ -218,9 +218,9 @@ class DemoSeeder extends Seeder
         $classOrder = Order::create([
             'user_id' => $users[1]->id,
             'invoice_number' => 'INV-CLASS-'.time(),
-            'subtotal' => 149.99 * 3,
+            'subtotal' => 300000.00 * 3,
             'discount_amount' => 0.00,
-            'total_amount' => 149.99 * 3,
+            'total_amount' => 300000.00 * 3,
             'status' => 'paid',
             'payment_method' => 'credit_card',
             'payment_proof' => null,
@@ -270,12 +270,26 @@ class DemoSeeder extends Seeder
         // Create Promos
         // =============================================
         $promo1 = \App\Models\Promo::create([
-            'code' => 'DISC50',
+            'code' => 'COURSE50',
             'name' => 'Diskon 50%',
             'description' => 'Promo spesial 50%',
             'type' => 'percentage',
             'value' => 50.00,
-            'min_order' => 0.00,
+            'min_order' => 200000.00,
+            'max_usage' => 100,
+            'max_usage_per_user' => 1,
+            'start_date' => now()->subDays(1),
+            'end_date' => now()->addDays(30),
+            'is_active' => true,
+            'for_all_products' => true,
+        ]);
+        $promo2 = \App\Models\Promo::create([
+            'code' => 'KELAS50',
+            'name' => 'Diskon 50%',
+            'description' => 'Promo spesial 50%',
+            'type' => 'percentage',
+            'value' => 50.00,
+            'min_order' => 200000.00,
             'max_usage' => 100,
             'max_usage_per_user' => 1,
             'start_date' => now()->subDays(1),
@@ -284,26 +298,34 @@ class DemoSeeder extends Seeder
             'for_all_products' => true,
         ]);
 
-        $promo2 = \App\Models\Promo::create([
-            'code' => 'POTONGAN100K',
+        $promo3 = \App\Models\Promo::create([
+            'code' => 'COURSE100K',
             'name' => 'Potongan 100 Ribu',
             'description' => 'Potongan langsung Rp100.000',
             'type' => 'fixed',
             'value' => 100000.00,
-            'min_order' => 150000.00,
+            'min_order' => 200000.00,
             'max_usage' => null,
             'max_usage_per_user' => 1,
             'start_date' => now()->subDays(1),
             'end_date' => now()->addDays(30),
             'is_active' => true,
-            'for_all_products' => false,
+            'for_all_products' => true,
         ]);
 
-        // Attach promo2 to specific products (Course & Class)
-        \App\Models\PromoProduct::create([
-            'promo_id' => $promo2->id,
-            'product_id' => $allCourses[0]->id,
-            'type_product' => 'course',
+        $promo4 = \App\Models\Promo::create([
+            'code' => 'KELAS100K',
+            'name' => 'Potongan 100 Ribu',
+            'description' => 'Potongan langsung Rp100.000',
+            'type' => 'fixed',
+            'value' => 100000.00,
+            'min_order' => 200000.00,
+            'max_usage' => null,
+            'max_usage_per_user' => 1,
+            'start_date' => now()->subDays(1),
+            'end_date' => now()->addDays(30),
+            'is_active' => true,
+            'for_all_products' => true,
         ]);
 
         $this->command->info('- Created 2 self-healing logs (1 course, 1 class)');

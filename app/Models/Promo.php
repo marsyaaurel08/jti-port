@@ -43,6 +43,11 @@ class Promo extends Model
         return $this->hasMany(PromoProduct::class);
     }
 
+    public function products(): HasMany
+    {
+        return $this->promoProducts();
+    }
+
     public function userPromos(): HasMany
     {
         return $this->hasMany(UserPromo::class);
