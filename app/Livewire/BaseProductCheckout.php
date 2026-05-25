@@ -178,8 +178,10 @@ abstract class BaseProductCheckout extends Component
             return;
         }
 
-        $productField = $this->getPromoProductField();
-        if (! $promo->for_all_products && ! $promo->products()->where($productField, $this->getProduct()->id)->exists()) {
+        if (! $promo->for_all_products && ! $promo->products()
+            ->where('type_product', $this->getProductType())
+            ->where('product_id', $this->getProduct()->id)
+            ->exists()) {
             $this->promoMessage = "Promo tidak berlaku untuk {$this->getProductType()} ini.";
             $this->promoApplied = false;
 

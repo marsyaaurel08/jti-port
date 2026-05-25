@@ -12,8 +12,8 @@ class PromoProduct extends Model
 
     protected $fillable = [
         'promo_id',
-        'course_id',
-        'class_id',
+        'product_id',
+        'type_product',
     ];
 
     public function promo(): BelongsTo
@@ -23,11 +23,11 @@ class PromoProduct extends Model
 
     public function course(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class, 'product_id')->where('type_product', 'course');
     }
 
     public function courseClass(): BelongsTo
     {
-        return $this->belongsTo(CourseClass::class, 'class_id');
+        return $this->belongsTo(CourseClass::class, 'product_id')->where('type_product', 'class');
     }
 }

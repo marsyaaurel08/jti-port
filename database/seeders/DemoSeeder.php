@@ -270,7 +270,21 @@ class DemoSeeder extends Seeder
         // Create Promos
         // =============================================
         $promo1 = \App\Models\Promo::create([
-            'code' => 'JTIPORTPERDANA',
+            'code' => 'COURSE50',
+            'name' => 'Diskon 50%',
+            'description' => 'Promo spesial 50%',
+            'type' => 'percentage',
+            'value' => 50.00,
+            'min_order' => 200000.00,
+            'max_usage' => 100,
+            'max_usage_per_user' => 1,
+            'start_date' => now()->subDays(1),
+            'end_date' => now()->addDays(30),
+            'is_active' => true,
+            'for_all_products' => true,
+        ]);
+        $promo2 = \App\Models\Promo::create([
+            'code' => 'KELAS50',
             'name' => 'Diskon 50%',
             'description' => 'Promo spesial 50%',
             'type' => 'percentage',
@@ -284,8 +298,23 @@ class DemoSeeder extends Seeder
             'for_all_products' => true,
         ]);
 
-        $promo2 = \App\Models\Promo::create([
-            'code' => 'JTIPORT100K',
+        $promo3 = \App\Models\Promo::create([
+            'code' => 'COURSE100K',
+            'name' => 'Potongan 100 Ribu',
+            'description' => 'Potongan langsung Rp100.000',
+            'type' => 'fixed',
+            'value' => 100000.00,
+            'min_order' => 200000.00,
+            'max_usage' => null,
+            'max_usage_per_user' => 1,
+            'start_date' => now()->subDays(1),
+            'end_date' => now()->addDays(30),
+            'is_active' => true,
+            'for_all_products' => true,
+        ]);
+
+        $promo4 = \App\Models\Promo::create([
+            'code' => 'KELAS100K',
             'name' => 'Potongan 100 Ribu',
             'description' => 'Potongan langsung Rp100.000',
             'type' => 'fixed',

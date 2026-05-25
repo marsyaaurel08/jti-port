@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
-use App\Models\Class as ClassModel;
 use App\Models\Course;
 use App\Models\CourseClass;
 use App\Models\Order;
@@ -145,7 +144,7 @@ class PaymentController extends Controller
      */
     private function generateInvoiceNumber(int $userId): string
     {
-        $micro = sprintf('%06d', (int)((microtime(true) - floor(microtime(true))) * 1000000));
+        $micro = sprintf('%06d', (int) ((microtime(true) - floor(microtime(true))) * 1000000));
 
         return 'INV-LOADTEST-' .
             date('YmdHis') .
@@ -217,7 +216,10 @@ class PaymentController extends Controller
                 }
 
                 // Validate promo applies to this course
-                if (! $promo->for_all_products && ! $promo->products()->where('course_id', $course->id)->exists()) {
+                if (! $promo->for_all_products && ! $promo->products()
+                    ->where('type_product', 'course')
+                    ->where('product_id', $course->id)
+                    ->exists()) {
                     throw new \Exception('Promo does not apply to this course.');
                 }
 
