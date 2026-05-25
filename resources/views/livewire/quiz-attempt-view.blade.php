@@ -34,6 +34,8 @@
             const component = window.Livewire.find(livewireEl.getAttribute('wire:id'));
             if (!component) return;
 
+            // Performance optimization: Batch all property updates into a single object
+            const updates = {};
             const answeredIds = [];
 
             for (const [questionId, answerData] of Object.entries(savedData.answers)) {
@@ -43,16 +45,21 @@
                 const { answer, questionType } = answerData;
 
                 if (questionType === 'drag_drop_sorting' && Array.isArray(answer)) {
-                    component.set('dragDropAnswers.' + questionId, answer);
+                    updates['dragDropAnswers.' + questionId] = answer;
                 } else if (questionType === 'matching' && typeof answer === 'object') {
-                    component.set('matchingAnswers.' + questionId, answer);
+                    updates['matchingAnswers.' + questionId] = answer;
                 } else if (questionType === 'drop_down' && typeof answer === 'object') {
-                    component.set('dropDownAnswers.' + questionId, answer);
+                    updates['dropDownAnswers.' + questionId] = answer;
                 } else if (questionType === 'multiple_choice' && Array.isArray(answer)) {
-                    component.set('multipleChoiceAnswers.' + questionId, answer);
+                    updates['multipleChoiceAnswers.' + questionId] = answer;
                 } else if (questionType === 'single_choice' || questionType === 'boolean') {
-                    component.set('answers.' + questionId, answer);
+                    updates['answers.' + questionId] = answer;
                 }
+            }
+
+            // Performance optimization: Single batch update instead of multiple set() calls
+            if (Object.keys(updates).length > 0) {
+                component.set(updates);
             }
 
             if (answeredIds.length > 0) {
@@ -298,14 +305,14 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('[QuizTimer] DOMContentLoaded fired');
-        console.log('[QuizTimer] timeRemaining:', {{ $timeRemaining }});
-        console.log('[QuizTimer] quizId:', {{ $quizId }});
-        console.log('[QuizTimer] window.QuizTimer available:', !!window.QuizTimer);
+        // console.log('[QuizTimer] DOMContentLoaded fired');
+        // console.log('[QuizTimer] timeRemaining:', {{ $timeRemaining }});
+        // console.log('[QuizTimer] quizId:', {{ $quizId }});
+        // console.log('[QuizTimer] window.QuizTimer available:', !!window.QuizTimer);
 
         // Initialize QuizTimer when page loads
         if (window.QuizTimer) {
-            console.log('[QuizTimer] Initializing timer...');
+            // console.log('[QuizTimer] Initializing timer...');
             window.QuizTimer.init({{ $timeRemaining }}, {{ $quizId }});
         } else {
             console.error('[QuizTimer] QuizTimer not available! Module may not have loaded.');
@@ -314,7 +321,7 @@
 
     // Clean up timer when leaving page
     window.addEventListener('beforeunload', function() {
-        console.log('[QuizTimer] beforeunload event fired');
+        // console.log('[QuizTimer] beforeunload event fired');
         if (window.QuizTimer) {
             window.QuizTimer.stopTimer();
         }

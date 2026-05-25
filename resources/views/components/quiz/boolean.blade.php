@@ -17,7 +17,7 @@
             <input
                 type="radio"
                 name="answer_{{ $questionId }}"
-                wire:model="{{ $wireModel }}"
+                wire:model.lazy="{{ $wireModel }}"
                 value="{{ $option['id'] }}"
                 class="absolute inset-0 opacity-0 cursor-pointer quiz-input">
 

@@ -122,7 +122,7 @@
                             <div class="space-y-1">
                                 @foreach ($chapter['lessons'] as $chapterLesson)
                                     @php
-                                        $isCompleted = isset($completedLessonIds[$chapterLesson['id']]);
+                                        $isCompleted = isset($completedIdsSet[$chapterLesson['id']]);
                                         $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
                                         $isAccessible = $isCompleted ||
                                                         $chapterLesson['id'] === $nextAccessibleLessonId ||
@@ -183,7 +183,7 @@
                                     <div class="space-y-1">
                                         @foreach ($chapter['lessons'] as $chapterLesson)
                                             @php
-                                                $isCompleted = isset($completedLessonIds[$chapterLesson['id']]);
+                                                $isCompleted = isset($completedIdsSet[$chapterLesson['id']]);
                                                 $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
                                                 $isAccessible = $isCompleted ||
                                                                 $chapterLesson['id'] === $nextAccessibleLessonId ||
