@@ -113,26 +113,6 @@
             <p class="text-xs text-gray-500">{{ count($completedLessonIds) }}/{{ $course['total_lessons'] ?? 0 }} pelajaran</p>
         </div>
 
-        @php
-            $nextAccessibleLessonId = null;
-            $allLessonsCompleted = false;
-            $allLessons = [];
-            foreach ($chapters as $chapter) {
-                foreach ($chapter['lessons'] as $lessonItem) {
-                    $allLessons[] = $lessonItem;
-                }
-            }
-            // Check if all lessons are completed
-            $allLessonsCompleted = count($completedLessonIds) >= count($allLessons);
-            // Find the first uncompleted lesson
-            foreach ($allLessons as $lessonItem) {
-                if (!in_array($lessonItem['id'], $completedLessonIds)) {
-                    $nextAccessibleLessonId = $lessonItem['id'];
-                    break;
-                }
-            }
-        @endphp
-
             <div class="space-y-2">
                 @if (!empty($chapters))
                     @foreach ($chapters as $chapter)
@@ -142,7 +122,7 @@
                             <div class="space-y-1">
                                 @foreach ($chapter['lessons'] as $chapterLesson)
                                     @php
-                                        $isCompleted = in_array($chapterLesson['id'], $completedLessonIds);
+                                        $isCompleted = isset($completedLessonIds[$chapterLesson['id']]);
                                         $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
                                         $isAccessible = $isCompleted ||
                                                         $chapterLesson['id'] === $nextAccessibleLessonId ||
@@ -203,7 +183,7 @@
                                     <div class="space-y-1">
                                         @foreach ($chapter['lessons'] as $chapterLesson)
                                             @php
-                                                $isCompleted = in_array($chapterLesson['id'], $completedLessonIds);
+                                                $isCompleted = isset($completedLessonIds[$chapterLesson['id']]);
                                                 $isActive = isset($lesson) && $chapterLesson['id'] === $lesson->id;
                                                 $isAccessible = $isCompleted ||
                                                                 $chapterLesson['id'] === $nextAccessibleLessonId ||

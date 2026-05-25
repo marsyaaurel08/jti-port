@@ -22,7 +22,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
-        "mallardduck/blade-lucide-icons": "^1.26",
+        "mallardduck/blade-lucide-icons": "*",
         "midtrans/midtrans-php": "^2.6",
         "openplain/filament-shadcn-theme": "^1.1",
         "owenvoke/blade-fontawesome": "^2.9",

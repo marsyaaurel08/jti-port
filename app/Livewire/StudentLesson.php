@@ -39,6 +39,12 @@ class StudentLesson extends Component
 
     public $isLessonCompleted = false;
 
+    public $nextAccessibleLessonId = null;
+
+    public $allLessonsCompleted = false;
+
+    public $allLessons = [];
+
     #[Computed]
     public function user()
     {
@@ -99,60 +105,97 @@ class StudentLesson extends Component
                 return;
             }
 
-            // Find the lesson by slug
-            $this->lesson = Lesson::with('chapter')
-                ->where('slug', $this->lessonSlug)
-                ->whereHas('chapter', function ($query) use ($course) {
-                    $query->where('course_id', $course->id);
-                })
+            // Find the lesson by slug - OPTIMIZED: Use join instead of whereHas
+            $this->lesson = Lesson::join('chapters', 'lessons.chapter_id', '=', 'chapters.id')
+                ->where('lessons.slug', $this->lessonSlug)
+                ->where('chapters.course_id', $course->id)
+                ->select('lessons.*')
                 ->firstOrFail();
+
+            // Load chapter relationship
+            $this->lesson->load('chapter');
 
             // Load quiz if lesson type is quiz
             if ($this->lesson->type === 'quiz') {
                 $this->lesson->load('quiz');
             }
 
-            // Get all chapters with lessons for the sidebar
+            // Get all chapters with lessons for the sidebar - OPTIMIZED: Select only needed fields
             $chapters = Chapter::with(['lessons' => function ($query) {
-                $query->orderBy('sort_order');
+                $query->select('id', 'chapter_id', 'title', 'slug', 'sort_order')
+                    ->orderBy('sort_order');
             }])
+                ->select('id', 'course_id', 'title', 'sort_order')
                 ->where('course_id', $course->id)
                 ->orderBy('sort_order')
                 ->get();
 
-            $this->chapters = $chapters->map(fn($chapter) => [
-                'id' => $chapter->id,
-                'title' => $chapter->title,
-                'sort_order' => $chapter->sort_order,
-                'lessons' => $chapter->lessons->toArray(),
-            ])->toArray();
+            // Build chapters array and collect all lessons for navigation
+            $this->allLessons = [];
+            $this->chapters = [];
 
-            // Get completed lesson IDs for the user
+            foreach ($chapters as $chapter) {
+                $chapterData = [
+                    'id' => $chapter->id,
+                    'title' => $chapter->title,
+                    'sort_order' => $chapter->sort_order,
+                    'lessons' => $chapter->lessons->toArray(),
+                ];
+                $this->chapters[] = $chapterData;
+
+                // Collect lessons for navigation
+                foreach ($chapter->lessons as $lesson) {
+                    $this->allLessons[] = $lesson;
+                }
+            }
+
+            // Get completed lesson IDs for the user - OPTIMIZED: Using composite index
             $this->completedLessonIds = CourseProgress::where('enrollment_id', $this->enrollment->id)
                 ->where('is_completed', true)
                 ->pluck('lesson_id')
                 ->toArray();
+
+            // Convert to array for faster lookups
+            $completedIdsSet = array_flip($this->completedLessonIds);
 
             // Calculate progress percentage
             $totalLessons = $course->total_lessons;
             $completedCount = count($this->completedLessonIds);
             $this->progress = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
 
-            // Check if current lesson is completed
-            $this->isLessonCompleted = in_array($this->lesson->id, $this->completedLessonIds);
+            // Check if current lesson is completed - OPTIMIZED: Use isset instead of in_array
+            $this->isLessonCompleted = isset($completedIdsSet[$this->lesson->id]);
 
-            // Find previous and next lessons
-            $allLessons = collect();
-            foreach ($chapters as $chapter) {
-                $allLessons = $allLessons->concat($chapter->lessons);
+            // Find previous and next lessons - OPTIMIZED: Use array search instead of collection
+            $currentLessonIndex = -1;
+            foreach ($this->allLessons as $index => $lesson) {
+                if ($lesson->id === $this->lesson->id) {
+                    $currentLessonIndex = $index;
+                    break;
+                }
             }
 
-            $currentLessonIndex = $allLessons->search(function ($item) {
-                return $item->id === $this->lesson->id;
-            });
+            if ($currentLessonIndex > 0) {
+                $this->previousLesson = $this->allLessons[$currentLessonIndex - 1]->toArray();
+            }
 
-            $this->previousLesson = $currentLessonIndex > 0 ? $allLessons[$currentLessonIndex - 1]->toArray() : null;
-            $this->nextLesson = $currentLessonIndex < $allLessons->count() - 1 ? $allLessons[$currentLessonIndex + 1]->toArray() : null;
+            if ($currentLessonIndex >= 0 && $currentLessonIndex < count($this->allLessons) - 1) {
+                $this->nextLesson = $this->allLessons[$currentLessonIndex + 1]->toArray();
+            }
+
+            // Pre-compute lesson accessibility for blade view - OPTIMIZATION
+            $this->allLessonsCompleted = $completedCount >= count($this->allLessons);
+
+            // Find the first uncompleted lesson
+            $this->nextAccessibleLessonId = null;
+            if (!$this->allLessonsCompleted) {
+                foreach ($this->allLessons as $lesson) {
+                    if (!isset($completedIdsSet[$lesson->id])) {
+                        $this->nextAccessibleLessonId = $lesson->id;
+                        break;
+                    }
+                }
+            }
 
             // Log::info('Lesson navigation determined', [
             //     'current_lesson_id' => $this->lesson->id,
@@ -220,7 +263,7 @@ class StudentLesson extends Component
 
         try {
             $isNewCompletion = false;
-            
+
             // Mark current lesson as completed
             $existingProgress = CourseProgress::where('enrollment_id', $this->enrollment->id)
                 ->where('lesson_id', $this->lesson->id)
