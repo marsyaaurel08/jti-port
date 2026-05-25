@@ -11,6 +11,51 @@
     const STORAGE_VERSION = "1.2";
     let isSubmitting = false;
 
+    // Performance optimization: Debounce for answer saving
+    let saveTimeout = null;
+    const SAVE_DEBOUNCE_MS = 500;
+
+    // Performance optimization: Cache Livewire component reference
+    let cachedComponent = null;
+    let cachedWireId = null;
+
+    /**
+     * Get cached Livewire component to avoid repeated DOM queries
+     */
+    function getLivewireComponent() {
+        if (cachedComponent && cachedWireId) {
+            // Verify component still exists
+            try {
+                const component = window.Livewire.find(cachedWireId);
+                if (component) {
+                    return component;
+                }
+            } catch (e) {
+                // Component no longer exists, clear cache
+                cachedComponent = null;
+                cachedWireId = null;
+            }
+        }
+
+        const quizElement = document.querySelector("[data-quiz-id]");
+        if (!quizElement) return null;
+
+        const livewireComponent = quizElement.closest("[wire\\:id]");
+        if (!livewireComponent || !window.Livewire) return null;
+
+        cachedWireId = livewireComponent.getAttribute("wire:id");
+        cachedComponent = window.Livewire.find(cachedWireId);
+        return cachedComponent;
+    }
+
+    /**
+     * Clear cached Livewire component
+     */
+    function clearLivewireCache() {
+        cachedComponent = null;
+        cachedWireId = null;
+    }
+
     /**
      * Get storage key for a specific quiz attempt
      */
@@ -113,24 +158,20 @@
 
             const saved = saveQuizData(quizId, data);
 
-            // Notify Livewire that an answer was removed to update answeredQuestionIds
+            // Performance optimization: Debounce Livewire notification for answer removal
             if (saved && window.Livewire) {
-                const quizElement = document.querySelector("[data-quiz-id]");
-                if (quizElement) {
-                    const livewireComponent =
-                        quizElement.closest("[wire\\:id]");
-                    if (livewireComponent) {
-                        const component = window.Livewire.find(
-                            livewireComponent.getAttribute("wire:id"),
-                        );
-                        if (component) {
-                            component.call(
-                                "answerRemovedFromLocalStorage",
-                                questionId,
-                            );
-                        }
-                    }
+                if (saveTimeout) {
+                    clearTimeout(saveTimeout);
                 }
+                saveTimeout = setTimeout(() => {
+                    const component = getLivewireComponent();
+                    if (component) {
+                        component.call(
+                            "answerRemovedFromLocalStorage",
+                            questionId,
+                        );
+                    }
+                }, SAVE_DEBOUNCE_MS);
             }
 
             return saved;
@@ -153,20 +194,17 @@
 
         const saved = saveQuizData(quizId, data);
 
-        // Notify Livewire that an answer was saved to update answeredQuestionIds
+        // Performance optimization: Debounce Livewire notification for answer saving
         if (saved && window.Livewire) {
-            const quizElement = document.querySelector("[data-quiz-id]");
-            if (quizElement) {
-                const livewireComponent = quizElement.closest("[wire\\:id]");
-                if (livewireComponent) {
-                    const component = window.Livewire.find(
-                        livewireComponent.getAttribute("wire:id"),
-                    );
-                    if (component) {
-                        component.call("answerSavedToLocalStorage", questionId);
-                    }
-                }
+            if (saveTimeout) {
+                clearTimeout(saveTimeout);
             }
+            saveTimeout = setTimeout(() => {
+                const component = getLivewireComponent();
+                if (component) {
+                    component.call("answerSavedToLocalStorage", questionId);
+                }
+            }, SAVE_DEBOUNCE_MS);
         }
 
         return saved;
@@ -226,11 +264,11 @@
                     }
                 }
 
-                // Also restore UI directly for all questions
+                // Performance optimization: Use requestAnimationFrame for immediate UI restoration
                 console.log(
-                    "[quiz-local-storage] Starting UI restoration after 300ms timeout",
+                    "[quiz-local-storage] Starting UI restoration using requestAnimationFrame",
                 );
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     console.log(
                         "[quiz-local-storage] Timeout reached, restoring UI...",
                     );
@@ -331,7 +369,7 @@
                             }
                         }
                     });
-                }, 300);
+                });
             }
 
             // Use event delegation for dynamically created inputs
@@ -561,8 +599,8 @@
             // Listen for restore-question event (from Livewire after loading from localStorage)
             if (window.Livewire) {
                 window.Livewire.on("restore-question", function () {
-                    // Add a delay to allow Livewire to update the DOM
-                    setTimeout(() => {
+                    // Performance optimization: Use requestAnimationFrame for immediate DOM update
+                    requestAnimationFrame(() => {
                         const savedData = getQuizData(quizId);
 
                         if (savedData && savedData.answers) {
@@ -659,7 +697,7 @@
                                 });
                             }
                         }
-                    }, 300);
+                    });
                 });
             }
 

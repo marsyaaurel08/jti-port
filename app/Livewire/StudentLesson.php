@@ -29,6 +29,8 @@ class StudentLesson extends Component
 
     public $completedLessonIds = [];
 
+    public $completedIdsSet = [];
+
     public $progress = 0;
 
     public $previousLesson = null;
@@ -155,8 +157,8 @@ class StudentLesson extends Component
                 ->pluck('lesson_id')
                 ->toArray();
 
-            // Convert to array for faster lookups
-            $completedIdsSet = array_flip($this->completedLessonIds);
+            // Convert to array for faster lookups - EXPOSED TO VIEW
+            $this->completedIdsSet = array_flip($this->completedLessonIds);
 
             // Calculate progress percentage
             $totalLessons = $course->total_lessons;
@@ -164,7 +166,7 @@ class StudentLesson extends Component
             $this->progress = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
 
             // Check if current lesson is completed - OPTIMIZED: Use isset instead of in_array
-            $this->isLessonCompleted = isset($completedIdsSet[$this->lesson->id]);
+            $this->isLessonCompleted = isset($this->completedIdsSet[$this->lesson->id]);
 
             // Find previous and next lessons - OPTIMIZED: Use array search instead of collection
             $currentLessonIndex = -1;
@@ -190,7 +192,7 @@ class StudentLesson extends Component
             $this->nextAccessibleLessonId = null;
             if (!$this->allLessonsCompleted) {
                 foreach ($this->allLessons as $lesson) {
-                    if (!isset($completedIdsSet[$lesson->id])) {
+                    if (!isset($this->completedIdsSet[$lesson->id])) {
                         $this->nextAccessibleLessonId = $lesson->id;
                         break;
                     }

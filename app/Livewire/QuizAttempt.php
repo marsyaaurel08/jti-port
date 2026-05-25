@@ -14,10 +14,14 @@ use Livewire\Component;
 #[Layout('layouts.quiz')]
 class QuizAttempt extends Component
 {
+    // Performance optimization: Lock immutable properties to prevent Livewire tracking
+    #[\Livewire\Attributes\Locked]
     public $quizId;
 
+    #[\Livewire\Attributes\Locked]
     public $quiz;
 
+    #[\Livewire\Attributes\Locked]
     public $questions = [];
 
     public $attempt;
@@ -36,6 +40,7 @@ class QuizAttempt extends Component
 
     public $answeredQuestionIds = [];
 
+    #[\Livewire\Attributes\Locked]
     public $timeRemaining = 0;
 
     public $showSubmitConfirmation = false;
@@ -58,9 +63,13 @@ class QuizAttempt extends Component
 
     public function loadQuiz()
     {
-        // Eager-load only what's needed. questions + lesson.chapter.course covers
-        // both the question list and the redirect URL in one query.
-        $this->quiz = Quiz::with(['questions', 'lesson.chapter.course'])
+        // Performance optimization: Select only needed columns and eager-load efficiently
+        $this->quiz = Quiz::with([
+            'questions' => function ($query) {
+                $query->select('id', 'quiz_id', 'type', 'question_text', 'question_config');
+            },
+            'lesson.chapter.course'
+        ])->select('id', 'lesson_id', 'time_limit_minutes')
             ->findOrFail($this->quizId);
 
         // Use a plain array so Livewire doesn't hydrate Eloquent models on every request
@@ -280,42 +289,17 @@ class QuizAttempt extends Component
     {
         $this->isSubmitting = true;
 
-        // Collect all answer maps into a single flat list of rows for one upsert
-        $rows = [];
-        $now  = now();
-        $attemptId = $this->attempt->id;
+        // Performance optimization: Combine all operations in a single transaction
+        DB::transaction(function () {
+            $rows = [];
+            $now  = now();
+            $attemptId = $this->attempt->id;
 
-        // Single-value answers (single_choice, boolean) — encoded as JSON
-        foreach ($this->answers as $questionId => $answer) {
-            if ($answer === null) {
-                continue;
-            }
-            $rows[$questionId] = [
-                'quiz_attempt_id' => $attemptId,
-                'question_id'     => $questionId,
-                'user_answer'     => json_encode($answer),
-                'is_correct'      => false,
-                'score_obtained'  => 0,
-                'created_at'      => $now,
-                'updated_at'      => $now,
-            ];
-        }
-
-        // Array answers — stored as JSON
-        $jsonSources = [
-            $this->multipleChoiceAnswers,
-            $this->matchingAnswers,
-            $this->dragDropAnswers,
-            $this->dropDownAnswers,
-        ];
-
-        foreach ($jsonSources as $source) {
-            foreach ($source as $questionId => $answer) {
-                if (empty($answer)) {
+            // Single-value answers (single_choice, boolean) — encoded as JSON
+            foreach ($this->answers as $questionId => $answer) {
+                if ($answer === null) {
                     continue;
                 }
-                // Later sources overwrite earlier ones for the same question ID,
-                // which is safe because each question type only appears in one map.
                 $rows[$questionId] = [
                     'quiz_attempt_id' => $attemptId,
                     'question_id'     => $questionId,
@@ -326,28 +310,59 @@ class QuizAttempt extends Component
                     'updated_at'      => $now,
                 ];
             }
-        }
 
-        if (! empty($rows)) {
+            // Array answers — stored as JSON
+            $jsonSources = [
+                $this->multipleChoiceAnswers,
+                $this->matchingAnswers,
+                $this->dragDropAnswers,
+                $this->dropDownAnswers,
+            ];
+
+            foreach ($jsonSources as $source) {
+                foreach ($source as $questionId => $answer) {
+                    if (empty($answer)) {
+                        continue;
+                    }
+                    // Later sources overwrite earlier ones for the same question ID,
+                    // which is safe because each question type only appears in one map.
+                    $rows[$questionId] = [
+                        'quiz_attempt_id' => $attemptId,
+                        'question_id'     => $questionId,
+                        'user_answer'     => json_encode($answer),
+                        'is_correct'      => false,
+                        'score_obtained'  => 0,
+                        'created_at'      => $now,
+                        'updated_at'      => $now,
+                    ];
+                }
+            }
+
             // One round-trip to the database for all answers
-            DB::table('quiz_answers')->upsert(
-                array_values($rows),
-                ['quiz_attempt_id', 'question_id'],
-                ['user_answer', 'is_correct', 'score_obtained', 'updated_at']
-            );
-        }
+            if (! empty($rows)) {
+                DB::table('quiz_answers')->upsert(
+                    array_values($rows),
+                    ['quiz_attempt_id', 'question_id'],
+                    ['user_answer', 'is_correct', 'score_obtained', 'updated_at']
+                );
+            }
 
-        // Request any remaining answers from localStorage as backup
-        $this->dispatch('requestLocalStorageData');
+            // Request any remaining answers from localStorage as backup
+            // This will trigger submitFromLocalStorage which is also optimized
+            $this->dispatch('requestLocalStorageData');
+        });
     }
 
     #[\Livewire\Attributes\On('finalizeSubmission')]
     public function finalizeSubmission()
     {
-        $scoringService = new QuizScoringService;
-        $scoringService->gradeAttempt($this->attempt);
+        // Performance optimization: Combine grading and finalization in transaction
+        DB::transaction(function () {
+            $scoringService = new QuizScoringService;
+            $scoringService->gradeAttempt($this->attempt);
 
-        $this->attempt->update(['finished_at' => now()]);
+            $this->attempt->update(['finished_at' => now()]);
+        });
 
         $this->dispatch('quiz-submitted');
 
