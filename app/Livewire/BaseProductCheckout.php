@@ -474,7 +474,7 @@ abstract class BaseProductCheckout extends Component
         // Jika countdown masih ada, jalankan redirect setelah jeda waktu habis
         if ($this->successCountdown <= 0) {
             $this->showCustomPaymentModal = false;
-            $this->redirect(route('student.orders'), navigate: true);
+            $this->redirect(route('student.transactions'), navigate: true);
 
             return;
         }
