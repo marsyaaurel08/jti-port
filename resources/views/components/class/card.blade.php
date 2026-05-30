@@ -8,7 +8,7 @@
 
             {{-- Image Section --}}
             <div class="relative h-40 shrink-0 overflow-hidden">
-                <img src="{{ $class->thumbnail_url }}" alt="{{ $class->title }}"
+                <img src="{{ asset('storage/' . $class->thumbnail_url) }}" alt="{{ $class->title }}"
                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>

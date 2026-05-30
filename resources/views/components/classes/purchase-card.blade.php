@@ -5,18 +5,12 @@
 
     {{-- Thumbnail Preview Section --}}
     <div class="relative group cursor-pointer overflow-hidden aspect-video">
-        <img src="{{ $class->thumbnail_url }}"
+        <img src="{{ asset('storage/' . $class->thumbnail_url) }}"
             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Thumbnail">
 
         {{-- Glass Overlay --}}
         <div
             class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-            <div
-                class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-jti-yellow group-hover:text-jti-primary transition-all duration-300">
-                <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                </svg>
-            </div>
         </div>
     </div>
 
@@ -31,11 +25,6 @@
                     </span>
                 </div>
             </div>
-
-            <button title="Bagikan"
-                class="p-2.5 text-gray-500 hover:text-jti-yellow bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all">
-                <i data-lucide="share-2" class="w-4 h-4"></i>
-            </button>
         </div>
 
         {{-- Kapasitas & Enrolled Info --}}

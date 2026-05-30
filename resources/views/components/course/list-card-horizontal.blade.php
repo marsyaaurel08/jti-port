@@ -7,7 +7,7 @@
         {{-- Thumbnail Section --}}
         <div class="md:w-72 h-52 shrink-0 overflow-hidden relative">
             <a href="/courses/{{ $course->slug }}" class="block h-full">
-                <img src="{{ $course->thumbnail_url }}" alt="{{ $course->title }}"
+                <img src="{{ asset('storage/' . $course->thumbnail_url) }}" alt="{{ $course->title }}"
                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
 
                 <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>

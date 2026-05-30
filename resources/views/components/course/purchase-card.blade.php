@@ -6,16 +6,12 @@
 
     {{-- Video Preview Section --}}
     <div class="relative group cursor-pointer overflow-hidden aspect-video">
-        <img src="{{ $course->thumbnail_url }}"
+        <img src="{{ asset('storage/' . $course->thumbnail_url) }}"
             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Thumbnail">
 
         {{-- Glass Overlay --}}
         <div
             class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-            <div
-                class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-jti-yellow group-hover:text-jti-primary transition-all duration-300">
-                <x-lucide-play class="w-4 h-4" />
-            </div>
         </div>
     </div>
 
@@ -40,11 +36,6 @@
                     @endif
                 </div>
             </div>
-
-            <button title="Bagikan"
-                class="p-2.5 text-gray-500 hover:text-jti-yellow bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all">
-                <x-lucide-share-2 class="w-4 h-4" />
-            </button>
         </div>
 
         {{-- Action Buttons --}}
