@@ -77,6 +77,9 @@ abstract class BaseProductCheckout extends Component
     {
         $this->loadProduct($slug);
 
+        // Check if user has pending order for this product
+        $this->checkAndRedirectPendingOrder($slug);
+
         // Pre-fill user info if authenticated
         if (Auth::check()) {
             $user = Auth::user();
@@ -87,7 +90,45 @@ abstract class BaseProductCheckout extends Component
     }
 
     /**
-     * Get the loaded product (Course or CourseClass)
+     * Check if user has pending order and redirect to product show page
+     */
+    protected function checkAndRedirectPendingOrder(string $slug): void
+    {
+        $userId = Auth::id();
+        if (!$userId) {
+            return;
+        }
+
+        $product = $this->getProduct();
+        if (!$product) {
+            return;
+        }
+
+        $pendingOrder = Order::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->whereHas('items', function ($query) {
+                $query->where($this->getProductIdField(), $this->getProduct()->id);
+            })
+            ->latest()
+            ->first();
+
+        if ($pendingOrder) {
+            $this->redirect(route($this->getProductShowRoute(), $slug));
+        }
+    }
+
+    /**
+     * Get product ID field name ('course_id' or 'class_id')
+     */
+    abstract protected function getProductIdField(): string;
+
+    /**
+     * Get product show route name ('courses.show' or 'classes.show')
+     */
+    abstract protected function getProductShowRoute(): string;
+
+    /**
+     * Get product (Course or CourseClass)
      */
     abstract protected function getProduct();
 
