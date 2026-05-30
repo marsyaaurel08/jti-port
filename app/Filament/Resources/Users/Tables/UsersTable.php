@@ -60,16 +60,16 @@ class UsersTable
             ], FiltersLayout::AboveContentCollapsible)
             ->recordActions([
                 EditAction::make(),
-                Action::make('impersonate')
-                    ->label('Impersonate')
-                    ->icon('heroicon-o-finger-print')
-                    ->action(function ($record) {
-                        $impersonate = ImpersonateAction::make()
-                            ->redirectTo(route('filament.admin.pages.dashboard'));
+                // Action::make('impersonate')
+                //     ->label('Impersonate')
+                //     ->icon('heroicon-o-finger-print')
+                //     ->action(function ($record) {
+                //         $impersonate = ImpersonateAction::make()
+                //             ->redirectTo(route('filament.admin.pages.dashboard'));
 
-                        return $impersonate->impersonate($record);
-                    })
-                    ->visible(fn ($record) => auth()->user()->canImpersonate() && $record->canBeImpersonated()),
+                //         return $impersonate->impersonate($record);
+                //     })
+                //     ->visible(fn ($record) => auth()->user()->canImpersonate() && $record->canBeImpersonated()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
