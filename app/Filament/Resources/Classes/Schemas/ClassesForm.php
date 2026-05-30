@@ -51,6 +51,7 @@ class ClassesForm
                                 FileUpload::make('thumbnail_url')
                                     ->label('Thumbnail Kelas')
                                     ->image()
+                                    ->disk('public')
                                     ->directory('course-classes'),
 
                                 Toggle::make('is_active')

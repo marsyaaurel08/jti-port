@@ -68,5 +68,5 @@
     </div>
 
     {{-- Mobile Checkout Bar --}}
-    <x-course.mobile-checkout-bar :course="$course" />
+    <x-course.mobile-checkout-bar :course="$course" :is_user_enrolled="$is_user_enrolled"/>
 </x-layouts.app>

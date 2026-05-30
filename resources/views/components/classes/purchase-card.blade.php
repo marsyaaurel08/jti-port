@@ -98,7 +98,8 @@
                     </a>
                 @else
                     {{-- Tombol Checkout (Yellow Theme) --}}
-                    <a href="{{ $targetUrl }}"
+                    <button type="button"
+                        onclick="const modal = document.querySelector('[data-pending-order]'); if (modal) { const evt = new Event('show-pending-modal'); window.dispatchEvent(evt); } else { window.location.href = '{{ $targetUrl }}'; }"
                         class="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-jti-yellow px-6 py-4 text-sm font-semibold text-jti-primary shadow-sm transition-all duration-200 hover:bg-amber-400 hover:shadow-md active:scale-[0.98]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -106,7 +107,7 @@
                                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                         <span class="capitalize">Checkout Sekarang</span>
-                    </a>
+                    </button>
                 @endif
             </div>
             @if (

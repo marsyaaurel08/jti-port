@@ -71,11 +71,12 @@
                     </a>
                 @else
                     {{-- Tombol Checkout (Yellow Theme) --}}
-                    <a href="{{ $targetUrl }}"
+                    <button type="button"
+                        onclick="const modal = document.querySelector('[data-pending-order]'); if (modal) { const evt = new Event('show-pending-modal'); window.dispatchEvent(evt); } else { window.location.href = '{{ $targetUrl }}'; }"
                         class="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-jti-yellow px-6 py-4 text-sm font-semibold text-jti-primary shadow-sm transition-all duration-200 hover:bg-amber-400 hover:shadow-md active:scale-[0.98]">
                         <x-lucide-handbag class="w-5 h-5" />
                         <span class="capitalize">Checkout Sekarang</span>
-                    </a>
+                    </button>
                 @endif
             </div>
             @if (
@@ -91,7 +92,7 @@
                         class="w-4 h-4 text-slate-400 group-hover:text-white transition-colors"></x-lucide-shopping-cart>
 
                     {{-- Loading Spinner --}}
-                    <x-lucide-loader-2 x-show="isLoading" x-cloak class="w-4 h-4 animate-spin text-jti-yellow"/>
+                    <x-lucide-loader-2 x-show="isLoading" x-cloak class="w-4 h-4 animate-spin text-jti-yellow" />
                     <span>Tambah ke Keranjang</span>
                 </button>
             @endif
@@ -102,13 +103,11 @@
             <h5 class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-4">Termasuk di dalamnya:</h5>
             <ul class="space-y-4">
                 <li class="flex items-center gap-3 text-sm text-gray-400 group">
-                    <x-lucide-play-circle
-                        class="w-4 h-4 text-gray-600 group-hover:text-jti-yellow transition-colors" />
+                    <x-lucide-play-circle class="w-4 h-4 text-gray-600 group-hover:text-jti-yellow transition-colors" />
                     <span>{{ $course->total_duration }} Durasi Video</span>
                 </li>
                 <li class="flex items-center gap-3 text-sm text-gray-400 group">
-                    <x-lucide-book-open
-                        class="w-4 h-4 text-gray-600 group-hover:text-jti-yellow transition-colors" />
+                    <x-lucide-book-open class="w-4 h-4 text-gray-600 group-hover:text-jti-yellow transition-colors" />
                     <span>{{ $course->chapters_count }} Bab Pembelajaran</span>
                 </li>
                 <li class="flex items-center gap-3 text-sm text-gray-300 group">
