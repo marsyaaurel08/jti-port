@@ -6,7 +6,7 @@
         {{-- Thumbnail Section --}}
         <div class="md:w-72 h-54 shrink-0 overflow-hidden relative">
             <a href="{{ route('classes.show', $class->slug) }}" class="block h-full">
-                <img src="{{ $class->course->thumbnail_url ?? 'https://via.placeholder.com/400x300' }}"
+                <img src="{{ asset('storage/' . $class->thumbnail_url) }}"
                     alt="{{ $class->title }}"
                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
 
