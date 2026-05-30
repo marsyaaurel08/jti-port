@@ -172,22 +172,7 @@ class ClassStudentService implements ClassStudentContract
 
     public function getClassStatus(Enrollment $enrollment): string
     {
-        $class = $enrollment->class;
-        $now = Carbon::now();
-
-        if ($enrollment->is_completed) {
-            return 'completed';
-        }
-
-        if ($class->start_date > $now) {
-            return 'upcoming';
-        }
-
-        if ($class->end_date < $now) {
-            return 'finished';
-        }
-
-        return 'ongoing';
+        return $enrollment->is_completed ? 'completed' : 'in-progress';
     }
 
     public function isEnrolledInClass(int $userId, int $classId): bool
