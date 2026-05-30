@@ -154,6 +154,9 @@
 
             </div>
         </div>
-        <x-classes.mobile-checkout-bar :class="$class" />
+        <x-classes.mobile-checkout-bar :class="$class" :is_user_enrolled="$is_user_enrolled" />
     </div>
+
+    {{-- Pending Order Modal --}}
+    <x-classes.pending-order-modal :class="$class" :pendingOrder="$pendingOrder" />
 </x-layouts.app>

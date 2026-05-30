@@ -54,15 +54,15 @@
                                     {{ $item->item_name }}
                                 </h4>
                                 <div class="shrink-0">
-                                    @if ($item->course_id)
+                                    @if ($item->class_id)
                                         <span
                                             class="inline-block px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider bg-jti-yellow text-white whitespace-nowrap">
-                                            Course
+                                            Kelas
                                         </span>
                                     @else
                                         <span
-                                            class="inline-block px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider bg-jti-maroon text-jti-primary whitespace-nowrap">
-                                            Kelas
+                                            class="inline-block px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider bg-jti-orange text-white whitespace-nowrap">
+                                            Course
                                         </span>
                                     @endif
                                 </div>

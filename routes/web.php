@@ -8,6 +8,8 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentStatusController;
 use App\Http\Controllers\StudentController;
+use App\Livewire\Pages\ClassShow;
+use App\Livewire\Pages\CourseShow;
 use App\Livewire\StudentCart;
 use App\Livewire\StudentClassCheckout;
 use App\Livewire\StudentClassLesson;
@@ -25,12 +27,13 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // --- Kursus & Kelas (Katalog Publik) ---
 Route::prefix('courses')->name('courses.')->group(function () {
     Route::get('/', [CourseController::class, 'index'])->name('index');
-    Route::get('/{slug}', [CourseController::class, 'show'])->name('show');
+    // Use Livewire CourseShow component for course detail page
+    Route::get('/{slug}', CourseShow::class)->name('show');
 });
 
 Route::prefix('classes')->name('classes.')->group(function () {
     Route::get('/', [ClassesController::class, 'index'])->name('index');
-    Route::get('/{slug}', [ClassesController::class, 'show'])->name('show');
+    Route::get('/{slug}', ClassShow::class)->name('show');
 });
 
 Route::middleware(['auth'])->prefix('/user')->name('user.')->group(function () {
@@ -101,9 +104,9 @@ Route::delete('/auth/{provider}/unlink', [SocialiteController::class, 'unlink'])
 // ============================================================
 
 Route::prefix('payment')->name('payment.')->group(function () {
-    Route::get('/finish', fn () => redirect()->route('student.orders'))->name('finish');
-    Route::get('/unfinish', fn () => redirect()->route('student.orders'))->name('unfinish');
-    Route::get('/error', fn () => redirect()->route('student.orders'))->name('error');
+    Route::get('/finish', fn() => redirect()->route('student.orders'))->name('finish');
+    Route::get('/unfinish', fn() => redirect()->route('student.orders'))->name('unfinish');
+    Route::get('/error', fn() => redirect()->route('student.orders'))->name('error');
 });
 
 Route::get('/payment/check-status/{externalId}', [PaymentStatusController::class, 'check'])

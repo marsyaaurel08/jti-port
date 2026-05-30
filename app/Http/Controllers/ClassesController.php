@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CourseClass;
+use App\Models\Order;
 
 class ClassesController extends Controller
 {
@@ -37,6 +38,22 @@ class ClassesController extends Controller
                 ->firstOrFail();
         });
 
-        return view('pages.classes.show', ['class' => $courseClass, 'is_user_enrolled' => $is_user_enrolled]);
+        // Check for pending order
+        $pendingOrder = null;
+        if ($user_id) {
+            $pendingOrder = Order::where('user_id', $user_id)
+                ->where('status', 'pending')
+                ->whereHas('items', function ($query) use ($courseClass) {
+                    $query->where('class_id', $courseClass->id);
+                })
+                ->latest()
+                ->first();
+        }
+
+        return view('pages.classes.show', [
+            'class' => $courseClass,
+            'is_user_enrolled' => $is_user_enrolled,
+            'pendingOrder' => $pendingOrder,
+        ]);
     }
 }

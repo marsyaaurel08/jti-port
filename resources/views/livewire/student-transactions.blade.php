@@ -75,7 +75,7 @@
                                     @php
                                         $firstItem = $transaction->orderItems->first();
                                         $typeLabel =
-                                            $firstItem && $firstItem->course_id
+                                            $firstItem && $firstItem->class_id
                                                 ? 'Pembayaran course'
                                                 : 'Pembayaran kelas';
                                     @endphp

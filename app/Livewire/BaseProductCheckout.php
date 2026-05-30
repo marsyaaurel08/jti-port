@@ -55,7 +55,7 @@ abstract class BaseProductCheckout extends Component
 
     public array $vaData = [];
 
-    public string $redirectRoute = 'student.orders';
+    public string $redirectRoute = 'student.transactions';
 
     public bool $showCustomPaymentModal = false;
 
