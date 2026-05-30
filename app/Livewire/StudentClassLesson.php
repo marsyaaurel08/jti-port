@@ -18,19 +18,33 @@ use Livewire\Component;
 class StudentClassLesson extends Component
 {
     public $classSlug = '';
+
     public $instructor = null;
+
     public $zoomLink = null;
+
     public $lessonSlug = '';
+
     public $course = null;
+
     public $class = null;
+
     public $chapters = [];
+
     public $lesson = null;
+
     public $lessons = [];
+
     public $completedLessonIds = [];
+
     public $progress = 0;
+
     public $previousLesson = null;
+
     public $nextLesson = null;
+
     public $enrollment = null;
+
     public $isLessonCompleted = false;
 
     #[Computed]
@@ -42,7 +56,7 @@ class StudentClassLesson extends Component
     #[Computed]
     public function videoEmbedUrl(): ?string
     {
-        if (!$this->lesson || !$this->lesson->content_url) {
+        if (! $this->lesson || ! $this->lesson->content_url) {
             return null;
         }
 
@@ -78,7 +92,7 @@ class StudentClassLesson extends Component
 
             // 2. Ambil course dari relasi kelas
             $course = $class->course;
-            if (!$course || $course->status !== 'published') {
+            if (! $course || $course->status !== 'published') {
                 throw new \Exception('Course not found or not published');
             }
             $this->course = $course->toArray();
@@ -93,9 +107,10 @@ class StudentClassLesson extends Component
                 ->latest('id')
                 ->first();
 
-            if (!$this->enrollment) {
+            if (! $this->enrollment) {
                 session()->flash('error', 'Anda tidak memiliki akses ke kelas ini.');
                 redirect()->route('courses.show', $course->slug);
+
                 return;
             }
 
@@ -148,7 +163,7 @@ class StudentClassLesson extends Component
             $this->nextLesson = $currentLessonIndex < $allLessons->count() - 1 ? $allLessons[$currentLessonIndex + 1]->toArray() : null;
 
             // 8. Auto-mark last lesson
-            if ($this->nextLesson === null && !$this->isLessonCompleted) {
+            if ($this->nextLesson === null && ! $this->isLessonCompleted) {
                 $existingProgress = CourseProgress::where('enrollment_id', $this->enrollment->id)
                     ->where('lesson_id', $this->lesson->id)
                     ->first();
@@ -164,6 +179,15 @@ class StudentClassLesson extends Component
                 $this->isLessonCompleted = true;
                 $completedCount = count($this->completedLessonIds) + 1;
                 $this->progress = $totalLessons > 0 ? round(($completedCount / $totalLessons) * 100) : 0;
+
+                // Update enrollment status if all lessons are now completed
+                if ($totalLessons > 0 && $completedCount >= $totalLessons && ! $this->enrollment->is_completed) {
+                    $this->enrollment->update([
+                        'is_completed' => true,
+                        'completed_at' => now(),
+                        'completed_lesson_count' => $completedCount,
+                    ]);
+                }
             }
 
             // 9. Update last accessed lesson
@@ -175,7 +199,6 @@ class StudentClassLesson extends Component
             session()->flash('error', 'Gagal memuat materi kelas. Silakan coba lagi.');
         }
     }
-
 
     public function markAsCompletedAndNext(): void
     {
@@ -194,10 +217,30 @@ class StudentClassLesson extends Component
                 ]);
             }
 
+            // Check if all lessons are completed and update enrollment status
+            $course = $this->course;
+            if ($course) {
+                $totalLessons = $course['total_lessons'] ?? 0;
+                $completedCount = CourseProgress::where('enrollment_id', $this->enrollment->id)
+                    ->where('is_completed', true)
+                    ->count();
+
+                $updateData = [
+                    'completed_lesson_count' => $completedCount,
+                ];
+
+                if ($totalLessons > 0 && $completedCount >= $totalLessons && ! $this->enrollment->is_completed) {
+                    $updateData['is_completed'] = true;
+                    $updateData['completed_at'] = now();
+                }
+
+                $this->enrollment->update($updateData);
+            }
+
             if ($this->nextLesson) {
                 $this->redirect(route('student.classLesson', [
                     'classSlug' => $this->classSlug,
-                    'lessonSlug' => $this->nextLesson['slug']
+                    'lessonSlug' => $this->nextLesson['slug'],
                 ]));
             } else {
                 session()->flash('info', 'Selamat! Anda telah menyelesaikan semua pelajaran di kelas ini.');
