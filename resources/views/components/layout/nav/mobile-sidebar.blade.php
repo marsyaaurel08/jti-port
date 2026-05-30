@@ -158,7 +158,7 @@
 
                 {{-- Logout Section --}}
                 <div class="p-6 mt-auto border-t border-gray-100">
-                    <form method="POST" action="{{ route('filament.admin.auth.logout') }}">
+                    <form method="POST" action="{{ $user->hasRole(['admin', 'super_admin', 'pengajar']) ? route('filament.admin.auth.logout') : route('filament.user.auth.logout') }}">
                         @csrf
                         <button type="submit"
                             class="w-full flex items-center justify-center gap-3 px-4 py-4 text-xs text-red-500 font-black uppercase tracking-widest rounded-2xl bg-red-50 hover:bg-red-100 transition-all">

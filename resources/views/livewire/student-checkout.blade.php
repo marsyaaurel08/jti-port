@@ -26,7 +26,7 @@
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-8">
                         {{-- Product Image --}}
                         <div class="relative group mx-auto sm:mx-0 shrink-0">
-                            <img src="{{ $product->thumbnail_url }}" alt="{{ $product->title }}"
+                            <img src="{{ asset('storage/' . $product->thumbnail_url) }}" alt="{{ $product->title }}"
                                 class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-xl shadow-md transition-transform group-hover:scale-105">
                         </div>
 

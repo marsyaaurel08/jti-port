@@ -68,7 +68,7 @@
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2 mb-0.5">
                                         <span
-                                            class="text-sm font-semibold text-slate-900 truncate capitalize">inv-{{ $transaction->invoice_number }}</span>
+                                            class="text-sm font-semibold text-slate-900 truncate capitalize">{{ $transaction->invoice_number }}</span>
                                         <span
                                             class="text-[11px] font-medium text-slate-400 shrink-0">{{ $transaction->created_at->format('d M, Y') }}</span>
                                     </div>

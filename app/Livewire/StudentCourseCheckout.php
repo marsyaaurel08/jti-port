@@ -33,6 +33,16 @@ class StudentCourseCheckout extends BaseProductCheckout
         return 'course_id';
     }
 
+    protected function getProductIdField(): string
+    {
+        return 'course_id';
+    }
+
+    protected function getProductShowRoute(): string
+    {
+        return 'courses.show';
+    }
+
     protected function loadProduct(string $slug): void
     {
         // Load course from Redis cache first, fallback to database

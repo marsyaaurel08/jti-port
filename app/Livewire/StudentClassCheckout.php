@@ -34,6 +34,16 @@ class StudentClassCheckout extends BaseProductCheckout
         return 'class_id';
     }
 
+    protected function getProductIdField(): string
+    {
+        return 'class_id';
+    }
+
+    protected function getProductShowRoute(): string
+    {
+        return 'classes.show';
+    }
+
     protected function loadProduct(string $slug): void
     {
         $cacheKey = $this->getCacheKey($slug);

@@ -22,10 +22,6 @@ class ClassesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('thumbnail_url')
-                    ->label('Thumbnail')
-                    ->circular(),
-
                 TextColumn::make('title')
                     ->label('Judul')
                     ->searchable()
