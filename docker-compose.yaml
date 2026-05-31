@@ -10,7 +10,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "./docker/nginx:/etc/nginx/conf.d"
+      - "./docker/nginx/${NGINX_CONFIG_DIR:-server1}:/etc/nginx/conf.d"   # ← Diubah sedikit
       - "app_storage:/var/www/html/storage"
       - "/etc/letsencrypt:/etc/letsencrypt:ro"      # ← SSL dari host
       - "/var/www/certbot:/var/www/certbot:ro"       # ← certbot challenge

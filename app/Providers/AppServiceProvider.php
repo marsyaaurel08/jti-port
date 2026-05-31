@@ -2,13 +2,27 @@
 
 namespace App\Providers;
 
-use App\Contract\{CourseStudentContract, ClassStudentContract};
+use App\Contract\ClassStudentContract;
+use App\Contract\CourseStudentContract;
+use App\Http\Responses\LoginResponse;
 use App\Http\Responses\LogoutResponse;
-use App\Models\{Category, Order, User, UserCart};
-use App\Observers\{CategoryObserver, OrderObserver, UserCartObserver, UserObserver};
-use App\Services\{ClassStudentService, CourseStudentService};
+use App\Models\Category;
+use App\Models\Order;
+use App\Models\User;
+use App\Models\UserCart;
+use App\Observers\CategoryObserver;
+use App\Observers\OrderObserver;
+use App\Observers\UserCartObserver;
+use App\Observers\UserObserver;
+use App\Services\ClassStudentService;
+use App\Services\CourseStudentService;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse as ContractsLoginResponse;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as ContractsLogoutResponse;
-use Illuminate\Support\Facades\{Auth, Blade, Cache, URL, View};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -18,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('local', 'staging')) {  // atau hanya 'local'
             $this->app->register(\App\Providers\TelescopeServiceProvider::class);
         }
+        $this->app->bind(ContractsLoginResponse::class, LoginResponse::class);
         $this->app->bind(ContractsLogoutResponse::class, LogoutResponse::class);
         $this->app->bind(CourseStudentContract::class, CourseStudentService::class);
         $this->app->bind(ClassStudentContract::class, ClassStudentService::class);
@@ -40,21 +55,22 @@ class AppServiceProvider extends ServiceProvider
 
         // Cache categories untuk navbar dengan durasi 24 jam - untuk semua user
         View::composer('*', function ($view) {
-            $categories = Cache::remember('categories', 86400, fn() => Category::all());
+            $categories = Cache::remember('categories', 86400, fn () => Category::all());
 
-            if (!Auth::check()) {
+            if (! Auth::check()) {
                 $view->with([
                     'categories' => $categories,
                     'cartCount' => 0,
                     'isStaff' => false,
                     'user' => null,
                 ]);
+
                 return;
             }
 
             $user = Auth::user();
-            $user = Cache::remember("user_{$user->id}", 3600, fn() => $user->fresh());
-            $isStaff = Cache::remember("user_staff_{$user->id}", 3600, fn() => $user->hasRole(['super_admin', 'admin', 'pengajar']));
+            $user = Cache::remember("user_{$user->id}", 3600, fn () => $user->fresh());
+            $isStaff = Cache::remember("user_staff_{$user->id}", 3600, fn () => $user->hasRole(['super_admin', 'admin', 'pengajar']));
 
             $view->with(array_merge(
                 compact('categories', 'user'),

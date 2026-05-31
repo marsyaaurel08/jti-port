@@ -16,13 +16,17 @@ SERVER=${2:-server-ihza}
 DOCKER_IMAGE="${DOCKER_HUB_USERNAME}/jtiport:${IMAGE_TAG}"
 NETWORK_NAME="jtiport_network"
 PROJECT_NAME="jtiport"
+
+# ==================== TAMBAHAN UNTUK MULTI SERVER ====================
+NGINX_CONFIG_DIR=${NGINX_CONFIG_DIR:-server_ihza}
+
 if [ "$SERVER" = "server-ihza" ]; then
     BACKUP_DIR="$HOME/backups/jtiport"
 else
     BACKUP_DIR="/home/dika/backups/jtiport"
 fi
 STATE_FILE="$BACKUP_DIR/deployment.state"
-NGINX_CONF_DIR="./docker/nginx"
+NGINX_CONF_DIR="./docker/nginx/${NGINX_CONFIG_DIR}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 APP_ENV="${APP_ENV:-production}"
 
@@ -162,7 +166,7 @@ if is_container_running "${PROJECT_NAME}_nginx"; then
     fi
 else
     echo -e "${YELLOW}🚀 Starting Nginx for the first time...${NC}"
-    docker compose up -d nginx
+    NGINX_CONFIG_DIR=$NGINX_CONFIG_DIR docker compose up -d nginx
     for i in $(seq 1 15); do
         if is_container_running "${PROJECT_NAME}_nginx"; then
             echo -e "${GREEN}✅ Nginx started. Traffic is on $NEW_NAME${NC}"
