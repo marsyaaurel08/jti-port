@@ -20,13 +20,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # FIX UTAMA: Strip CRLF SEBELUM build.
-      # Harus di sini — bukan di Dockerfile dan bukan di deploy job.
-      # Alasannya:
-      #   - Di Dockerfile: kalau layer ter-cache, RUN sed tidak dieksekusi
-      #     ulang sehingga CRLF dari build sebelumnya bisa lolos.
-      #   - Di deploy job: terlambat, file sudah masuk image saat build.
-      #   - Di sini (sebelum build): file yang di-COPY ke image sudah LF.
       - name: Strip Windows line endings (CRLF -> LF)
         run: |
           sed -i 's/\r//' docker-entrypoint.sh deploy.sh rollback.sh
@@ -55,7 +48,7 @@ jobs:
           cache-to: type=inline
 
   # ====================================================================
-  # JOB 2: DEPLOY TO PRODUCTION
+  # JOB 2: DEPLOY TO PRODUCTION (2 Servers)
   # ====================================================================
   deploy-production:
     name: Deploy to Production
@@ -65,7 +58,12 @@ jobs:
     environment: production
     strategy:
       matrix:
-        server: [server-ihza] # Nilai inilah yang diambil!
+        include:
+          - server: server-ihza
+            nginx_config: server_ihza          # ← konfigurasi nginx untuk server ini
+          - server: server-jti           # ganti dengan label runner kamu
+            nginx_config: server_jti          # ← konfigurasi nginx untuk server ini
+
     steps:
       - name: Repair workspace permissions (self-hosted)
         run: |
@@ -98,6 +96,7 @@ jobs:
           LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           APP_ENV: production
+          NGINX_CONFIG_DIR: ${{ matrix.nginx_config }}
         run: ./deploy.sh ${{ github.sha }} ${{ matrix.server }}
 
       - name: Smoke Test
@@ -118,12 +117,13 @@ jobs:
         if: success()
         run: |
           curl -s -X POST -H "Content-Type: application/json" \
-            -d '{"text":"✅ *JTIport* deployed\nCommit: `${{ github.sha }}`\nBy: ${{ github.actor }}"}' \
+            -d '{"text":"✅ *JTIport* deployed successfully\nServer: ${{ matrix.server }}\nConfig: ${{ matrix.nginx_config }}\nCommit: `${{ github.sha }}`\nBy: ${{ github.actor }}"}' \
             ${{ secrets.SLACK_WEBHOOK_URL }} || true
 
       - name: Notify Failure
         if: failure()
         run: |
           curl -s -X POST -H "Content-Type: application/json" \
-            -d '{"text":"❌ *JTIport* deployment FAILED\nCommit: `${{ github.sha }}`\nCheck: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+            -d '{"text":"❌ *JTIport* deployment FAILED\nServer: ${{ matrix.server }}\nCommit: `${{ github.sha }}`\nCheck: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+            ${{ secrets.SLACK_WEBHOOK_URL }} || true
             ${{ secrets.SLACK_WEBHOOK_URL }} || true
