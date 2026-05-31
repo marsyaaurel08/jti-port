@@ -10,7 +10,6 @@ use App\Filament\Resources\ClassResults\Schemas\ClassResultForm;
 use App\Filament\Resources\ClassResults\Schemas\ClassResultInfolist;
 use App\Filament\Resources\ClassResults\Tables\ClassResultsTable;
 use App\Models\ClassResult;
-use App\Models\CourseClass;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -22,10 +21,14 @@ use UnitEnum;
 
 class ClassResultResource extends Resource
 {
-    protected static ?string $model = CourseClass::class;
+    protected static ?string $model = ClassResult::class;
+
     protected static ?string $navigationLabel = 'Progres Kelas';
+
     protected static ?string $pluralLabel = 'Progres Kelas';
+
     protected static ?string $modelLabel = 'Progres Kelas';
+
     protected static string|UnitEnum|null $navigationGroup = 'Kelas';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBarSquare;
@@ -69,6 +72,7 @@ class ClassResultResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
@@ -77,6 +81,7 @@ class ClassResultResource extends Resource
             if (str_contains(auth()->user()->email ?? '', '@admin')) {
                 return $query;
             }
+
             return $query->where('instructor_id', auth()->id());
         }
 

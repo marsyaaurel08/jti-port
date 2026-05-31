@@ -9,20 +9,22 @@ use App\Filament\Widgets\TotalIncomesWidget;
 use App\Filament\Widgets\TotalOrdersWidget;
 use App\Filament\Widgets\TotalUsersWidget;
 use Filament\Forms\Components\Select;
-use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Actions\FilterAction;
+use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersAction;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 
 class Dashboard extends BaseDashboard
 {
     use HasFiltersAction;
 
-    // Tambahkan baris berikut:
     protected static ?string $navigationLabel = 'Dashboard';
 
     protected static ?int $navigationSort = 1;
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasAnyRole(['super_admin', 'admin']) ?? false;
+    }
 
     public function getColumns(): int|array
     {
