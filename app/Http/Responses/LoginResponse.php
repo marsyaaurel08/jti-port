@@ -26,6 +26,6 @@ class LoginResponse implements ContractsLoginResponse
             return Redirect::to('/staff/class-results');
         }
 
-        return Redirect::to('/staff/class-results');
+        return Redirect::to('/');
     }
 }
