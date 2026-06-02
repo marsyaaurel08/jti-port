@@ -22,6 +22,9 @@ class LoginResponse implements ContractsLoginResponse
         if ($user->hasAnyRole(['admin', 'super_admin'])) {
             return Redirect::to('/staff');
         }
+        if ($user->hasRole('pengajar')) {
+            return Redirect::to('/staff/class-results');
+        }
 
         return Redirect::to('/staff/class-results');
     }
