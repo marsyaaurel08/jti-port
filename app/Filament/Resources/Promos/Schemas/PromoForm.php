@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Promos\Schemas;
 
 use App\Models\{Course, CourseClass};
-use Filament\Forms\Components\{DateTimePicker,Repeater,Select,Textarea,TextInput,Toggle};
+use Filament\Forms\Components\{DateTimePicker, Repeater, Select, Textarea, TextInput, Toggle};
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -28,14 +28,22 @@ class PromoForm
                                     ->schema([
                                         TextInput::make('code')
                                             ->label('Kode Promo')
-                                            ->required()
+                                            ->required('Kode promo harus diisi')
+                                            ->validationMessages([
+                                                'required' => 'Kode promo tidak boleh kosong.',
+                                                'unique' => 'Kode promo ini sudah digunakan.',
+                                                'alpha_num' => 'Kode promo hanya boleh mengandung huruf dan angka.',
+                                            ])
                                             ->unique(ignoreRecord: true)
                                             ->alphaNum()
                                             ->placeholder('CONTOH: RAMADAN2026'),
 
                                         TextInput::make('name')
                                             ->label('Nama Promo')
-                                            ->required()
+                                            ->required('Nama promo harus diisi')
+                                            ->validationMessages([
+                                                'required' => 'Nama promo tidak boleh kosong.',
+                                            ])
                                             ->placeholder('Diskon Berkah Ramadan'),
 
                                         Textarea::make('description')
@@ -56,13 +64,20 @@ class PromoForm
                                                 'percentage' => 'Persentase (%)',
                                                 'fixed' => 'Nominal Tetap (Rp)',
                                             ])
-                                            ->required()
+                                            ->required('Tipe potongan harus dipilih')
+                                            ->validationMessages([
+                                                'required' => 'Tipe potongan tidak boleh kosong, pilih salah satu.',
+                                            ])
                                             ->live()
                                             ->default('percentage'),
 
                                         TextInput::make('value')
                                             ->label('Nilai Potongan')
-                                            ->required()
+                                            ->required('Nilai potongan harus diisi')
+                                            ->validationMessages([
+                                                'required' => 'Nilai potongan tidak boleh kosong.',
+                                                'numeric' => 'Nilai potongan harus berupa angka.',
+                                            ])
                                             ->numeric()
                                             ->prefix(fn(callable $get) => $get('type') === 'fixed' ? 'Rp' : null)
                                             ->suffix(fn(callable $get) => $get('type') === 'percentage' ? '%' : null)
@@ -97,13 +112,19 @@ class PromoForm
                                                         'course' => '📚 Kursus (Course)',
                                                         'class' => '🏛️ Kelas (Class)',
                                                     ])
-                                                    ->required()
+                                                    ->required('Jenis item harus dipilih')
+                                                    ->validationMessages([
+                                                        'required' => 'Jenis item tidak boleh kosong, pilih salah satu.',
+                                                    ])
                                                     ->live()
                                                     ->afterStateUpdated(fn(callable $set) => $set('product_id', null)),
 
                                                 Select::make('product_id')
                                                     ->label('Pilih Produk')
-                                                    ->required()
+                                                    ->required('Produk harus dipilih')
+                                                    ->validationMessages([
+                                                        'required' => 'Produk tidak boleh kosong, pilih produk terlebih dahulu.',
+                                                    ])
                                                     ->disabled(fn(callable $get) => !$get('type_product'))
                                                     ->placeholder(fn(callable $get) => !$get('type_product') ? 'Pilih jenis item terlebih dahulu' : 'Cari produk...')
                                                     ->options(function (callable $get) {
@@ -142,12 +163,19 @@ class PromoForm
 
                                         DateTimePicker::make('start_date')
                                             ->label('Waktu Mulai')
-                                            ->required()
+                                            ->required('Tanggal mulai harus diisi')
+                                            ->validationMessages([
+                                                'required' => 'Tanggal mulai tidak boleh kosong.',
+                                            ])
                                             ->native(false),
 
                                         DateTimePicker::make('end_date')
                                             ->label('Waktu Berakhir')
-                                            ->required()
+                                            ->required('Tanggal berakhir harus diisi')
+                                            ->validationMessages([
+                                                'required' => 'Tanggal berakhir tidak boleh kosong.',
+                                                'after' => 'Tanggal berakhir harus lebih akhir dari tanggal mulai.',
+                                            ])
                                             ->native(false)
                                             ->after('start_date'),
                                     ]),
@@ -165,7 +193,11 @@ class PromoForm
                                         TextInput::make('max_usage_per_user')
                                             ->label('Batas per Pengguna')
                                             ->numeric()
-                                            ->required()
+                                            ->required('Batas penggunaan per pengguna harus diisi')
+                                            ->validationMessages([
+                                                'required' => 'Batas penggunaan per pengguna tidak boleh kosong.',
+                                                'numeric' => 'Batas penggunaan harus berupa angka.',
+                                            ])
                                             ->default(1),
                                     ]),
                             ])

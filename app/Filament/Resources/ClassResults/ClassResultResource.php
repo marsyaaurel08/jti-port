@@ -78,7 +78,8 @@ class ClassResultResource extends Resource
         $query = parent::getEloquentQuery();
 
         if (auth()->check()) {
-            if (str_contains(auth()->user()->email ?? '', '@admin')) {
+            $user = auth()->user();
+            if ($user->hasAnyRole(['admin', 'super_admin'])) {
                 return $query;
             }
 
