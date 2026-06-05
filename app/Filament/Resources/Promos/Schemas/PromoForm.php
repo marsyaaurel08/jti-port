@@ -60,6 +60,7 @@ class PromoForm
                                     ->schema([
                                         Select::make('type')
                                             ->label('Tipe Potongan')
+                                            ->placeholder('Pilih tipe potongan')
                                             ->options([
                                                 'percentage' => 'Persentase (%)',
                                                 'fixed' => 'Nominal Tetap (Rp)',
@@ -108,6 +109,7 @@ class PromoForm
                                             ->schema([
                                                 Select::make('type_product')
                                                     ->label('Jenis Item')
+                                                    ->placeholder('Pilih jenis item')
                                                     ->options([
                                                         'course' => '📚 Kursus (Course)',
                                                         'class' => '🏛️ Kelas (Class)',

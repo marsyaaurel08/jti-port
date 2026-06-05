@@ -50,6 +50,7 @@ class UserForm
 
                         Select::make('roles')
                             ->label('User Level (Roles)')
+                            ->placeholder('Pilih 1 atau lebih role')
                             ->multiple()
                             ->relationship('roles', 'name')
                             ->options(function () {

@@ -76,6 +76,7 @@ class ClassesForm
                             ->schema([
                                 Select::make('course_id')
                                     ->live()
+                                    ->placeholder('Pilih kursus')
                                     ->relationship('course', 'title')
                                     ->searchable()
                                     ->preload()
@@ -86,6 +87,7 @@ class ClassesForm
                                     ->afterStateUpdated(fn($state, $set) => $set('category', \App\Models\Course::find($state)?->category?->name)),
 
                                 Select::make('instructor_id')
+                                    ->placeholder('Pilih instruktur')
                                     ->relationship('instructor', 'name')
                                     ->searchable()
                                     ->preload()
@@ -104,6 +106,7 @@ class ClassesForm
                                     }),
 
                                 Select::make('level')
+                                    ->placeholder('Pilih tingkat kesulitan')
                                     ->options([
                                         'beginner' => 'Beginner',
                                         'intermediate' => 'Intermediate',
