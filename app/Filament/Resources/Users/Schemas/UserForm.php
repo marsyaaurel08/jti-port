@@ -20,18 +20,29 @@ class UserForm
                 Section::make('User Information')
                     ->schema([
                         TextInput::make('name')
-                            ->required()
+                            ->required('Nama pengguna harus diisi')
+                            ->validationMessages([
+                                'required' => 'Nama pengguna tidak boleh kosong.',
+                            ])
                             ->maxLength(255),
 
                         TextInput::make('email')
-                            ->email()
-                            ->required()
+                            ->email('Format email tidak valid')
+                            ->required('Email harus diisi')
+                            ->validationMessages([
+                                'required' => 'Email tidak boleh kosong.',
+                                'email' => 'Email harus berformat valid (contoh: user@example.com).',
+                                'unique' => 'Email ini sudah terdaftar di sistem.',
+                            ])
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
 
                         TextInput::make('password')
                             ->password()
-                            ->required(fn(string $context): bool => $context === 'create')
+                            ->required(fn(string $context): bool => $context === 'create' ? 'Password harus diisi' : false)
+                            ->validationMessages([
+                                'required' => 'Password tidak boleh kosong saat membuat user baru.',
+                            ])
                             ->maxLength(255)
                             ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
                             ->dehydrated(fn($state) => filled($state)),
@@ -39,6 +50,7 @@ class UserForm
 
                         Select::make('roles')
                             ->label('User Level (Roles)')
+                            ->placeholder('Pilih 1 atau lebih role')
                             ->multiple()
                             ->relationship('roles', 'name')
                             ->options(function () {
@@ -59,7 +71,10 @@ class UserForm
                             ->searchable()
                             ->helperText('Select one or more roles to assign to this user')
                             ->visible(fn() => Auth::check() && Auth::user()->hasRole('super_admin'))
-                            ->required(),
+                            ->required('Minimal 1 role harus dipilih')
+                            ->validationMessages([
+                                'required' => 'Minimal 1 role harus dipilih untuk user ini.',
+                            ]),
                     ])
                     ->columnSpan(2),
 

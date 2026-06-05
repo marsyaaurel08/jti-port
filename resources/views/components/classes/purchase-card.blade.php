@@ -60,7 +60,7 @@
         <div class="flex flex-col gap-3 mb-8" x-data="{ isLoading: false }">
             @php
                 // Menyiapkan URL agar logika di dalam atribut href tidak terlalu panjang
-                $targetUrl = auth()->check()
+                $targetUrl = auth()->check() && auth()->user()->hasVerifiedEmail()
                     ? ($is_user_enrolled
                         ? route('student.classLesson', [
                             'classSlug' => $class->course->slug,

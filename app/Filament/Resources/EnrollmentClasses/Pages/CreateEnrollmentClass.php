@@ -9,6 +9,7 @@ use App\Models\Enrollment;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\ValidationException;
 
 class CreateEnrollmentClass extends CreateRecord
 {
@@ -31,7 +32,9 @@ class CreateEnrollmentClass extends CreateRecord
                 ->body('Kelas dan minimal 1 siswa harus dipilih')
                 ->danger()
                 ->send();
-            throw new \Exception('Kelas dan siswa harus dipilih');
+            throw ValidationException::withMessages([
+                'class_id' => 'Kelas dan siswa harus dipilih',
+            ]);
         }
 
         // Validasi kapasitas kelas
@@ -46,7 +49,9 @@ class CreateEnrollmentClass extends CreateRecord
                 ->body("Hanya tersedia {$availableSlots} slot, namun anda mencoba mendaftarkan {$studentCount} siswa.")
                 ->danger()
                 ->send();
-            throw new \Exception("Kapasitas kelas tidak cukup. Tersedia {$availableSlots} slot.");
+            throw ValidationException::withMessages([
+                'students' => "Kapasitas kelas tidak cukup. Tersedia {$availableSlots} slot.",
+            ]);
         }
 
         // Cek duplicate user dalam form repeater
@@ -57,7 +62,9 @@ class CreateEnrollmentClass extends CreateRecord
                 ->body('Siswa tidak boleh didaftarkan lebih dari sekali dalam satu form.')
                 ->danger()
                 ->send();
-            throw new \Exception('Ada siswa yang terdaftar lebih dari sekali.');
+            throw ValidationException::withMessages([
+                'students' => 'Ada siswa yang terdaftar lebih dari sekali.',
+            ]);
         }
 
         // Cek apakah siswa sudah terdaftar di kelas ini
@@ -73,7 +80,9 @@ class CreateEnrollmentClass extends CreateRecord
                 ->body("{$enrolledCount} siswa sudah terdaftar di kelas ini.")
                 ->warning()
                 ->send();
-            throw new \Exception('Ada siswa yang sudah terdaftar di kelas ini.');
+            throw ValidationException::withMessages([
+                'students' => 'Ada siswa yang sudah terdaftar di kelas ini.',
+            ]);
         }
 
         // Bulk create enrollments

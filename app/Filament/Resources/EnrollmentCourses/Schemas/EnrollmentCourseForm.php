@@ -27,7 +27,10 @@ class EnrollmentCourseForm
                                     ->prefixIcon('heroicon-m-book-open') // Ikon buku di dalam field
                                     ->searchable()
                                     ->preload()
-                                    ->required()
+                                    ->required('Kursus harus dipilih')
+                                    ->validationMessages([
+                                        'required' => 'Kursus tidak boleh kosong, silakan pilih kursus terlebih dahulu.',
+                                    ])
                                     ->columnSpan(2),
 
                                 // KOLOM KANAN: Repeater Siswa
@@ -45,7 +48,10 @@ class EnrollmentCourseForm
                                             ->placeholder('Pilih siswa...')
                                             ->prefixIcon('heroicon-m-user') // Ikon user di dalam field
                                             ->searchable()
-                                            ->required()
+                                            ->required('Siswa harus dipilih')
+                                            ->validationMessages([
+                                                'required' => 'Nama siswa tidak boleh kosong.',
+                                            ])
                                             ->distinct()
                                             ->disableOptionsWhenSelectedInSiblingRepeaterItems(), // Mencegah duplikasi visual
                                     ])

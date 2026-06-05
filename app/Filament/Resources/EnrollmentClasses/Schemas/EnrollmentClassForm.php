@@ -17,11 +17,15 @@ class EnrollmentClassForm
                     ->description('Pendaftaran manual oleh admin untuk siswa ke kelas spesifik.')
                     ->schema([
                         Select::make('class_id')
-                            ->relationship('class', 'title', fn ($query) => $query->where('is_active', true))
+                            ->relationship('class', 'title', fn($query) => $query->where('is_active', true))
                             ->label('Pilih Kelas')
+                            ->placeholder('Cari nama kelas...')
                             ->searchable()
                             ->preload()
-                            ->required()
+                            ->required('Kelas harus dipilih')
+                            ->validationMessages([
+                                'required' => 'Kelas tidak boleh kosong, silakan pilih kelas terlebih dahulu.',
+                            ])
                             ->live()
                             ->afterStateUpdated(function ($state, $set) {
                                 if (! $state) {
@@ -46,18 +50,22 @@ class EnrollmentClassForm
                             ->suffix(' Kursi'),
 
                         View::make('filament.components.quota-full-warning')
-                            ->hidden(fn (Get $get) => empty($get('class_id')) || (int) $get('available_slots') > 0),
+                            ->hidden(fn(Get $get) => empty($get('class_id')) || (int) $get('available_slots') > 0),
 
                         Repeater::make('students')
                             ->label('Daftar Siswa')
-                            ->hidden(fn (Get $get) => empty($get('class_id')) || (int) $get('available_slots') <= 0)
+                            ->hidden(fn(Get $get) => empty($get('class_id')) || (int) $get('available_slots') <= 0)
                             ->schema([
                                 Select::make('user_id')
                                     ->relationship('user', 'name')
                                     ->label('Nama Siswa')
+                                    ->placeholder('Cari nama siswa...')
                                     ->searchable()
                                     ->preload()
-                                    ->required()
+                                    ->required('Siswa harus dipilih')
+                                    ->validationMessages([
+                                        'required' => 'Nama siswa tidak boleh kosong.',
+                                    ])
                                     ->distinct()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
 
@@ -74,7 +82,7 @@ class EnrollmentClassForm
                             })
 
                             ->minItems(1)
-                            ->collapsed()
+                            ->collapsible()
                             ->cloneable()
                             ->columnSpanFull(),
                     ])->columnSpanFull(),

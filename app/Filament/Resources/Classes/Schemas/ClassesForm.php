@@ -26,7 +26,10 @@ class ClassesForm
                         Section::make('Informasi Utama')
                             ->schema([
                                 TextInput::make('title')
-                                    ->required()
+                                    ->required('Nama kelas harus diisi')
+                                    ->validationMessages([
+                                        'required' => 'Nama kelas tidak boleh kosong.',
+                                    ])
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(
@@ -36,11 +39,18 @@ class ClassesForm
                                 TextInput::make('slug')
                                     ->disabled()
                                     ->dehydrated()
-                                    ->required()
+                                    ->required('Slug harus diisi')
+                                    ->validationMessages([
+                                        'required' => 'Slug tidak boleh kosong.',
+                                        'unique' => 'Slug ini sudah digunakan oleh kelas lain.',
+                                    ])
                                     ->unique(CourseClass::class, 'slug', ignoreRecord: true),
 
                                 RichEditor::make('description')
-                                    ->required()
+                                    ->required('Deskripsi kelas harus diisi')
+                                    ->validationMessages([
+                                        'required' => 'Deskripsi kelas tidak boleh kosong.',
+                                    ])
                                     ->columnSpanFull(),
                             ])
                             ->columnSpan(2),
@@ -66,17 +76,25 @@ class ClassesForm
                             ->schema([
                                 Select::make('course_id')
                                     ->live()
+                                    ->placeholder('Pilih kursus')
                                     ->relationship('course', 'title')
                                     ->searchable()
                                     ->preload()
-                                    ->required()
+                                    ->required('Kursus harus dipilih')
+                                    ->validationMessages([
+                                        'required' => 'Kursus tidak boleh kosong, pilih kursus terlebih dahulu.',
+                                    ])
                                     ->afterStateUpdated(fn($state, $set) => $set('category', \App\Models\Course::find($state)?->category?->name)),
 
                                 Select::make('instructor_id')
+                                    ->placeholder('Pilih instruktur')
                                     ->relationship('instructor', 'name')
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required('Instruktur harus dipilih')
+                                    ->validationMessages([
+                                        'required' => 'Instruktur tidak boleh kosong, pilih instruktur terlebih dahulu.',
+                                    ]),
 
                                 TextInput::make('category')
                                     ->disabled()
@@ -88,12 +106,16 @@ class ClassesForm
                                     }),
 
                                 Select::make('level')
+                                    ->placeholder('Pilih tingkat kesulitan')
                                     ->options([
                                         'beginner' => 'Beginner',
                                         'intermediate' => 'Intermediate',
                                         'advanced' => 'Advanced',
                                     ])
-                                    ->required(),
+                                    ->required('Level kelas harus dipilih')
+                                    ->validationMessages([
+                                        'required' => 'Level kelas tidak boleh kosong, pilih level terlebih dahulu.',
+                                    ]),
                             ])
                             ->columns(2)
                             ->columnSpan(2),
@@ -104,12 +126,20 @@ class ClassesForm
                                 TextInput::make('price')
                                     ->numeric()
                                     ->prefix('IDR')
-                                    ->required(),
+                                    ->required('Harga kelas harus diisi')
+                                    ->validationMessages([
+                                        'required' => 'Harga kelas tidak boleh kosong.',
+                                        'numeric' => 'Harga harus berupa angka.',
+                                    ]),
 
                                 TextInput::make('max_capacity')
                                     ->numeric()
                                     ->label('Kapasitas Maksimal')
-                                    ->required(),
+                                    ->required('Kapasitas maksimal harus diisi')
+                                    ->validationMessages([
+                                        'required' => 'Kapasitas maksimal tidak boleh kosong.',
+                                        'numeric' => 'Kapasitas harus berupa angka.',
+                                    ]),
 
                                 TextInput::make('current_enrolled')
                                     ->numeric()
@@ -122,10 +152,17 @@ class ClassesForm
                         Section::make('Jadwal & Link Pertemuan')
                             ->schema([
                                 DateTimePicker::make('start_date')
-                                    ->required(),
+                                    ->required('Tanggal mulai kelas harus diisi')
+                                    ->validationMessages([
+                                        'required' => 'Tanggal mulai kelas tidak boleh kosong.',
+                                    ]),
 
                                 DateTimePicker::make('end_date')
-                                    ->required()
+                                    ->required('Tanggal akhir kelas harus diisi')
+                                    ->validationMessages([
+                                        'required' => 'Tanggal akhir kelas tidak boleh kosong.',
+                                        'after' => 'Tanggal akhir harus lebih akhir dari tanggal mulai.',
+                                    ])
                                     ->after('start_date'),
 
                                 TextInput::make('meeting_link')

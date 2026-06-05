@@ -25,7 +25,7 @@ class ListClassResults extends ListRecords
     public function getTabs(): array
     {
         $user = auth()->user();
-        $isAdmin = str_contains($user->email, '@admin.');
+        $isAdmin = $user->hasAnyRole(['admin', 'super_admin']);
         $instructorId = $user->id;
 
         return [
