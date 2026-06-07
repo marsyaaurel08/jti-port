@@ -1,6 +1,6 @@
-@props(['show', 'vaData', 'transferMethodName', 'instructions'])
+@props(['show' => false, 'bniPaymentData' => $bniPaymentData])
 
-@if ($show && !empty($vaData))
+@if ($show && !empty($bniPaymentData))
     <div class="fixed inset-0 bg-slate-900/60 z-9999 flex items-center justify-center p-4 backdrop-blur-md"
         x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
@@ -20,7 +20,7 @@
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                         </span>
                         <p class="text-xs text-slate-500 font-medium">
-                            Batas waktu: {{ \Carbon\Carbon::parse($vaData['expired_at'])->diffInHours(now()) }} jam ke
+                            Batas waktu: {{ \Carbon\Carbon::parse($bniPaymentData['expired_at'])->diffInHours(now()) }} jam ke
                             depan
                         </p>
                     </div>
@@ -54,10 +54,10 @@
                         <p class="text-[10px] text-slate-300 font-bold tracking-widest mb-2">NOMOR VIRTUAL ACCOUNT</p>
                         <div class="flex items-center justify-between gap-4">
                             <div class="text-3xl font-mono font-bold text-jti-yellow tracking-widest">
-                                {{ $vaData['va_number'] }}
+                                {{ $bniPaymentData['va_number'] }}
                             </div>
                             <button
-                                @click="navigator.clipboard.writeText('{{ $vaData['va_number'] }}'); $dispatch('notify', {message: 'Nomor VA berhasil disalin!'})"
+                                @click="navigator.clipboard.writeText('{{ $bniPaymentData['va_number'] }}'); $dispatch('notify', {message: 'Nomor VA berhasil disalin!'})"
                                 class="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all active:scale-90 group border border-white/10">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                     class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition" viewBox="0 0 24 24"
@@ -72,12 +72,12 @@
                         <div class="mt-8 grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
                             <div>
                                 <p class="text-[10px] text-slate-400 font-bold mb-1">BANK PENERIMA</p>
-                                <p class="font-bold text-sm">{{ $vaData['bank_name'] }}</p>
+                                <p class="font-bold text-sm">{{ $bniPaymentData['bank_name'] }}</p>
                             </div>
                             <div>
                                 <p class="text-[10px] text-slate-400 font-bold mb-1">TOTAL NOMINAL</p>
                                 <p class="font-bold text-sm text-jti-yellow">
-                                    Rp{{ number_format($vaData['amount'], 0, ',', '.') }}
+                                    Rp{{ number_format($bniPaymentData['amount'], 0, ',', '.') }}
                                 </p>
                             </div>
                         </div>
@@ -88,12 +88,12 @@
                 <div class="space-y-4">
                     <div class="flex items-center gap-2 px-1">
                         <i data-lucide="info" class="w-4 h-4 text-jti-yellow"></i>
-                        <p class="text-xs font-bold text-slate-500 tracking-wide">METODE: {{ $transferMethodName['name'] ?? 'Transfer' }}</p>
+                        <p class="text-xs font-bold text-slate-500 tracking-wide">METODE: {{ $bniPaymentData['transfer_method_name'] ?? 'Transfer' }}</p>
                     </div>
 
                     <div class="bg-slate-50 rounded-2xl border border-slate-100 p-6 shadow-inner">
                         <ul class="space-y-5">
-                            @forelse ($instructions as $index => $step)
+                            @forelse ($bniPaymentData['instructions'] as $index => $step)
                                 <li class="flex gap-4">
                                     <span
                                         class="shrink-0 w-6 h-6 bg-white border border-slate-200 text-jti-primary text-[11px] font-bold flex items-center justify-center rounded-lg shadow-sm">
@@ -115,7 +115,7 @@
                     </div>
                     <p class="text-sm text-amber-900 leading-relaxed">
                         Selesaikan pembayaran sebelum <span
-                            class="font-bold underline">{{ \Carbon\Carbon::parse($vaData['expired_at'])->format('d M Y, H:i') }}
+                            class="font-bold underline">{{ \Carbon\Carbon::parse($bniPaymentData['expired_at'])->format('d M Y, H:i') }}
                             WIB</span>.
                         Pesanan akan dibatalkan otomatis jika melewati batas waktu.
                     </p>

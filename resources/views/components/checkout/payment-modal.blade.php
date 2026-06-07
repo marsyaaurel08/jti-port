@@ -1,5 +1,5 @@
 @props([
-    'showCustomPaymentModal',
+    'showMidtransPaymentModal',
     'paymentModalData',
     'totalAmount',
     'countdownSeconds',
@@ -8,9 +8,34 @@
 ])
 
 {{-- Di tag pembuka div paling luar, pastikan polling dimatikan/diubah kondisinya saat sukses --}}
-<div wire:target="showCustomPaymentModal" @if ($showCustomPaymentModal && !$isPaid) wire:poll.3s="checkPaymentStatus" @endif
+<div x-data="{
+    showToast: false,
+    toastMessage: '',
+    copyToClipboard(text, message) {
+        let cleanText = text.toString().replace(/\D/g, '');
+        navigator.clipboard.writeText(cleanText).then(() => {
+            this.toastMessage = message;
+            this.showToast = true;
+            setTimeout(() => this.showToast = false, 3000);
+        });
+    }
+}" wire:target="showMidtransPaymentModal" @if ($showMidtransPaymentModal && !$isPaid)
+    wire:poll.3s="checkPaymentStatus"
+    @endif
     class="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
-    style="display: {{ $showCustomPaymentModal ? 'flex' : 'none' }}">
+    style="display: {{ $showMidtransPaymentModal ? 'flex' : 'none' }}">
+
+    <!-- Alpine Toast Notification -->
+    <div x-cloak x-show="showToast" x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+        x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
+        class="fixed top-6 left-1/2 -translate-x-1/2 z-10000 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-medium">
+        <x-lucide-check-circle class="w-5 h-5 text-green-400" />
+        <span x-text="toastMessage"></span>
+    </div>
 
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl mx-4 flex flex-col overflow-hidden max-h-[90vh]">
 
@@ -20,7 +45,7 @@
                     {{ $isPaid ? 'Status Pembayaran' : 'Instruksi Pembayaran' }}
                 </h2>
             </div>
-            <button wire:click="closePaymentModal" class="text-gray-400 hover:text-gray-600 transition">
+            <button wire:click="closeMidtransPaymentModal" class="text-gray-400 hover:text-gray-600 transition">
                 <x-lucide-x class="w-6 h-6" />
             </button>
         </div>
@@ -132,14 +157,9 @@
 
                         <div class="flex justify-between items-center mb-6 relative z-10">
                             <p class="text-3xl font-extrabold text-jti-yellow tracking-widest">{{ $paymentCode }}</p>
-                            <button x-data="{
-                                textToCopy: '{{ data_get($paymentModalData, 'va_number') }}',
-                                copied: false
-                            }"
-                                x-on:click="navigator.clipboard.writeText(textToCopy);copied = true;setTimeout(() => copied = false, 2000);"
-                                type="button"
-                                class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 active:scale-95 transition">
-                                <!-- Teks tombol akan berubah otomatis saat berhasil disalin -->
+                            <button type="button"
+                                @click="copyToClipboard('{{ $paymentCode }}', 'Kode Pembayaran disalin!')"
+                                class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 active:scale-95 transition group">
                                 <x-lucide-copy
                                     class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition-transform" />
                             </button>
@@ -171,14 +191,9 @@
                             <p class="text-lg md:text-2xl font-extrabold text-jti-yellow tracking-widest">
                                 {{ data_get($paymentModalData, 'bill_key') ?? data_get($paymentModalData, 'va_number') }}
                             </p>
-                            <button x-data="{
-                                textToCopy: '{{ data_get($paymentModalData, 'va_number') }}',
-                                copied: false
-                            }"
-                                x-on:click="navigator.clipboard.writeText(textToCopy);copied = true;setTimeout(() => copied = false, 2000);"
-                                type="button"
-                                class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 active:scale-95 transition">
-                                <!-- Teks tombol akan berubah otomatis saat berhasil disalin -->
+                            <button type="button"
+                                @click="copyToClipboard('{{ data_get($paymentModalData, 'bill_key') ?? data_get($paymentModalData, 'va_number') }}', 'Nomor Virtual Account disalin!')"
+                                class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 active:scale-95 transition group">
                                 <x-lucide-copy
                                     class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition-transform" />
                             </button>
@@ -263,7 +278,7 @@
 
         {{-- FOOTER ACTION BUTTON --}}
         <div class="px-6 py-4 bg-white border-t border-gray-100">
-            <button wire:click="closePaymentModal"
+            <button wire:click="closeMidtransPaymentModal"
                 class="w-full py-3.5 {{ $isPaid ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-jti-yellow hover:bg-[#FFB300] text-gray-900' }} font-bold rounded-xl transition-colors">
                 {{ $isPaid ? 'Selesai' : 'Tutup' }}
             </button>

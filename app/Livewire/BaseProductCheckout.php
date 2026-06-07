@@ -57,9 +57,13 @@ abstract class BaseProductCheckout extends Component
 
     public string $redirectRoute = 'student.transactions';
 
-    public bool $showCustomPaymentModal = false;
+    public bool $showMidtransPaymentModal = false;
 
     public ?array $paymentModalData = null;
+
+    public bool $showFallbackPaymentModal = false;
+
+    public ?array $fallbackPaymentData = null;
 
     public string $externalId = '';
 
@@ -265,13 +269,6 @@ abstract class BaseProductCheckout extends Component
 
     private function handlePostPayment(string $gateway, Order $order, array $gatewayResponse): void
     {
-        if ($gateway === 'midtrans') {
-            // Kirim snap_token ke frontend untuk memunculkan Midtrans Snap popup
-            $this->dispatch('trigger-midtrans-snap', token: $gatewayResponse['snap_token']);
-
-            return;
-        }
-
         // BNI: tampilkan instruksi Virtual Account di halaman yang sama
         $this->vaData = $order->getVaData();
         $this->showVAInstructions = true;
@@ -357,18 +354,45 @@ abstract class BaseProductCheckout extends Component
                 $this->paymentModalData['instructions'] = $this->getTransferInstructions();
                 $this->externalId = $gatewayResponse['external_id'] ?? $order->invoice_number;
 
-                $this->showCustomPaymentModal = true;
+                $this->showMidtransPaymentModal = true;
             } else {
                 // === GATEWAY LAIN (BNI, dll) - Behavior Lama ===
-                $gatewayResponse = $paymentService->createTransaction($order, $this->transferMethod);
+                try {
+                    $gatewayResponse = $paymentService->createTransaction($order, $this->transferMethod);
 
-                // Simpan response gateway ke Order
-                $order->update($gatewayResponse);
+                    // Simpan response gateway ke Order
+                    $order->update($gatewayResponse);
 
-                DB::commit();
-                $this->clearCartItems();
+                    DB::commit();
+                    $this->clearCartItems();
 
-                $this->handlePostPayment($activeGateway, $order, $gatewayResponse);
+                    $this->handlePostPayment($activeGateway, $order, $gatewayResponse);
+                } catch (\Exception $e) {
+                    if ($activeGateway === 'bni') {
+                        // Fallback ke default VA
+                        $defaultVa = config('payment.bni.default_va', '1234567890');
+
+                        $gatewayResponse = [
+                            'va_number' => $defaultVa,
+                            'va_bank' => $this->transferMethod ?: 'bni',
+                        ];
+
+                        $order->update($gatewayResponse);
+                        $order->update(['is_fallback_va' => true]);
+                        $order->update(['payment_response' => ['fallback' => true, 'error' => $e->getMessage()]]);
+
+                        DB::commit();
+                        $this->clearCartItems();
+
+                        $this->fallbackPaymentData = $gatewayResponse;
+                        $this->fallbackPaymentData['instructions'] = $this->getTransferInstructions();
+                        $this->externalId = $order->invoice_number;
+
+                        $this->showFallbackPaymentModal = true;
+                    } else {
+                        throw $e;
+                    }
+                }
             }
         } catch (PaymentException $e) {
             DB::rollBack();
@@ -503,7 +527,7 @@ abstract class BaseProductCheckout extends Component
 
         // === KEDALUWARSA / DIBATALKAN ===
         if ($status['is_expired'] ?? false || $status['is_cancelled'] ?? false) {
-            $this->showCustomPaymentModal = false;
+            $this->showMidtransPaymentModal = false;
             session()->flash('error', 'Pembayaran kedaluwarsa atau dibatalkan.');
             $this->redirect(route('student.orders'), navigate: true);
         }
@@ -514,7 +538,7 @@ abstract class BaseProductCheckout extends Component
     {
         // Jika countdown masih ada, jalankan redirect setelah jeda waktu habis
         if ($this->successCountdown <= 0) {
-            $this->showCustomPaymentModal = false;
+            $this->showMidtransPaymentModal = false;
             $this->redirect(route('student.transactions'), navigate: true);
 
             return;
@@ -524,10 +548,17 @@ abstract class BaseProductCheckout extends Component
         $this->successCountdown--;
     }
 
-    public function closePaymentModal(): void
+    public function closeMidtransPaymentModal(): void
     {
-        $this->showCustomPaymentModal = false;
+        $this->showMidtransPaymentModal = false;
         $this->reset(['paymentModalData', 'externalId', 'isPaid', 'successCountdown']);
+        $this->redirect(route('student.orders'), navigate: true);
+    }
+
+    public function closeFallbackPaymentModal(): void
+    {
+        $this->showFallbackPaymentModal = false;
+        $this->reset(['fallbackPaymentData']);
         $this->redirect(route('student.orders'), navigate: true);
     }
 

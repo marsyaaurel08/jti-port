@@ -188,8 +188,10 @@
                                 <button wire:click="removePromoCode" type="button" wire:loading.attr="disabled"
                                     wire:target="removePromoCode"
                                     class="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <x-lucide-trash-2 wire:loading.remove wire:target="removePromoCode" class="w-5 h-5 " />
-                                    <x-lucide-loader-2 wire:loading wire:target="removePromoCode" class="animate-spin w-5 h-5 text-red-500" />
+                                    <x-lucide-trash-2 wire:loading.remove wire:target="removePromoCode"
+                                        class="w-5 h-5 " />
+                                    <x-lucide-loader-2 wire:loading wire:target="removePromoCode"
+                                        class="animate-spin w-5 h-5 text-red-500" />
                                 </button>
                             </div>
                         </div>
@@ -299,13 +301,16 @@
                         <span wire:loading wire:target="processPayment" class="flex items-center gap-2">
                             Memproses...
                         </span>
-                        <x-lucide-loader-2 wire:loading wire:target="processPayment" class="animate-spin w-5 h-5 text-jti-primary" />
+                        <x-lucide-loader-2 wire:loading wire:target="processPayment"
+                            class="animate-spin w-5 h-5 text-jti-primary" />
                     </button>
                 </div>
             </div>
         </div>
 
-        <x-checkout.payment-modal :showCustomPaymentModal="$showCustomPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$this->getTotalAmount()" :isPaid="$isPaid"
+        <x-checkout.payment-modal :showMidtransPaymentModal="$showMidtransPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$this->getTotalAmount()" :isPaid="$isPaid"
             :successCountdown="$successCountdown" />
+
+        <x-checkout.fallback-payment-modal :showFallbackPaymentModal="$showFallbackPaymentModal" :fallbackPaymentData="$fallbackPaymentData" :totalAmount="$this->getTotalAmount()" />
     </div>
 </div>
