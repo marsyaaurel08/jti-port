@@ -1,4 +1,4 @@
-@props(['showFallbackPaymentModal', 'fallbackPaymentData'])
+@props(['showFallbackPaymentModal', 'fallbackPaymentData', 'totalAmount'])
 
 <div x-data="{
     showToast: false,
@@ -12,7 +12,7 @@
         });
     }
 }"
-    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+    class="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
     style="display: {{ $showFallbackPaymentModal ? 'flex' : 'none' }}">
 
     <div x-cloak x-show="showToast" x-transition:enter="transition ease-out duration-300 transform"
@@ -21,7 +21,7 @@
         x-transition:leave="transition ease-in duration-200 transform"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
-        class="fixed top-6 left-1/2 -translate-x-1/2 z-[10000] bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-medium">
+        class="fixed top-6 left-1/2 -translate-x-1/2 z-10000 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-medium">
         <x-lucide-check-circle class="w-5 h-5 text-emerald-400" />
         <span x-text="toastMessage"></span>
     </div>
@@ -74,8 +74,8 @@
                     </div>
                     <div class="text-right flex flex-col items-end">
                         <p class="text-[10px] text-gray-400 mb-1 uppercase">Total Nominal</p>
-                        <p class="font-bold text-jti-yellow text-lg leading-none">Rp{{ number_format(data_get($fallbackPaymentData, 'total_amount'), 0, ',', '.') }}</p>
-                        <button type="button" @click="copyToClipboard('{{ data_get($fallbackPaymentData, 'total_amount') }}', 'Nominal Tagihan disalin!')"
+                        <p class="font-bold text-jti-yellow text-lg leading-none">Rp{{ number_format($totalAmount, 0, ',', '.') }}</p>
+                        <button type="button" @click="copyToClipboard('{{ $totalAmount }}', 'Nominal Tagihan disalin!')"
                             class="flex items-center gap-1 text-[10px] text-gray-400 hover:text-jti-yellow transition mt-1.5 active:scale-95">
                             <x-lucide-copy class="w-3 h-3" /> Salin Nominal
                         </button>

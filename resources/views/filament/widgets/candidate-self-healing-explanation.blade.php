@@ -31,11 +31,11 @@
                     {{-- <li class="flex items-start gap-2.5">
                         <x-heroicon-m-check-circle class="w-5 h-5 text-primary-500 shrink-0" />
                         <span>Gateway: <strong>BNI</strong> atau <strong>Midtrans</strong> (otomatis).</span>
-                    </li>
+                    </li> --}}
                     <li class="flex items-start gap-2.5">
                         <x-heroicon-m-check-circle class="w-5 h-5 text-primary-500 shrink-0" />
                         <span>Tidak menggunakan <em>fallback</em> Virtual Account (VA).</span>
-                    </li> --}}
+                    </li>
                     <li class="flex items-start gap-2.5">
                         <x-heroicon-m-check-circle class="w-5 h-5 text-primary-500 shrink-0" />
                         <span>Belum menerima <em>webhook / callback</em> dari gateway.</span>
