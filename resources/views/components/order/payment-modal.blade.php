@@ -1,5 +1,5 @@
 @props([
-    'showCustomPaymentModal',
+    'showMidtransPaymentModal',
     'paymentModalData',
     'totalAmount',
     'countdownSeconds',
@@ -8,9 +8,9 @@
 ])
 
 {{-- Di tag pembuka div paling luar, pastikan polling dimatikan/diubah kondisinya saat sukses --}}
-<div wire:target="showCustomPaymentModal" @if ($showCustomPaymentModal && !$isPaid) wire:poll.3s="checkPaymentStatus" @endif
+<div wire:target="showMidtransPaymentModal" @if ($showMidtransPaymentModal && !$isPaid) wire:poll.3s="checkPaymentStatus" @endif
     class="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
-    style="display: {{ $showCustomPaymentModal ? 'flex' : 'none' }}">
+    style="display: {{ $showMidtransPaymentModal ? 'flex' : 'none' }}">
 
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl mx-4 flex flex-col overflow-hidden max-h-[90vh]">
 
@@ -20,7 +20,7 @@
                     {{ $isPaid ? 'Status Pembayaran' : 'Instruksi Pembayaran' }}
                 </h2>
             </div>
-            <button wire:click="closePaymentModal" class="text-gray-400 hover:text-gray-600 transition">
+            <button wire:click="closeMidtransPaymentModal" class="text-gray-400 hover:text-gray-600 transition">
                 <x-lucide-x class="w-6 h-6" />
             </button>
         </div>
@@ -263,7 +263,7 @@
 
         {{-- FOOTER ACTION BUTTON --}}
         <div class="px-6 py-4 bg-white border-t border-gray-100">
-            <button wire:click="closePaymentModal"
+            <button wire:click="closeMidtransPaymentModal"
                 class="w-full py-3.5 {{ $isPaid ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-jti-yellow hover:bg-[#FFB300] text-gray-900' }} font-bold rounded-xl transition-colors">
                 {{ $isPaid ? 'Selesai' : 'Tutup' }}
             </button>

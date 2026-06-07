@@ -54,17 +54,10 @@
                                     {{ $item->item_name }}
                                 </h4>
                                 <div class="shrink-0">
-                                    @if ($item->class_id)
-                                        <span
-                                            class="inline-block px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider bg-jti-yellow text-white whitespace-nowrap">
-                                            Kelas
-                                        </span>
-                                    @else
-                                        <span
-                                            class="inline-block px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider bg-jti-orange text-white whitespace-nowrap">
-                                            Course
-                                        </span>
-                                    @endif
+                                    <span
+                                        class="inline-block px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider text-white whitespace-nowrap {{ $item->class_id ? 'bg-jti-yellow' : 'bg-jti-orange' }}">
+                                        {{ $item->class_id ? 'Kelas' : 'Course' }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -81,58 +74,22 @@
                 <div
                     class="flex flex-wrap gap-2 w-full sm:w-auto sm:flex-1 lg:flex-initial justify-start sm:justify-end lg:justify-start xl:justify-end">
                     <!-- Cek Gateway Pembayaran -->
-                    @if ($order->payment_gateway === 'midtrans')
-                        <!-- Tombol untuk Midtrans -->
-                        <button
-                            wire:click="openPaymentModal({{ $order->id }})"
-                            class="flex-1 sm:flex-none px-4 py-2 bg-jti-yellow text-jti-primary font-bold text-xs rounded-xl hover:bg-jti-yellow/90 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-3.5 h-3.5">
-                                <rect width="20" height="14" x="2" y="5" rx="2" />
-                                <line x1="2" x2="22" y1="10" y2="10" />
-                            </svg>
-                            Bayar
-                        </button>
-                    @else
-                        <!-- Tombol untuk BNI / VA Native -->
-                        <button wire:click="showVaInstructions({{ $order->id }})"
-                            class="flex-1 sm:flex-none px-4 py-2 bg-jti-yellow text-jti-primary font-bold text-xs rounded-xl hover:bg-jti-yellow/90 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-3.5 h-3.5">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                <polyline points="14 2 14 8 20 8" />
-                                <line x1="16" x2="8" y1="13" y2="13" />
-                                <line x1="16" x2="8" y1="17" y2="17" />
-                                <polyline points="10 9 9 9 8 9" />
-                            </svg>
-                            Instruksi
-                        </button>
-                    @endif
+                    <button wire:click="openPaymentModal({{ $order->id }})"
+                        class="flex-1 sm:flex-none px-4 py-2 bg-jti-yellow text-jti-primary font-bold text-xs rounded-xl hover:bg-jti-yellow/90 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5">
+                        <x-lucide-credit-card class="w-3.5 h-3.5" />
+                        Bayar
+                    </button>
 
                     @if ($order->payment_proof)
                         <button wire:click="viewProof({{ $order->id }})"
                             class="flex-1 sm:flex-none px-4 py-2 bg-white text-emerald-600 border border-emerald-100 font-bold text-xs rounded-xl hover:bg-emerald-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                                <path
-                                    d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
+                            <x-lucide-eye class="w-3.5 h-3.5" />
                             Bukti
                         </button>
                     @else
                         <button wire:click="openProofUpload({{ $order->id }})"
                             class="flex-1 sm:flex-none px-4 py-2 bg-white text-blue-600 border border-blue-100 font-bold text-xs rounded-xl hover:bg-blue-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/xl" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-3.5 h-3.5">
-                                <path d="M12 3v12" />
-                                <path d="m17 8-5-5-5 5" />
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            </svg>
+                            <x-lucide-upload class="w-3.5 h-3.5" />
                             Upload
                         </button>
                     @endif
@@ -140,13 +97,7 @@
                     <button wire:click="cancelOrder({{ $order->id }})"
                         onclick="return confirm('Apakah Anda yakin ingin membatalkan order ini?')"
                         class="flex-1 sm:flex-none px-4 py-2 bg-white text-rose-600 border border-rose-100 font-bold text-xs rounded-xl hover:bg-rose-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-3.5 h-3.5">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="m15 9-6 6" />
-                            <path d="m9 9 6 6" />
-                        </svg>
+                        <x-lucide-x class="w-3.5 h-3.5" />
                         Batal
                     </button>
                 </div>

@@ -35,6 +35,7 @@ return [
     */
 
     'bni' => [
+        'default_va'    => env('BNI_DEFAULT_VA', '1234567890'),
         'client_id'     => env('BNI_CLIENT_ID', ''),
         'client_secret' => env('BNI_CLIENT_SECRET', ''),
         'api_key'       => env('BNI_API_KEY', ''),

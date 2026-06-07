@@ -19,33 +19,36 @@ class StudentOrders extends Component
 
     public ?object $user = null;
 
-    public bool $showVAInstructions = false;
-
     public bool $showProofUpload = false;
-
     public bool $showProofView = false;
 
     public array $vaData = [];
-
     public ?Order $selectedOrder = null;
 
     #[Validate('nullable|image|max:5120')]
     public $paymentProof = null;
 
     public array $transferMethods;
-
     public array $transferInstructions;
 
-    // Untuk custom payment modal
-    public bool $showCustomPaymentModal = false;
+    // === Midtrans Payment Modal ===
+    public bool $showMidtransPaymentModal = false;
     public ?array $paymentModalData = null;
     public bool $isPaid = false;
     public ?string $externalId = null;
     public int $successCountdown = 0;
     public float $totalAmount = 0;
 
+    // === Fallback Payment Modal (Manual Transfer selain BNI) ===
+    public bool $showFallbackPaymentModal = false;
+    public ?array $fallbackPaymentData = null;
+
+    // === BNI Payment Modal (Khusus BNI VA) ===
+    public bool $showBNIPaymentModal = false;
+    public ?array $bniPaymentData = null;
+
     // Cache configuration
-    private const CACHE_TTL_MINUTES = 10; // sesuaikan kebutuhan (5-15 menit biasanya cukup)
+    private const CACHE_TTL_MINUTES = 10;
 
     public function __construct()
     {
@@ -57,7 +60,6 @@ class StudentOrders extends Component
     {
         if (! Auth::check()) {
             redirect()->route('home');
-
             return;
         }
 
@@ -81,36 +83,10 @@ class StudentOrders extends Component
     public function getTransferInstructions(string $transferMethod): array
     {
         $instructions = $this->transferInstructions;
-
         return $instructions[$transferMethod] ?? [];
     }
 
-    // public function viewVAInstructions($orderId): void
-    // {
-    //     $order = Order::findOrFail($orderId);
-
-    //     if ($order->user_id !== Auth::id()) {
-    //         abort(403, 'Unauthorized');
-    //     }
-
-    //     if ($order->status !== 'pending') {
-    //         session()->flash('error', 'Order ini sudah dibayar');
-
-    //         return;
-    //     }
-
-    //     $this->selectedOrder = $order;
-    //     $this->vaData = $order->getVaData();
-    //     $this->showVAInstructions = true;
-    // }
-
-    public function closeModal(): void
-    {
-        $this->showVAInstructions = false;
-        $this->vaData = [];
-        $this->selectedOrder = null;
-    }
-
+    // ====================== PROOF UPLOAD ======================
     public function openProofUpload($orderId): void
     {
         $order = Order::findOrFail($orderId);
@@ -121,7 +97,6 @@ class StudentOrders extends Component
 
         if ($order->status !== 'pending') {
             session()->flash('error', 'Order ini sudah dibayar atau tidak dapat diverifikasi');
-
             return;
         }
 
@@ -141,7 +116,6 @@ class StudentOrders extends Component
     {
         if (! $this->selectedOrder) {
             session()->flash('error', 'Order tidak ditemukan');
-
             return;
         }
 
@@ -149,19 +123,18 @@ class StudentOrders extends Component
 
         try {
             $filename = 'proof_' . $this->selectedOrder->id . '_' . now()->timestamp . '.' . $this->paymentProof->extension();
-
             $path = $this->paymentProof->storeAs('payments/proof', $filename, 'public');
 
             $this->selectedOrder->update(['payment_proof' => $path]);
 
             session()->flash('success', 'Bukti pembayaran berhasil diupload. Admin akan memverifikasi dalam waktu 1x24 jam.');
-
             $this->closeProofUpload();
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal mengupload bukti pembayaran: ' . $e->getMessage());
         }
     }
 
+    // ====================== CANCEL ORDER ======================
     public function cancelOrder($orderId): void
     {
         try {
@@ -173,31 +146,33 @@ class StudentOrders extends Component
 
             if ($order->status !== 'pending') {
                 session()->flash('error', 'Hanya order yang masih pending yang dapat dibatalkan');
-
                 return;
             }
 
             $order->update(['status' => 'cancelled']);
-
             session()->flash('success', 'Order berhasil dibatalkan');
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal membatalkan order: ' . $e->getMessage());
         }
     }
-    public function openPaymentModal($orderId): void
+
+    // ====================== MIDTRANS PAYMENT MODAL ======================
+    public function openMidtransPaymentModal($orderId): void
     {
         $order = Order::findOrFail($orderId);
         $this->paymentModalData = is_string($order->payment_response)
             ? json_decode($order->payment_response, true)
             : $order->payment_response;
-        $this->totalAmount = $order->subtotal;
+
+        $this->totalAmount = $order->total_amount;
         $this->paymentModalData['instructions'] = $this->getTransferInstructions($order->payment_method);
         $this->externalId = $order->external_id;
 
-        Log::info('Opening payment modal for order ID: ' . $orderId, ['payment_response' => $this->paymentModalData]);
+        Log::info('Opening Midtrans payment modal for order ID: ' . $orderId);
 
-        $this->showCustomPaymentModal = true;
+        $this->showMidtransPaymentModal = true;
     }
+
     public function checkPaymentStatus(): void
     {
         if (empty($this->externalId)) return;
@@ -205,21 +180,15 @@ class StudentOrders extends Component
         $service = new \App\Services\Payment\MidtransService();
         $status = $service->checkTransactionStatus($this->externalId);
 
-        // === PEMBAYARAN BERHASIL ===
         if ($status['is_paid'] ?? false) {
             $this->isPaid = true;
-
-            // Mulai countdown sebelum redirect
-            $this->successCountdown = 5;        // Detik (bisa diubah)
+            $this->successCountdown = 5;
             $this->dispatch('payment-success-countdown');
-
-            // Tidak langsung close modal, biarkan countdown berjalan
             return;
         }
 
-        // === KEDALUWARSA / DIBATALKAN ===
         if ($status['is_expired'] ?? false || $status['is_cancelled'] ?? false) {
-            $this->showCustomPaymentModal = false;
+            $this->showMidtransPaymentModal = false;
             session()->flash('error', 'Pembayaran kedaluwarsa atau dibatalkan.');
         }
     }
@@ -227,36 +196,122 @@ class StudentOrders extends Component
     #[On('payment-success-countdown')]
     public function startSuccessCountdown(): void
     {
-        // Jika countdown masih ada, jalankan redirect setelah jeda waktu habis
         if ($this->successCountdown <= 0) {
-            $this->showCustomPaymentModal = false;
+            $this->showMidtransPaymentModal = false;
             return;
         }
 
-        // Kurangi 1 detik setiap kali di-poll oleh Blade
         $this->successCountdown--;
     }
 
-    public function closePaymentModal(): void
+    public function closeMidtransPaymentModal(): void
     {
-        $this->showCustomPaymentModal = false;
-        $this->reset(['paymentModalData', 'isPaid', 'successCountdown']);
+        $this->showMidtransPaymentModal = false;
+        $this->reset(['paymentModalData', 'isPaid', 'successCountdown', 'externalId']);
     }
 
+    // ====================== FALLBACK PAYMENT MODAL ======================
+    public function openFallbackPaymentModal($orderId): void
+    {
+        $order = Order::findOrFail($orderId);
+
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($order->status !== 'pending') {
+            session()->flash('error', 'Order ini sudah dibayar');
+            return;
+        }
+
+        $this->selectedOrder = $order;
+        $this->fallbackPaymentData = [
+            'order_id'       => $order->id,
+            'invoice_number' => $order->invoice_number,
+            'amount'         => $order->subtotal,
+            'payment_method' => $order->payment_method,
+            'bank'           => $this->getBankName($order->payment_method),
+            'va_number'      => $order->va_number ?? null,
+            'total_amount'    => $order->total_amount,
+            'instructions'   => $this->getTransferInstructions($order->payment_method),
+            'expired_at'     => $order->expired_at?->format('d M Y, H:i'),
+        ];
+
+        Log::info('Opening fallback payment modal for order ID: ' . $orderId, [
+            'method' => $order->payment_method
+        ]);
+
+        $this->showFallbackPaymentModal = true;
+    }
+
+    public function closeFallbackPaymentModal(): void
+    {
+        $this->showFallbackPaymentModal = false;
+        $this->reset(['fallbackPaymentData']);
+    }
+
+    // ====================== BNI PAYMENT MODAL ======================
+    public function openBNIPaymentModal($orderId): void
+    {
+        // $order = Order::findOrFail($orderId);
+        // $this->paymentModalData = is_string($order->payment_response)
+        //     ? json_decode($order->payment_response, true)
+        //     : $order->payment_response;
+
+        // $this->totalAmount = $order->subtotal;
+        // $this->paymentModalData['instructions'] = $this->getTransferInstructions($order->payment_method);
+        // $this->externalId = $order->external_id;
+        Log::info('Opening BNI payment modal for order ID: ' . $orderId);
+
+        $this->showBNIPaymentModal = true;
+    }
+
+    public function closeBNIPaymentModal(): void
+    {
+        $this->showBNIPaymentModal = false;
+        $this->reset(['bniPaymentData']);
+    }
+
+    // ====================== HELPER METHODS ======================
+    private function getBankName(string $paymentMethod): string
+    {
+        $map = [
+            'bri'      => 'BRI',
+            'bca'      => 'BCA',
+            'mandiri'  => 'Mandiri',
+            'permata'  => 'Permata',
+            // tambahkan sesuai kebutuhan
+        ];
+
+        return $map[strtolower($paymentMethod)] ?? strtoupper($paymentMethod);
+    }
+
+    private function getVaNumberFromResponse(Order $order): ?string
+    {
+        if (empty($order->payment_response)) return null;
+
+        $data = is_string($order->payment_response)
+            ? json_decode($order->payment_response, true)
+            : $order->payment_response;
+
+        return $data['va_numbers'][0]['va_number']
+            ?? $data['bill_key']
+            ?? $data['permata_va_number']
+            ?? null;
+    }
+
+    // ====================== OTHER METHODS ======================
     public function viewProof($orderId): void
     {
         try {
             $order = Order::findOrFail($orderId);
 
-            // Check authorization
             if ($order->user_id !== Auth::id()) {
                 abort(403, 'Anda tidak memiliki izin untuk melihat bukti ini');
             }
 
-            // Check if proof exists
             if (! $order->payment_proof) {
                 session()->flash('error', 'Bukti pembayaran tidak ditemukan');
-
                 return;
             }
 
@@ -276,33 +331,40 @@ class StudentOrders extends Component
     public function handlePaymentFinished(int $orderId): void
     {
         $order = Order::find($orderId);
-
-        if (! $order) {
-            return;
-        }
+        if (! $order) return;
 
         $order->refresh();
 
         if (in_array($order->status, ['paid', 'success', 'settlement'])) {
             session()->flash('success', 'Terima kasih! Pembayaran untuk Invoice ' . $order->invoice_number . ' telah berhasil dikonfirmasi.');
         } else {
-            session()->flash('info', 'Sistem sedang memverifikasi pembayaran Anda. Status akan diperbarui secara otomatis dalam beberapa saat.');
+            session()->flash('info', 'Sistem sedang memverifikasi pembayaran Anda. Status akan diperbarui secara otomatis.');
         }
     }
+    public function openPaymentModal($orderId)
+    {
+        $order = Order::findOrFail($orderId);
 
+        if ($order->is_fallback_va) {
+            return $this->openFallbackPaymentModal($orderId);
+        }
+
+        if ($order->payment_gateway === 'midtrans') {
+            return $this->openMidtransPaymentModal($orderId);
+        }
+
+        // BNI Masih Error, jadi sementara pakai fallback dulu
+        return $this->openFallbackPaymentModal($orderId);
+        // return $this->openBNIPaymentModal($orderId);
+    }
     public function render()
     {
         $unpaidOrders = $this->getUnpaidOrders();
 
-        $transferInstructions = [];
-        if ($this->selectedOrder) {
-            $transferInstructions = $this->getTransferInstructions($this->selectedOrder->payment_method);
-        }
-
         return view('livewire.student-orders', [
             'orders' => $unpaidOrders,
             'transferMethods' => $this->transferMethods,
-            'transferInstructions' => $transferInstructions,
+            'transferInstructions' => $this->transferInstructions,
         ]);
     }
 }
