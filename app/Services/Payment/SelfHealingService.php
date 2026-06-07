@@ -161,7 +161,7 @@ class SelfHealingService
     /**
      * Proses satu order: cek ke gateway, update order jika lunas, catat log.
      */
-    private function reconcile(Order $order): void
+    private function reconcile(Order $order): bool
     {
         $attempt = $order->selfHealingLogs->count() + 1;
         $gateway = $order->payment_gateway;
@@ -181,7 +181,7 @@ class SelfHealingService
 
             $this->log($order, $attempt, 'skipped', gateway: $gateway);
 
-            return;
+            return true;
         }
         // Catat bahwa kita melakukan inquiry sekarang (untuk monitoring)
         $order->increment('inquiry_count');
@@ -199,6 +199,7 @@ class SelfHealingService
                     'invoice_number' => $order->invoice_number,
                     'attempt' => $attempt,
                 ]);
+                return true;
             } else {
                 $this->log($order, $attempt, 'pending', raw: $statusResult, gateway: $gateway);
 
@@ -206,6 +207,7 @@ class SelfHealingService
                     'invoice_number' => $order->invoice_number,
                     'attempt' => $attempt,
                 ]);
+                return true;
             }
         } catch (PaymentException $e) {
             $this->log(
@@ -222,6 +224,7 @@ class SelfHealingService
                 'gateway' => $gateway,
                 'error' => $e->getMessage(),
             ]);
+            return false;
         }
     }
 
