@@ -29,7 +29,7 @@ class HomeInstructorsTable
                 ImageColumn::make('image')
                     ->label('Image')
                     ->circular()
-                    ->defaultImageUrl(url('/images/placeholder.png')), // Opsional jika ingin ada gambar default
+                    ->disk('public'), // Opsional jika ingin ada gambar default
 
                 TextColumn::make('name')
                     ->label('Name')
@@ -82,7 +82,7 @@ class HomeInstructorsTable
                     ->form([
                         TextInput::make('name')->required()->maxLength(255),
                         TextInput::make('role')->required()->maxLength(255),
-                        FileUpload::make('image')->image()->directory('instructors')->required(),
+                        FileUpload::make('image')->image()->disk('public')->directory('instructors')->required(),
                         Textarea::make('bio')->maxLength(65535)->columnSpanFull(),
                         TextInput::make('linkedin')->url()->maxLength(255),
                         TextInput::make('sort_order')->numeric()->default(0),

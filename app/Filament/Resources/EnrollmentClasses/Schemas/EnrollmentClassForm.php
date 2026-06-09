@@ -6,6 +6,7 @@ use Filament\Forms\Components\{DateTimePicker, Repeater, Select, TextInput};
 use Filament\Schemas\Components\{Section, View};
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class EnrollmentClassForm
 {
@@ -57,7 +58,11 @@ class EnrollmentClassForm
                             ->hidden(fn(Get $get) => empty($get('class_id')) || (int) $get('available_slots') <= 0)
                             ->schema([
                                 Select::make('user_id')
-                                    ->relationship('user', 'name')
+                                    ->relationship(
+                                        name: 'user',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn(Builder $query) => $query->withoutRole(['super_admin', 'pengajar'])
+                                    )
                                     ->label('Nama Siswa')
                                     ->placeholder('Cari nama siswa...')
                                     ->searchable()

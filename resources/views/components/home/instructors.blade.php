@@ -38,7 +38,7 @@
 
                                     {{-- Image --}}
                                     <div class="relative aspect-[4/5] overflow-hidden bg-jti-primary">
-                                        <img src="{{ $instructor['image']}}" alt="{{ $instructor['name'] }}"
+                                        <img src="{{ asset('storage/' . $instructor['image']) }}" alt="{{ $instructor['name'] }}"
                                             class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                             loading="lazy">
 
