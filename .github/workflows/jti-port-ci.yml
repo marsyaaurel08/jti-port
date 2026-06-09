@@ -63,7 +63,7 @@ jobs:
             nginx_config: server_ihza
           - server: server-jti
             nginx_config: server_jti
-          - server: srv-94778432
+          - server: jagoan-hosting
             nginx_config: srv-94778432
 
     steps:
