@@ -20,11 +20,7 @@ PROJECT_NAME="jtiport"
 # ==================== TAMBAHAN UNTUK MULTI SERVER ====================
 NGINX_CONFIG_DIR=${NGINX_CONFIG_DIR:-server_ihza}
 
-if [ "$SERVER" = "server-ihza" ]; then
-    BACKUP_DIR="$HOME/backups/jtiport"
-else
-    BACKUP_DIR="/home/dika/backups/jtiport"
-fi
+BACKUP_DIR="$HOME/backups/jtiport"
 STATE_FILE="$BACKUP_DIR/deployment.state"
 NGINX_CONF_DIR="./docker/nginx/${NGINX_CONFIG_DIR}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
