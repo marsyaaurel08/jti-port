@@ -60,9 +60,11 @@ jobs:
       matrix:
         include:
           - server: server-ihza
-            nginx_config: server_ihza          # ← konfigurasi nginx untuk server ini
-          - server: server-jti           # ganti dengan label runner kamu
-            nginx_config: server_jti          # ← konfigurasi nginx untuk server ini
+            nginx_config: server_ihza
+          - server: server-jti
+            nginx_config: server_jti
+          - server: srv-94778432
+            nginx_config: srv-94778432
 
     steps:
       - name: Repair workspace permissions (self-hosted)
@@ -89,7 +91,15 @@ jobs:
 
       - name: Decrypt Environment File
         run: |
-          ./decrypt.sh .env.production.enc '${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}' .env
+          if [ "${{ matrix.server }}" = "srv-94778432" ]; then
+            ENCRYPTED_FILE=".env.production.jaghos.enc"
+            echo "Using Jaghos encrypted file for srv-94778432"
+          else
+            ENCRYPTED_FILE=".env.production.neva.enc"
+            echo "Using Neva encrypted file for ${{ matrix.server }}"
+          fi
+
+          ./decrypt.sh "$ENCRYPTED_FILE" '${{ secrets.LARAVEL_ENV_ENCRYPTION_KEY }}' .env
 
       - name: Deploy to Production
         env:
