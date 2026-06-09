@@ -91,9 +91,9 @@ jobs:
 
       - name: Decrypt Environment File
         run: |
-          if [ "${{ matrix.server }}" = "srv-94778432" ]; then
+          if [ "${{ matrix.server }}" = "jagoan-hosting" ]; then
             ENCRYPTED_FILE=".env.production.jaghos.enc"
-            echo "Using Jaghos encrypted file for srv-94778432"
+            echo "Using Jaghos encrypted file for jagoan-hosting"
           else
             ENCRYPTED_FILE=".env.production.neva.enc"
             echo "Using Neva encrypted file for ${{ matrix.server }}"

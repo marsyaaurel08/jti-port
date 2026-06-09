@@ -33,8 +33,7 @@ class UsersTable
                         'warning' => 'admin',
                         'success' => 'editor',
                         'gray' => 'user',
-                    ])
-                    ->sortable(),
+                    ]),
             ])
             ->filters([
                 Filter::make('name')

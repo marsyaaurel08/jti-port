@@ -5,6 +5,7 @@ namespace App\Filament\Resources\EnrollmentCourses\Schemas;
 use Filament\Forms\Components\{Hidden, Repeater, Select};
 use Filament\Schemas\Components\{Grid, Section};
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class EnrollmentCourseForm
 {
@@ -40,14 +41,15 @@ class EnrollmentCourseForm
                                     ->schema([
                                         Select::make('user_id')
                                             ->relationship(
-                                                'user',
-                                                'name',
-                                                fn($query) => $query->where('role', 'user')
+                                                name: 'user',
+                                                titleAttribute: 'name',
+                                                modifyQueryUsing: fn(Builder $query) => $query->withoutRole(['super_admin', 'pengajar'])
                                             )
                                             ->label('Nama Siswa')
                                             ->placeholder('Pilih siswa...')
                                             ->prefixIcon('heroicon-m-user') // Ikon user di dalam field
                                             ->searchable()
+                                            ->preload()
                                             ->required('Siswa harus dipilih')
                                             ->validationMessages([
                                                 'required' => 'Nama siswa tidak boleh kosong.',

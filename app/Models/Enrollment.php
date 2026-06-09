@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Permission\Traits\HasRoles;
 
 class Enrollment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasRoles;
 
     protected $fillable = [
         'user_id',
@@ -99,5 +100,10 @@ class Enrollment extends Model
     public function progress(): HasMany
     {
         return $this->hasMany(CourseProgress::class);
+    }
+
+    public function isStudent(): bool
+    {
+        return !$this->hasAnyRole(['admin', 'super_admin', 'pengajar']);
     }
 }
