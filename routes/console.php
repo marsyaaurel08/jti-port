@@ -9,7 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('payment:self-healing')
-    ->everyFiveMinutes()
+    ->everyMinute()
     ->withoutOverlapping()      // Cegah proses ganda jika satu siklus memakan > 5 menit
     ->runInBackground()         // Jangan blokir scheduler untuk command lain
     ->onFailure(function () {
