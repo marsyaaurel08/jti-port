@@ -62,15 +62,12 @@ fi
 # Hanya generate kalau belum ada (misalnya di-generate deploy.sh).
 # Cek config.php sebagai indikator cache sudah ada.
 # =====================================================================
-if [ ! -f bootstrap/cache/config.php ]; then
-    echo -e "${YELLOW}⚡ Generating Laravel cache...${NC}"
-    php artisan config:cache
-    php artisan route:cache
-    php artisan view:cache
-    echo -e "${GREEN}✓ Cache generated${NC}"
-else
-    echo -e "${GREEN}✓ Cache already exists, skipping${NC}"
-fi
+echo -e "${YELLOW}⚡ Generating Laravel cache...${NC}"
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+echo -e "${GREEN}✓ Cache generated${NC}"
 
 # =====================================================================
 # 5. STORAGE LINK
@@ -121,9 +118,6 @@ EOF
 chmod 0644 /etc/crontabs/www-data
 touch /var/log/laravel-cron.log /var/log/cron.log
 chmod 666 /var/log/laravel-cron.log /var/log/cron.log
-
-# Load cron untuk root
-crontab -u root /etc/crontabs/root
 
 echo -e "${GREEN}✓ Laravel Scheduler cron installed${NC}"
 
