@@ -122,6 +122,9 @@ chmod 0644 /etc/crontabs/www-data
 touch /var/log/laravel-cron.log /var/log/cron.log
 chmod 666 /var/log/laravel-cron.log /var/log/cron.log
 
+# Load cron untuk root
+crontab -u root /etc/crontabs/root
+
 echo -e "${GREEN}✓ Laravel Scheduler cron installed${NC}"
 
 # =====================================================================
