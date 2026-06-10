@@ -63,6 +63,7 @@ fi
 # Cek config.php sebagai indikator cache sudah ada.
 # =====================================================================
 echo -e "${YELLOW}⚡ Generating Laravel cache...${NC}"
+php artisan schedule:clear-cache
 php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
