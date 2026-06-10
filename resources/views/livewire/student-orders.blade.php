@@ -145,16 +145,16 @@
             </div>
         </div>
     @endif
+    {{-- Modal: Upload Bukti Pembayaran --}}
+    <x-student.proof-upload-modal :show="$showProofUpload" :selectedOrder="$selectedOrder" :paymentProof="$paymentProof" />
+
+    {{-- Modal: BNI --}}
+    {{-- <x-order.bni-payment-modal :show="$showBNIPaymentModal" :bniPaymentData="$bniPaymentData" /> --}}
+
+    {{-- Fallback Payment Modal (jika gagal BNI) --}}
+    <x-order.fallback-payment-modal :showFallbackPaymentModal="$showFallbackPaymentModal" :fallbackPaymentData="$fallbackPaymentData" />
+
+    {{-- Modal: Custom Payment --}}
+    <x-order.payment-modal :showMidtransPaymentModal="$showMidtransPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$totalAmount" :isPaid="$isPaid"
+        :successCountdown="$successCountdown" />
 </x-layouts.user>
-{{-- Modal: Upload Bukti Pembayaran --}}
-<x-student.proof-upload-modal :show="$showProofUpload" :selectedOrder="$selectedOrder" :paymentProof="$paymentProof" />
-
-{{-- Modal: BNI --}}
-{{-- <x-order.bni-payment-modal :show="$showBNIPaymentModal" :bniPaymentData="$bniPaymentData" /> --}}
-
-{{-- Fallback Payment Modal (jika gagal BNI) --}}
-<x-order.fallback-payment-modal :showFallbackPaymentModal="$showFallbackPaymentModal" :fallbackPaymentData="$fallbackPaymentData"/>
-
-{{-- Modal: Custom Payment --}}
-<x-order.payment-modal :showMidtransPaymentModal="$showMidtransPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$totalAmount" :isPaid="$isPaid" :successCountdown="$successCountdown" />
-</div>
