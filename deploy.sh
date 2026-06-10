@@ -107,7 +107,7 @@ else
     ENV_OPTS="-e LARAVEL_ENV_ENCRYPTION_KEY=$LARAVEL_ENV_ENCRYPTION_KEY -e APP_ENV=$APP_ENV"
 fi
 
-docker run -d \
+docker run \
   --name $NEW_NAME \
   --network $NETWORK_NAME \
   --restart unless-stopped \
