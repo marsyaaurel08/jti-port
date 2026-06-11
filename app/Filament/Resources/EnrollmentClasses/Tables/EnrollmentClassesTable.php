@@ -46,6 +46,7 @@ class EnrollmentClassesTable
                     ->placeholder('Lifetime')
                     ->color(fn ($state) => $state && $state->isPast() ? 'danger' : 'gray'),
             ])
+            ->defaultSort('enrolled_at', 'desc')
             ->filters([
                 // TrashedFilter::make(),
                 SelectFilter::make('class_id')
