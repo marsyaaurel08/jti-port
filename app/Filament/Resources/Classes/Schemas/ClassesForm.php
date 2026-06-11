@@ -27,6 +27,7 @@ class ClassesForm
                         Section::make('Informasi Utama')
                             ->schema([
                                 TextInput::make('title')
+                                    ->label('Nama Kelas')
                                     ->required('Nama kelas harus diisi')
                                     ->validationMessages([
                                         'required' => 'Nama kelas tidak boleh kosong.',
@@ -38,6 +39,7 @@ class ClassesForm
                                     ),
 
                                 TextInput::make('slug')
+                                    ->label('Slug Kelas')
                                     ->disabled()
                                     ->dehydrated()
                                     ->required('Slug harus diisi')
@@ -45,9 +47,11 @@ class ClassesForm
                                         'required' => 'Slug tidak boleh kosong.',
                                         'unique' => 'Slug ini sudah digunakan oleh kelas lain.',
                                     ])
+                                    ->hidden()
                                     ->unique(CourseClass::class, 'slug', ignoreRecord: true),
 
                                 RichEditor::make('description')
+                                    ->label('Deskripsi Kelas')
                                     ->required('Deskripsi kelas harus diisi')
                                     ->validationMessages([
                                         'required' => 'Deskripsi kelas tidak boleh kosong.',
@@ -76,6 +80,7 @@ class ClassesForm
                         Section::make('Detail Kursus & Pengaturan')
                             ->schema([
                                 Select::make('course_id')
+                                    ->label('Kursus')
                                     ->live()
                                     ->placeholder('Pilih kursus')
                                     ->relationship('course', 'title')
@@ -88,6 +93,7 @@ class ClassesForm
                                     ->afterStateUpdated(fn($state, $set) => $set('category', \App\Models\Course::find($state)?->category?->name)),
 
                                 Select::make('instructor_id')
+                                    ->label('Instruktur')
                                     ->placeholder('Pilih instruktur')
                                     ->relationship(
                                         name: 'instructor',
@@ -102,6 +108,7 @@ class ClassesForm
                                     ]),
 
                                 TextInput::make('category')
+                                    ->label('Kategori')
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->afterStateHydrated(function (TextInput $component, $state, $record) {
@@ -128,15 +135,19 @@ class ClassesForm
                         // Section Samping: Harga & Kapasitas
                         Section::make('Biaya & Kapasitas')
                             ->schema([
+                                // Baris 1: [ ] (Full width)
                                 TextInput::make('price')
+                                    ->label('Harga Kelas')
                                     ->numeric()
                                     ->prefix('IDR')
                                     ->required('Harga kelas harus diisi')
                                     ->validationMessages([
                                         'required' => 'Harga kelas tidak boleh kosong.',
                                         'numeric' => 'Harga harus berupa angka.',
-                                    ]),
+                                    ])
+                                    ->columnSpanFull(), // Membuat input ini membentang penuh (2 kolom)
 
+                                // Baris 2: [ ] [ ] (Dibagi 2 kolom)
                                 TextInput::make('max_capacity')
                                     ->numeric()
                                     ->label('Kapasitas Maksimal')
@@ -151,7 +162,8 @@ class ClassesForm
                                     ->default(0)
                                     ->disabled(), // Biasanya diupdate lewat sistem pendaftaran
                             ])
-                            ->columnSpan(1),
+                            ->columns(2) // Membagi section ini menjadi 2 kolom grid
+                            ->columnSpan(1), // Tetap menggunakan 1 column span di parent grid jika Anda meletakkannya di sam
 
                         // Section Full: Waktu & Link
                         Section::make('Jadwal & Link Pertemuan')
@@ -171,9 +183,11 @@ class ClassesForm
                                     ->after('start_date'),
 
                                 TextInput::make('meeting_link')
+                                    ->label('Link Pertemuan')
                                     ->url()
                                     ->placeholder('https://zoom.us/j/...')
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->helperText('Masukkan link pertemuan jika kelas dilaksanakan secara online.'),
                             ])
                             ->columns(2)
                             ->columnSpanFull(),

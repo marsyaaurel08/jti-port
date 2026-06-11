@@ -36,6 +36,7 @@ class ClassResultsTable
                     ->label('Total Mahasiswa')
                     ->alignCenter(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->actions([
                 ViewAction::make()
                     ->label('Lihat Detail'),
