@@ -22,7 +22,7 @@
 
                 {{-- Deskripsi Singkat --}}
                 <p class="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">
-                    {{ $course->description }}
+                    {{ strip_tags($course->description) }}
                 </p>
 
                 {{-- Rating & Level Section --}}
