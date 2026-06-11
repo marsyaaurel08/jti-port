@@ -40,7 +40,7 @@
                     Saya</a>
                 <a href="{{ route('student.cart') }}"
                     class="flex items-center justify-between px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">
-                    <span>Keranjang Belanja</span>
+                    <span>Keranjang Saya</span>
                     <template x-if="cartCount > 0">
                         <span x-text="cartCount"
                             class="bg-jti-orange text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full"></span>

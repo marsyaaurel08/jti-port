@@ -334,30 +334,30 @@ abstract class BaseProductCheckout extends Component
             // ==================== PROSES PAYMENT GATEWAY ====================
             $paymentService = PaymentFactory::make($activeGateway);
 
-            if ($activeGateway === 'midtrans') {
-                // === MIDTRANS CORE API + CUSTOM MODAL ===
-                $gatewayResponse = $paymentService->createTransaction(
-                    $order,
-                    $this->transferMethod,
-                    true
-                );
+            try {
+                if ($activeGateway === 'midtrans') {
+                    // === MIDTRANS CORE API + CUSTOM MODAL ===
+                    $gatewayResponse = $paymentService->createTransaction(
+                        $order,
+                        $this->transferMethod,
+                        true
+                    );
 
-                // Simpan response gateway ke Order
-                $order->update($gatewayResponse);
-                $order->update(['payment_response' => $gatewayResponse]);
+                    // Simpan response gateway ke Order
+                    $order->update($gatewayResponse);
+                    $order->update(['payment_response' => $gatewayResponse]);
 
-                DB::commit();
-                $this->clearCartItems();
+                    DB::commit();
+                    $this->clearCartItems();
 
-                // Siapkan data untuk Custom Payment Modal
-                $this->paymentModalData = $gatewayResponse;
-                $this->paymentModalData['instructions'] = $this->getTransferInstructions();
-                $this->externalId = $gatewayResponse['external_id'] ?? $order->invoice_number;
+                    // Siapkan data untuk Custom Payment Modal
+                    $this->paymentModalData = $gatewayResponse;
+                    $this->paymentModalData['instructions'] = $this->getTransferInstructions();
+                    $this->externalId = $gatewayResponse['external_id'] ?? $order->invoice_number;
 
-                $this->showMidtransPaymentModal = true;
-            } else {
-                // === GATEWAY LAIN (BNI, dll) - Behavior Lama ===
-                try {
+                    $this->showMidtransPaymentModal = true;
+                } else {
+                    // === GATEWAY LAIN (BNI, dll) - Behavior Lama ===
                     $gatewayResponse = $paymentService->createTransaction($order, $this->transferMethod);
 
                     // Simpan response gateway ke Order
@@ -367,31 +367,31 @@ abstract class BaseProductCheckout extends Component
                     $this->clearCartItems();
 
                     $this->handlePostPayment($activeGateway, $order, $gatewayResponse);
-                } catch (\Exception $e) {
-                    if ($activeGateway === 'bni') {
-                        // Fallback ke default VA
-                        $defaultVa = config('payment.bni.default_va', '1234567890');
+                }
+            } catch (\Exception $e) {
+                if (in_array($activeGateway, ['bni', 'midtrans'])) {
+                    // Fallback ke default VA
+                    $defaultVa = config("payment.default_va", '1234567890');
 
-                        $gatewayResponse = [
-                            'va_number' => $defaultVa,
-                            'va_bank' => $this->transferMethod ?: 'bni',
-                        ];
+                    $gatewayResponse = [
+                        'va_number' => $defaultVa,
+                        'va_bank' => $this->transferMethod ?: $activeGateway,
+                    ];
 
-                        $order->update($gatewayResponse);
-                        $order->update(['is_fallback_va' => true]);
-                        $order->update(['payment_response' => ['fallback' => true, 'error' => $e->getMessage()]]);
+                    $order->update($gatewayResponse);
+                    $order->update(['is_fallback_va' => true]);
+                    $order->update(['payment_response' => ['fallback' => true, 'error' => $e->getMessage()]]);
 
-                        DB::commit();
-                        $this->clearCartItems();
+                    DB::commit();
+                    $this->clearCartItems();
 
-                        $this->fallbackPaymentData = $gatewayResponse;
-                        $this->fallbackPaymentData['instructions'] = $this->getTransferInstructions();
-                        $this->externalId = $order->invoice_number;
+                    $this->fallbackPaymentData = $gatewayResponse;
+                    $this->fallbackPaymentData['instructions'] = $this->getTransferInstructions();
+                    $this->externalId = $order->invoice_number;
 
-                        $this->showFallbackPaymentModal = true;
-                    } else {
-                        throw $e;
-                    }
+                    $this->showFallbackPaymentModal = true;
+                } else {
+                    throw $e;
                 }
             }
         } catch (PaymentException $e) {
@@ -506,6 +506,7 @@ abstract class BaseProductCheckout extends Component
     // Method Polling
     public function checkPaymentStatus(): void
     {
+        if (!$this->showMidtransPaymentModal) return;
         if (empty($this->externalId)) {
             return;
         }

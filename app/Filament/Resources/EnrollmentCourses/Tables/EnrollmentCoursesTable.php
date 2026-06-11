@@ -44,6 +44,7 @@ class EnrollmentCoursesTable
                     ->dateTime('d M Y')
                     ->sortable(),
             ])
+            ->defaultSort('enrolled_at', 'desc')
             ->filters([
                 // TrashedFilter::make(),
                 SelectFilter::make('course_id')

@@ -5,7 +5,7 @@
             <div class="relative inline-flex mb-6">
                 <div class="absolute inset-0 bg-jti-yellow/15 rounded-full blur-2xl"></div>
                 <div class="relative w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
-                    <i data-lucide="receipt" class="w-10 h-10" style="stroke-width: 1.2px;"></i>
+                    <x-lucide-file-text class="w-10 h-10" style="stroke-width: 1.5px;" />
                 </div>
             </div>
             <div class="mb-8">
@@ -15,7 +15,7 @@
             <a href="{{ route('courses.index') }}"
                 class="inline-flex items-center gap-2 px-6 py-3 bg-jti-primary text-white text-sm font-medium rounded-xl hover:shadow-lg transition-all active:scale-95 group">
                 Mulai eksplorasi kursus
-                <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                <x-lucide-arrow-right class="w-4 h-4" style="stroke-width: 2px;" />
             </a>
         </div>
     @else
@@ -63,7 +63,7 @@
                             <div class="flex items-center gap-5 flex-1 min-w-0">
                                 <div
                                     class="w-12 h-12 shrink-0 bg-jti-light rounded-xl flex items-center justify-center text-jti-primary group-hover:bg-jti-yellow/20 transition-colors">
-                                    <i data-lucide="file-text" class="w-5 h-5" style="stroke-width: 1.5px;"></i>
+                                    <x-lucide-file-text class="w-6 h-6" style="stroke-width: 1.5px;" />
                                 </div>
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2 mb-0.5">
@@ -111,7 +111,7 @@
                             {{ $this->transactions->lastPage() }}
                         </p>
                         <div class="pagination-minimalist">
-                            {{ $this->transactions->links() }}
+                            {{ $this->transactions->links('components.pagination.custom-tailwind') }}
                         </div>
                     </div>
                 </div>

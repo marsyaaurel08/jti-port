@@ -2,23 +2,22 @@
     {{-- Toast Notifikasi Berhasil (Melayang fixed di pojok kanan bawah, otomatis hilang) --}}
     @if (session('success'))
         <div class="fixed top-24 right-6 bg-green-50 text-green-800 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px]"
-            x-data="{ show: true }"
-            x-show="show"
-            x-init="setTimeout(() => show = false, 4000)"
+            x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:translate-x-4"
             x-transition:enter-end="opacity-100 translate-y-0 sm:translate-x-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0 blur-sm">
-            <div class="flex-shrink-0 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-sm">
+            <div
+                class="flex-shrink-0 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-sm">
                 <x-lucide-check class="w-4 h-4" />
             </div>
             <div class="pr-2">
                 <p class="text-sm font-semibold text-emerald-800">Tindakan berhasil</p>
                 <p class="text-xs text-emerald-200/90">{{ session('success') }}</p>
             </div>
-            <button type="button" @click="show = false" class="text-emerald-300 hover:text-white ml-auto transition-colors">
+            <button type="button" @click="show = false"
+                class="text-emerald-300 hover:text-white ml-auto transition-colors">
                 <x-lucide-x class="w-4 h-4" />
             </button>
         </div>
@@ -38,20 +37,31 @@
 
         <form wire:submit="updateProfile" class="space-y-10">
             {{-- Bagian Avatar --}}
-            <div class="flex flex-col md:flex-row items-center gap-8 p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+            <div
+                class="flex flex-col md:flex-row items-center gap-8 p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                 <div class="relative">
-                    <div class="w-32 h-32 rounded-[2rem] overflow-hidden ring-4 ring-white shadow-xl bg-white">
+                    <div class="relative w-32 h-32 rounded-[2rem] overflow-hidden ring-4 ring-white shadow-xl bg-white">
+
+                        {{-- Indikator Loading Upload --}}
+                        <div wire:loading.flex wire:target="avatar"
+                            class="absolute inset-0 bg-white/80 backdrop-blur-md flex-col items-center justify-center z-20 transition-all">
+                            <x-lucide-loader-2 class="w-8 h-8 animate-spin text-jti-primary mb-1" />
+                        </div>
+
+                        {{-- Preview / Tampilan Avatar --}}
                         @if ($avatar)
                             <img src="{{ $avatar->temporaryUrl() }}" class="w-full h-full object-cover">
                         @elseif ($user->getFirstMediaUrl('avatar'))
                             <img src="{{ $user->getFirstMediaUrl('avatar') }}" class="w-full h-full object-cover">
                         @else
-                            <div class="w-full h-full bg-jti-light flex items-center justify-center text-jti-primary text-3xl font-semibold">
+                            <div
+                                class="w-full h-full bg-jti-light flex items-center justify-center text-jti-primary text-4xl font-bold uppercase">
                                 {{ substr($user->name, 0, 1) }}
                             </div>
                         @endif
                     </div>
-                    <label class="absolute -bottom-2 -right-2 p-2.5 bg-jti-yellow text-jti-primary rounded-xl shadow-lg cursor-pointer hover:scale-105 transition-transform">
+                    <label
+                        class="absolute z-50 -bottom-2 -right-2 p-2.5 bg-jti-yellow text-jti-primary rounded-xl shadow-lg cursor-pointer hover:scale-105 transition-transform">
                         <x-lucide-camera class="w-5 h-5" />
                         <input type="file" wire:model="avatar" accept="image/*" class="hidden">
                     </label>
@@ -59,12 +69,20 @@
 
                 <div class="flex-1 text-center md:text-left">
                     <h4 class="font-semibold text-slate-800 mb-1">Foto profil</h4>
-                    <p class="text-xs text-slate-500 max-w-xs leading-relaxed font-medium mb-3">Gunakan foto asli untuk memudahkan verifikasi sertifikat. PNG atau JPG, maksimal 2MB.</p>
+                    <p class="text-xs text-slate-500 max-w-xs leading-relaxed font-medium mb-3">Gunakan foto asli untuk
+                        memudahkan verifikasi sertifikat. PNG atau JPG, maksimal 2MB.</p>
                     @if ($user->getFirstMediaUrl('avatar'))
-                        <button type="button" wire:click="deleteAvatar"
-                            class="text-[11px] font-semibold text-rose-500 hover:text-rose-600 transition-colors">
-                            Hapus foto saat ini
-                        </button>
+                        <div class="flex flex-col md:flex-row items-center md:items-start gap-2">
+                            <button type="button" wire:click="deleteAvatar" wire:loading.attr="disabled"
+                                wire:target="deleteAvatar"
+                                class="text-[11px] font-semibold text-rose-500 hover:text-rose-600 transition-colors flex items-center gap-1">
+                                <span wire:loading.remove wire:target="deleteAvatar">Hapus foto saat ini</span>
+                                <span wire:loading wire:target="deleteAvatar" class="flex items-center gap-1">
+                                    <x-lucide-loader-2 class="w-3 h-3 animate-spin" />
+                                    Menghapus...
+                                </span>
+                            </button>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -74,7 +92,8 @@
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-slate-600 ml-1">Nama lengkap</label>
                     <div class="relative group">
-                        <x-lucide-user class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-jti-yellow transition-colors" />
+                        <x-lucide-user
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-jti-yellow transition-colors" />
                         <input type="text" wire:model="name"
                             class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-jti-yellow/20 transition-all text-sm font-medium text-slate-800">
                     </div>
@@ -86,7 +105,8 @@
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-slate-600 ml-1">Alamat email</label>
                     <div class="relative group">
-                        <x-lucide-mail class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-jti-yellow transition-colors" />
+                        <x-lucide-mail
+                            class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-jti-yellow transition-colors" />
                         <input type="email" wire:model="email"
                             class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-jti-yellow/20 transition-all text-sm font-medium text-slate-800">
                     </div>
@@ -180,7 +200,8 @@
                 </div>
             </div>
 
-            <div class="md:col-span-2 mt-4 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 p-6 rounded-2xl gap-4">
+            <div
+                class="md:col-span-2 mt-4 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 p-6 rounded-2xl gap-4">
                 <div class="flex items-start gap-3">
                     <x-lucide-info class="w-5 h-5 text-slate-400 shrink-0" />
                     <p class="text-[11px] text-slate-500 leading-relaxed font-medium max-w-[280px]">Gunakan minimal 8

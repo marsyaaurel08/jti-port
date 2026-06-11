@@ -7,6 +7,7 @@ use App\Filament\Resources\Settings\Schemas\SettingForm;
 use App\Filament\Resources\Settings\Tables\SettingsTable;
 use App\Models\Setting;
 use BackedEnum;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -34,7 +35,20 @@ class SettingResource extends Resource
     {
         return SettingsTable::configure($table);
     }
-
+    public static function getNavigationItems(): array
+    {
+        $listActiveRoutes = [
+            'filament.admin.resources.home-instructors.*',
+            'filament.admin.resources.log-home-instructors.*',
+        ];
+        return [
+            NavigationItem::make(static::getNavigationLabel())
+                ->icon(static::$navigationIcon)
+                ->url(static::getUrl())
+                ->group(static::$navigationGroup)
+                ->isActiveWhen(fn(): bool => request()->routeIs($listActiveRoutes)),
+        ];
+    }
     public static function getRelations(): array
     {
         return [
