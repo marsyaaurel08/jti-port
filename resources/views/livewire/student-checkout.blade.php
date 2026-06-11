@@ -308,9 +308,9 @@
             </div>
         </div>
 
-        <x-checkout.payment-modal :showMidtransPaymentModal="$showMidtransPaymentModal" :paymentModalData="$paymentModalData" :totalAmount="$this->getTotalAmount()" :isPaid="$isPaid"
+        <x-checkout.payment-modal :paymentModalData="$paymentModalData" :totalAmount="$this->getTotalAmount()" :isPaid="$isPaid"
             :successCountdown="$successCountdown" />
 
-        <x-checkout.fallback-payment-modal :showFallbackPaymentModal="$showFallbackPaymentModal" :fallbackPaymentData="$fallbackPaymentData" :totalAmount="$this->getTotalAmount()" />
+        <x-checkout.fallback-payment-modal :fallbackPaymentData="$fallbackPaymentData" :totalAmount="$this->getTotalAmount()" />
     </div>
 </div>

@@ -175,6 +175,7 @@ class StudentOrders extends Component
 
     public function checkPaymentStatus(): void
     {
+        if (!$this->showMidtransPaymentModal) return;
         if (empty($this->externalId)) return;
 
         $service = new \App\Services\Payment\MidtransService();

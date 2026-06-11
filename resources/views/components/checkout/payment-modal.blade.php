@@ -1,5 +1,4 @@
 @props([
-    'showMidtransPaymentModal',
     'paymentModalData',
     'totalAmount',
     'countdownSeconds',
@@ -9,6 +8,7 @@
 
 {{-- Di tag pembuka div paling luar, pastikan polling dimatikan/diubah kondisinya saat sukses --}}
 <div x-data="{
+    showModal: $wire.entangle('showMidtransPaymentModal'),
     showToast: false,
     toastMessage: '',
     copyToClipboard(text, message) {
@@ -19,11 +19,18 @@
             setTimeout(() => this.showToast = false, 3000);
         });
     }
-}" wire:target="showMidtransPaymentModal" @if ($showMidtransPaymentModal && !$isPaid)
-    wire:poll.3s="checkPaymentStatus"
+}" wire:target="showMidtransPaymentModal" @if (!$isPaid)
+    wire:poll.visible.3s="checkPaymentStatus"
     @endif
-    class="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
-    style="display: {{ $showMidtransPaymentModal ? 'flex' : 'none' }}">
+    x-cloak
+    x-show="showModal"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
 
     <!-- Alpine Toast Notification -->
     <div x-cloak x-show="showToast" x-transition:enter="transition ease-out duration-300 transform"
@@ -45,7 +52,7 @@
                     {{ $isPaid ? 'Status Pembayaran' : 'Instruksi Pembayaran' }}
                 </h2>
             </div>
-            <button wire:click="closeMidtransPaymentModal" class="text-gray-400 hover:text-gray-600 transition">
+            <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition">
                 <x-lucide-x class="w-6 h-6" />
             </button>
         </div>
@@ -278,7 +285,7 @@
 
         {{-- FOOTER ACTION BUTTON --}}
         <div class="px-6 py-4 bg-white border-t border-gray-100">
-            <button wire:click="closeMidtransPaymentModal"
+            <button @click="showModal = false"
                 class="w-full py-3.5 {{ $isPaid ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-jti-yellow hover:bg-[#FFB300] text-gray-900' }} font-bold rounded-xl transition-colors">
                 {{ $isPaid ? 'Selesai' : 'Tutup' }}
             </button>

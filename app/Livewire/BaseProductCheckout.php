@@ -506,6 +506,7 @@ abstract class BaseProductCheckout extends Component
     // Method Polling
     public function checkPaymentStatus(): void
     {
+        if (!$this->showMidtransPaymentModal) return;
         if (empty($this->externalId)) {
             return;
         }

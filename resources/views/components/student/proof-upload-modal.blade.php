@@ -1,13 +1,28 @@
-@props(['show', 'selectedOrder', 'paymentProof'])
+@props(['selectedOrder', 'paymentProof'])
 
 {{-- Modal: Upload Bukti Pembayaran --}}
-@if ($show && $selectedOrder)
-    <div class="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
-        x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-        @click.self="show = false; $wire.closeProofUpload()">
+<div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+    x-data="{ showModal: $wire.entangle('showProofUpload') }" 
+    x-cloak
+    x-show="showModal" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0" 
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    @click.self="showModal = false"
+    @keydown.escape.window="showModal = false">
 
-        <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+    @if ($selectedOrder)
+        <div x-show="showModal"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+            class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
             @click.stop>
 
             {{-- Header --}}
@@ -17,7 +32,7 @@
                     <p class="text-xs text-slate-500 font-medium mt-1">Invoice {{ $selectedOrder->invoice_number }}
                     </p>
                 </div>
-                <button @click="show = false; $wire.closeProofUpload()"
+                <button @click="showModal = false"
                     class="p-2 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -139,7 +154,7 @@
 
             {{-- Footer --}}
             <div class="px-8 py-6 border-t border-slate-100 bg-slate-50/50 flex gap-3">
-                <button @click="show = false; $wire.closeProofUpload()"
+                <button @click="showModal = false"
                     class="flex-1 py-3 text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-100 transition-all">
                     Batal
                 </button>
@@ -154,5 +169,5 @@
                 </button>
             </div>
         </div>
-    </div>
-@endif
+    @endif
+</div>

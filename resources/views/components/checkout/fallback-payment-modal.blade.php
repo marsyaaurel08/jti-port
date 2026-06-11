@@ -1,6 +1,7 @@
-@props(['showFallbackPaymentModal', 'fallbackPaymentData', 'totalAmount'])
+@props(['fallbackPaymentData', 'totalAmount'])
 
 <div x-data="{
+    showModal: $wire.entangle('showFallbackPaymentModal'),
     showToast: false,
     toastMessage: '',
     copyToClipboard(text, message) {
@@ -12,8 +13,15 @@
         });
     }
 }"
-    class="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
-    style="display: {{ $showFallbackPaymentModal ? 'flex' : 'none' }}">
+    x-cloak
+    x-show="showModal"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
 
     <div x-cloak x-show="showToast" x-transition:enter="transition ease-out duration-300 transform"
         x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
@@ -34,7 +42,7 @@
                     Instruksi Pembayaran Manual
                 </h2>
             </div>
-            <button wire:click="closeFallbackPaymentModal" class="text-gray-400 hover:text-gray-600 transition">
+            <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition">
                 <x-lucide-x class="w-6 h-6" />
             </button>
         </div>
@@ -121,7 +129,7 @@
         </div>
 
         <div class="px-6 py-4 bg-white border-t border-gray-100">
-            <button wire:click="closeFallbackPaymentModal"
+            <button @click="showModal = false"
                 class="w-full py-3.5 bg-jti-yellow hover:bg-[#FFB300] text-gray-900 font-bold rounded-xl transition-colors">
                 Mengerti & Tutup
             </button>
