@@ -62,14 +62,19 @@ fi
 # Hanya generate kalau belum ada (misalnya di-generate deploy.sh).
 # Cek config.php sebagai indikator cache sudah ada.
 # =====================================================================
-echo -e "${YELLOW}⚡ Generating Laravel cache...${NC}"
-php artisan schedule:clear-cache
+echo -e "${YELLOW}⚡ Clearing Laravel cache...${NC}"
 php artisan optimize:clear
+php artisan view:clear
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+
+echo -e "${YELLOW}⚡ Generating fresh Laravel cache...${NC}"
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-echo -e "${GREEN}✓ Cache generated${NC}"
 
+echo -e "${GREEN}✓ Cache generated successfully${NC}"
 # =====================================================================
 # 5. STORAGE LINK
 # =====================================================================
