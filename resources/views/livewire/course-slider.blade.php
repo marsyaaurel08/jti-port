@@ -7,6 +7,8 @@
                 {{-- Tambahkan AOS di sini --}}
                 {{-- Delay dihitung agar kartu muncul bergantian (100ms, 200ms, dst) --}}
                 <div class="snap-start shrink-0 w-[260px] h-full"
+                     wire:key="course-{{ $course->id }}"
+                     wire:ignore.self
                      data-aos="fade-up"
                      data-aos-delay="{{ ($index % 4) * 100 }}"
                      data-aos-duration="800">
@@ -48,3 +50,14 @@
         </div>
     @endif
 </div>
+
+{{-- Script untuk Refresh AOS saat Livewire Load More (Livewire 3) --}}
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.hook('morph.updated', ({ el, component }) => {
+            if (typeof AOS !== 'undefined') {
+                AOS.refresh();
+            }
+        });
+    });
+</script>
