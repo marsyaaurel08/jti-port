@@ -9,6 +9,7 @@ use Filament\Resources\Pages\ViewRecord;
 class ViewClasses extends ViewRecord
 {
     protected static string $resource = ClassesResource::class;
+    protected static ?string $title = 'Detail Kelas';
 
     protected function getHeaderActions(): array
     {
