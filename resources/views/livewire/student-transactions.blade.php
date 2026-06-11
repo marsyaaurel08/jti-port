@@ -111,7 +111,7 @@
                             {{ $this->transactions->lastPage() }}
                         </p>
                         <div class="pagination-minimalist">
-                            {{ $this->transactions->links() }}
+                            {{ $this->transactions->links('components.pagination.custom-tailwind') }}
                         </div>
                     </div>
                 </div>
