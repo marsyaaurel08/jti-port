@@ -60,14 +60,16 @@
         <div class="flex flex-col gap-3 mb-8" x-data="{ isLoading: false }">
             @php
                 // Menyiapkan URL agar logika di dalam atribut href tidak terlalu panjang
-                $targetUrl = auth()->check() && auth()->user()->hasVerifiedEmail()
-                    ? ($is_user_enrolled
-                        ? route('student.classLesson', [
-                            'classSlug' => $class->course->slug,
-                            'lessonSlug' => $class->course->chapters->first()->lessons->first()->slug ?? 'first-lesson',
-                        ])
-                        : route('student.checkout.class', $class->slug))
-                    : route('filament.user.auth.login');
+                $targetUrl =
+                    auth()->check() && auth()->user()->hasVerifiedEmail()
+                        ? ($is_user_enrolled
+                            ? route('student.classLesson', [
+                                'classSlug' => $class->course->slug,
+                                'lessonSlug' =>
+                                    $class->course->chapters->first()->lessons->first()->slug ?? 'first-lesson',
+                            ])
+                            : route('student.checkout.class', $class->slug))
+                        : route('filament.user.auth.login');
             @endphp
 
             <div class="w-full">
@@ -107,9 +109,8 @@
                     @click="addToCartClass({{ $class->id }}, () => { isLoading = false; }); isLoading = true;"
                     :disabled="isLoading"
                     class="w-full py-4 bg-white/5 border border-white/10 text-gray-300 font-semibold rounded-xl hover:bg-white/10 transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-2 group">
-
-                    <i data-lucide="shopping-cart" x-show="!isLoading"
-                        class="w-4 h-4 text-slate-400 group-hover:text-white transition-colors"></i>
+                    <x-lucide-shopping-cart class="w-4 h-4 text-slate-400 group-hover:text-white transition-colors"
+                        x-show="!isLoading" />
 
                     {{-- Loading Spinner --}}
                     <svg x-show="isLoading" x-cloak class="w-4 h-4 animate-spin text-jti-primary" fill="none"
@@ -164,8 +165,7 @@
 
                 {{-- Sertifikat --}}
                 <li class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-jti-yellow flex-shrink-0 mt-0.5" fill="currentColor"
-                        viewBox="0 0 20 20">
+                    <svg class="w-5 h-5 text-jti-yellow flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd" />
