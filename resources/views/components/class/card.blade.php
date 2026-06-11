@@ -30,7 +30,7 @@
 
                 {{-- Deskripsi --}}
                 <p class="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">
-                    {{ $class->description }}
+                    {{ strip_tags($class->description) }}
                 </p>
 
                 {{-- Rating & Level Section (Disesuaikan berdampingan) --}}
