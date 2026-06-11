@@ -14,8 +14,12 @@
 
                 {{-- Avatar --}}
                 <div
-                    class="relative w-16 h-16 bg-white flex items-center justify-center rounded-2xl border border-slate-100 shadow-sm text-jti-primary text-xl font-semibold">
-                    {{ substr($user->name, 0, 1) }}
+                    class="relative w-16 h-16 bg-white flex items-center justify-center rounded-2xl border border-slate-100 shadow-sm text-jti-primary text-xl font-semibold overflow-hidden">
+                    @if ($user->getFirstMediaUrl('avatar'))
+                        <img src="{{ $user->getFirstMediaUrl('avatar') }}" alt="Avatar" class="w-full h-full object-cover">
+                    @else
+                        {{ substr($user->name, 0, 1) }}
+                    @endif
                 </div>
 
                 {{-- Status Online Dot --}}
