@@ -12,6 +12,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class ClassesForm
@@ -88,7 +89,11 @@ class ClassesForm
 
                                 Select::make('instructor_id')
                                     ->placeholder('Pilih instruktur')
-                                    ->relationship('instructor', 'name')
+                                    ->relationship(
+                                        name: 'instructor',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn(Builder $query) => $query->role(['pengajar'])
+                                    )
                                     ->searchable()
                                     ->preload()
                                     ->required('Instruktur harus dipilih')
