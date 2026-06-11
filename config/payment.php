@@ -13,7 +13,7 @@ return [
     | Install SDK: composer require midtrans/midtrans-php
     |
     */
-
+    'default_va'        => env('DEFAULT_VA', '1234567890'),
     'midtrans' => [
         'server_key'    => env('MIDTRANS_SERVER_KEY', ''),
         'client_key'    => env('MIDTRANS_CLIENT_KEY', ''),
@@ -35,7 +35,6 @@ return [
     */
 
     'bni' => [
-        'default_va'    => env('BNI_DEFAULT_VA', '1234567890'),
         'client_id'     => env('BNI_CLIENT_ID', ''),
         'client_secret' => env('BNI_CLIENT_SECRET', ''),
         'api_key'       => env('BNI_API_KEY', ''),
