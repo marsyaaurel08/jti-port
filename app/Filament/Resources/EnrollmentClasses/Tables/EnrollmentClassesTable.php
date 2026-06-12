@@ -48,7 +48,7 @@ class EnrollmentClassesTable
             ])
             ->defaultSort('enrolled_at', 'desc')
             ->filters([
-                // TrashedFilter::make(),
+                TrashedFilter::make(),
                 SelectFilter::make('class_id')
                     ->relationship('class', 'title')
                     ->label('Filter Kelas'),
