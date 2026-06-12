@@ -5,12 +5,9 @@ namespace App\Filament\Resources\EnrollmentClasses\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class EnrollmentClassesTable
@@ -48,7 +45,6 @@ class EnrollmentClassesTable
             ])
             ->defaultSort('enrolled_at', 'desc')
             ->filters([
-                TrashedFilter::make(),
                 SelectFilter::make('class_id')
                     ->relationship('class', 'title')
                     ->label('Filter Kelas'),
@@ -60,8 +56,6 @@ class EnrollmentClassesTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
