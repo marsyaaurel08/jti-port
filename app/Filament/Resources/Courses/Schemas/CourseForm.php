@@ -62,12 +62,9 @@ class CourseForm
                                 ->default('beginner')
                                 ->required(),
                             FileUpload::make('thumbnail_url')
-                                ->label('Thumbnail')
+                                ->label('Thumbnail Course')
                                 ->image()
-                                ->imageEditor()
-                                ->preserveFilenames()
-                                ->default('https://picsum.photos/400/200?random=1')
-                                ->visibility('public'),
+                                ->directory('course-thumbnails'),
                             Select::make('status')
                                 ->label('Status')
                                 ->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])
