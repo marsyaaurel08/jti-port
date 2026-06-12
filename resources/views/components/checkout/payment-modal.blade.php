@@ -52,7 +52,7 @@
                     {{ $isPaid ? 'Status Pembayaran' : 'Instruksi Pembayaran' }}
                 </h2>
             </div>
-            <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition">
+            <button @click="$wire.closeMidtransPaymentModal()" class="text-gray-400 hover:text-gray-600 transition">
                 <x-lucide-x class="w-6 h-6" />
             </button>
         </div>
@@ -285,7 +285,7 @@
 
         {{-- FOOTER ACTION BUTTON --}}
         <div class="px-6 py-4 bg-white border-t border-gray-100">
-            <button @click="showModal = false"
+            <button @click="$wire.closeMidtransPaymentModal()"
                 class="w-full py-3.5 {{ $isPaid ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-jti-yellow hover:bg-[#FFB300] text-gray-900' }} font-bold rounded-xl transition-colors">
                 {{ $isPaid ? 'Selesai' : 'Tutup' }}
             </button>
