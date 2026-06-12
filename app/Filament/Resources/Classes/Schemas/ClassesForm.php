@@ -40,14 +40,14 @@ class ClassesForm
 
                                 TextInput::make('slug')
                                     ->label('Slug Kelas')
-                                    // ->disabled()
+                                    ->disabled()
                                     ->dehydrated()
                                     ->required('Slug harus diisi')
                                     ->validationMessages([
                                         'required' => 'Slug tidak boleh kosong.',
                                         'unique' => 'Slug ini sudah digunakan oleh kelas lain.',
                                     ])
-                                    ->hidden()
+                                    // ->hidden()
                                     ->unique(CourseClass::class, 'slug', ignoreRecord: true),
 
                                 RichEditor::make('description')
