@@ -31,9 +31,8 @@ class ClassShow extends Component
 
         // Check if user is enrolled
         $this->isUserEnrolled = $userId ? CourseClass::withTrashed()
-            ->whereHas('course', function ($q) {
-                $q->where('slug', $this->slug)->withTrashed();
-            })->whereHas('enrollments', function ($query) use ($userId) {
+            ->where('slug', $this->slug)
+            ->whereHas('enrollments', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })->exists() : false;
 
