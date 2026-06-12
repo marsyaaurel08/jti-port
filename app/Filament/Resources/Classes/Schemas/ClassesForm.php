@@ -35,12 +35,12 @@ class ClassesForm
                                     ->maxLength(255)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(
-                                        fn(string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null
+                                        fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null
                                     ),
 
                                 TextInput::make('slug')
                                     ->label('Slug Kelas')
-                                    ->disabled()
+                                    // ->disabled()
                                     ->dehydrated()
                                     ->required('Slug harus diisi')
                                     ->validationMessages([
@@ -90,7 +90,7 @@ class ClassesForm
                                     ->validationMessages([
                                         'required' => 'Kursus tidak boleh kosong, pilih kursus terlebih dahulu.',
                                     ])
-                                    ->afterStateUpdated(fn($state, $set) => $set('category', \App\Models\Course::find($state)?->category?->name)),
+                                    ->afterStateUpdated(fn ($state, $set) => $set('category', \App\Models\Course::find($state)?->category?->name)),
 
                                 Select::make('instructor_id')
                                     ->label('Instruktur')
@@ -98,7 +98,7 @@ class ClassesForm
                                     ->relationship(
                                         name: 'instructor',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn(Builder $query) => $query->role(['pengajar'])
+                                        modifyQueryUsing: fn (Builder $query) => $query->role(['pengajar'])
                                     )
                                     ->searchable()
                                     ->preload()
