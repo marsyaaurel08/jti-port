@@ -19,21 +19,15 @@
         {{-- Price Section --}}
         <div class="flex items-end justify-between mb-8">
             <div class="flex flex-col gap-1">
-                @if ($course->old_price)
-                    <span class="text-xs font-medium text-gray-500 line-through leading-none">
-                        Rp{{ number_format($course->old_price, 0, ',', '.') }}
-                    </span>
-                @endif
+                <span class="text-xs font-medium text-gray-500">Harga Kelas</span>
                 <div class="flex items-center gap-2">
                     <span class="text-3xl font-bold tracking-tighter text-white">
-                        Rp{{ number_format($course->price, 0, ',', '.') }}
+                        @if ($course->price == 0)
+                            Gratis
+                        @else
+                            Rp{{ number_format($course->price, 0, ',', '.') }}
+                        @endif
                     </span>
-                    @if ($course->old_price)
-                        <span
-                            class="px-2 py-0.5 bg-jti-yellow/10 border border-jti-yellow/20 text-jti-yellow text-[10px] font-bold rounded">
-                            85% OFF
-                        </span>
-                    @endif
                 </div>
             </div>
         </div>

@@ -21,7 +21,11 @@
                 <span class="text-xs font-medium text-gray-500">Harga Kelas</span>
                 <div class="flex items-center gap-2">
                     <span class="text-3xl font-bold tracking-tighter text-white">
-                        Rp{{ number_format($class->price, 0, ',', '.') }}
+                        @if ($class->price == 0)
+                            Gratis
+                        @else
+                            Rp{{ number_format($class->price, 0, ',', '.') }}
+                        @endif
                     </span>
                 </div>
             </div>
