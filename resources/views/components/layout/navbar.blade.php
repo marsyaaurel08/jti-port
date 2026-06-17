@@ -58,5 +58,9 @@
     </div>
 
     {{-- Mobile Sidebar Layer --}}
-    <x-layout.nav.mobile-sidebar :categories="$categories" />
+    @if ($isStaff)
+        <x-layout.nav.admin-mobile-sidebar :categories="$categories" />
+    @else
+        <x-layout.nav.student-mobile-sidebar :categories="$categories" />
+    @endif
 </nav>
