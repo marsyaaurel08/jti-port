@@ -51,6 +51,7 @@ class CourseResource extends Resource
         ];
     }
 
+
     public static function getPages(): array
     {
         return [
