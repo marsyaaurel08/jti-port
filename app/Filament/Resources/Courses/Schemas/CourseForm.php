@@ -64,6 +64,7 @@ class CourseForm
                             FileUpload::make('thumbnail_url')
                                 ->label('Thumbnail Course')
                                 ->image()
+                                ->disk('public')
                                 ->directory('course-thumbnails'),
                             Select::make('status')
                                 ->label('Status')
