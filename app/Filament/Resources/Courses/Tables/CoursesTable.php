@@ -21,9 +21,6 @@ class CoursesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('thumbnail_url')
-                    ->label('Thumbnail')
-                    ->extraImgAttributes(['class' => 'w-full h-64 object-cover rounded-lg mb-3']),
 
                 TextColumn::make('title')
                     ->label('Judul Kursus')
