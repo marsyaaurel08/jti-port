@@ -25,6 +25,7 @@ class CourseInfolist
                             ->schema([
                                 ImageEntry::make('thumbnail_url')
                                     ->label('Thumbnail')
+                                    ->disk('public')
                                     ]),
                         Grid::make(2)
                             ->schema([
