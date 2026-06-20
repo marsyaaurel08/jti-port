@@ -9,6 +9,10 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\RestoreAction;
 
 class EnrollmentClassesTable
 {
@@ -48,14 +52,18 @@ class EnrollmentClassesTable
                 SelectFilter::make('class_id')
                     ->relationship('class', 'title')
                     ->label('Filter Kelas'),
+                TrashedFilter::make(),
             ])
             ->recordActions([
                 ViewAction::make(),
                 DeleteAction::make(),
+                RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
