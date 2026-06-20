@@ -12,14 +12,9 @@
             setTimeout(() => this.showToast = false, 3000);
         });
     }
-}"
-    x-cloak
-    x-show="showModal"
-    x-transition:enter="transition ease-out duration-300"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-200"
-    x-transition:leave-start="opacity-100"
+}" x-cloak x-show="showModal" x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
     class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
 
@@ -52,11 +47,14 @@
             <div class="bg-[#FFF5F5] border border-[#FED7D7] rounded-xl p-4 flex items-start gap-3 mb-2 mt-4">
                 <span class="w-3 h-3 rounded-full bg-red-500 mt-1 shrink-0"></span>
                 <p class="text-xs text-gray-700 leading-relaxed">
-                    Mohon maaf, sedang terjadi gangguan koneksi dengan layanan BNI. Kami telah membuatkan <strong class="text-gray-900">Virtual Account Alternatif</strong> untuk Anda. Silakan selesaikan pembayaran ke VA di bawah ini.
+                    Mohon maaf, sedang terjadi gangguan koneksi dengan layanan BNI. Kami telah membuatkan <strong
+                        class="text-gray-900">Virtual Account Alternatif</strong> untuk Anda. Silakan selesaikan
+                    pembayaran ke VA di bawah ini.
                 </p>
             </div>
 
-            <div class="bg-jti-primary rounded-2xl p-6 relative overflow-hidden shadow-lg border border-gray-800 mb-6 mt-4">
+            <div
+                class="bg-jti-primary rounded-2xl p-6 relative overflow-hidden shadow-lg border border-gray-800 mb-6 mt-4">
                 <div class="absolute top-4 right-4 opacity-10">
                     <x-lucide-credit-card class="w-16 h-16 text-gray-300" />
                 </div>
@@ -69,7 +67,8 @@
                     <p class="text-lg md:text-2xl font-extrabold text-jti-yellow tracking-widest">
                         {{ data_get($fallbackPaymentData, 'va_number') ?? '-' }}
                     </p>
-                    <button type="button" @click="copyToClipboard('{{ data_get($fallbackPaymentData, 'va_number') }}', 'Nomor Virtual Account disalin!')"
+                    <button type="button"
+                        @click="copyToClipboard('{{ data_get($fallbackPaymentData, 'va_number') }}', 'Nomor Virtual Account disalin!')"
                         class="text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-jti-yellow/20 active:scale-95 transition group">
                         <x-lucide-copy class="w-5 h-5 text-jti-yellow group-hover:scale-110 transition-transform" />
                     </button>
@@ -82,8 +81,10 @@
                     </div>
                     <div class="text-right flex flex-col items-end">
                         <p class="text-[10px] text-gray-400 mb-1 uppercase">Total Nominal</p>
-                        <p class="font-bold text-jti-yellow text-lg leading-none">Rp{{ number_format($totalAmount, 0, ',', '.') }}</p>
-                        <button type="button" @click="copyToClipboard('{{ $totalAmount }}', 'Nominal Tagihan disalin!')"
+                        <p class="font-bold text-jti-yellow text-lg leading-none">
+                            Rp{{ number_format($totalAmount, 0, ',', '.') }}</p>
+                        <button type="button"
+                            @click="copyToClipboard('{{ $totalAmount }}', 'Nominal Tagihan disalin!')"
                             class="flex items-center gap-1 text-[10px] text-gray-400 hover:text-jti-yellow transition mt-1.5 active:scale-95">
                             <x-lucide-copy class="w-3 h-3" /> Salin Nominal
                         </button>
@@ -99,27 +100,33 @@
                 <div class="border border-gray-100 bg-white shadow-sm rounded-xl p-5 mb-4">
                     <ul class="space-y-4">
                         <li class="flex items-start gap-3">
-                            <span class="shrink-0 w-6 h-6 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-md text-[11px] font-bold text-gray-700 mt-0.5">
+                            <span
+                                class="shrink-0 w-6 h-6 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-md text-[11px] font-bold text-gray-700 mt-0.5">
                                 1
                             </span>
                             <p class="text-sm text-gray-600 leading-relaxed">
-                                Lakukan transfer sesuai total nominal (tepat hingga 3 digit terakhir jika ada) ke nomor VA di atas.
+                                Lakukan transfer sesuai total nominal (tepat hingga 3 digit terakhir jika ada) ke nomor
+                                VA di atas.
                             </p>
                         </li>
                         <li class="flex items-start gap-3">
-                            <span class="shrink-0 w-6 h-6 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-md text-[11px] font-bold text-gray-700 mt-0.5">
+                            <span
+                                class="shrink-0 w-6 h-6 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-md text-[11px] font-bold text-gray-700 mt-0.5">
                                 2
                             </span>
                             <p class="text-sm text-gray-600 leading-relaxed">
-                                Setelah transfer berhasil, <strong class="text-gray-900">simpan struk/bukti transfer</strong> pembayaran Anda.
+                                Setelah transfer berhasil, <strong class="text-gray-900">simpan struk/bukti
+                                    transfer</strong> pembayaran Anda.
                             </p>
                         </li>
                         <li class="flex items-start gap-3">
-                            <span class="shrink-0 w-6 h-6 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-md text-[11px] font-bold text-gray-700 mt-0.5">
+                            <span
+                                class="shrink-0 w-6 h-6 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-md text-[11px] font-bold text-gray-700 mt-0.5">
                                 3
                             </span>
                             <p class="text-sm text-gray-600 leading-relaxed">
-                                Hubungi Admin melalui pesan/WhatsApp untuk melampirkan bukti tersebut guna mempercepat proses verifikasi.
+                                Hubungi Admin melalui pesan/WhatsApp untuk melampirkan bukti tersebut guna mempercepat
+                                proses verifikasi.
                             </p>
                         </li>
                     </ul>
@@ -129,10 +136,10 @@
         </div>
 
         <div class="px-6 py-4 bg-white border-t border-gray-100">
-            <button @click="showModal = false"
-                class="w-full py-3.5 bg-jti-yellow hover:bg-[#FFB300] text-gray-900 font-bold rounded-xl transition-colors">
-                Mengerti & Tutup
-            </button>
+            <a href="{{ route('student.orders') }}"
+                class="w-full block text-center py-3.5 bg-jti-yellow hover:bg-[#FFB300] text-gray-900 font-bold rounded-xl transition-colors">
+                Tutup
+            </a>
         </div>
 
     </div>

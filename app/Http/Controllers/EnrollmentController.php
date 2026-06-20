@@ -6,6 +6,8 @@ use App\Models\CourseProgress;
 use App\Models\Enrollment;
 use App\Models\Lesson;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Course;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -38,6 +40,16 @@ class EnrollmentController extends Controller
 
         // Asosiasikan Order ke Enrollment
         $enrollment->update(['order_id' => $order->id]);
+
+        $course = Course::find($courseId);
+        
+        OrderItem::create([
+            'order_id' => $order->id,
+            'course_id' => $courseId,
+            'class_id' => $enrollment->class_id,
+            'price_at_purchase' => 0,
+            'item_name' => $course ? $course->title : 'Course Enrollment',
+        ]);
 
         // Ambil semua ID lesson dari course
         $lessonIds = Lesson::whereHas('chapter', function ($query) use ($courseId) {

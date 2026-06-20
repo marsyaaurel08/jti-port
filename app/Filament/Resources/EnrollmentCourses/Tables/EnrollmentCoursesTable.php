@@ -6,6 +6,8 @@ use Filament\Actions\{BulkActionGroup, DeleteAction, DeleteBulkAction, ForceDele
 use Filament\Tables\Columns\{IconColumn, TextColumn};
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Actions\RestoreAction;
 
 class EnrollmentCoursesTable
 {
@@ -46,7 +48,7 @@ class EnrollmentCoursesTable
             ])
             ->defaultSort('enrolled_at', 'desc')
             ->filters([
-                // TrashedFilter::make(),
+                TrashedFilter::make(),
                 SelectFilter::make('course_id')
                     ->relationship('course', 'title')
                     ->label('Filter Kursus'),
@@ -54,6 +56,7 @@ class EnrollmentCoursesTable
             ->recordActions([
                 ViewAction::make(),
                 DeleteAction::make(),
+                RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

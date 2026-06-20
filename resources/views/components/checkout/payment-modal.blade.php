@@ -285,11 +285,10 @@
 
         {{-- FOOTER ACTION BUTTON --}}
         <div class="px-6 py-4 bg-white border-t border-gray-100">
-            <button @click="$wire.closeMidtransPaymentModal()"
-                class="w-full py-3.5 {{ $isPaid ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-jti-yellow hover:bg-[#FFB300] text-gray-900' }} font-bold rounded-xl transition-colors">
+            <a href="{{ route('student.orders') }}"
+                class="w-full block text-center text-base py-3.5 {{ $isPaid ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-jti-yellow hover:bg-[#FFB300] text-gray-900' }} font-bold rounded-xl transition-colors">
                 {{ $isPaid ? 'Selesai' : 'Tutup' }}
-            </button>
+            </a>
         </div>
-
     </div>
 </div>
