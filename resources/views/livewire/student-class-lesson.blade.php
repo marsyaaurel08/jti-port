@@ -76,6 +76,24 @@
             font-weight: 600;
             color: #1a202c;
         }
+        .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        .article-content th,
+        .article-content td {
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .article-content th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        .article-content tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
     </style>
 
     {{-- Mobile Sidebar Toggle Bar --}}
