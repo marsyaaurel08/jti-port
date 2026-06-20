@@ -2,7 +2,7 @@
 
 {{-- Modal: Upload Bukti Pembayaran --}}
 <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
-    x-data="{ showModal: $wire.entangle('showProofUpload') }" 
+    x-data="{ showModal: $wire.entangle('showProofUpload'), imageUrl: null }" 
     x-cloak
     x-show="showModal" 
     x-transition:enter="transition ease-out duration-300"
@@ -66,6 +66,7 @@
                         <div
                             class="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-blue-300 transition-colors cursor-pointer group">
                             <input type="file" wire:model="paymentProof" accept="image/*"
+                                @change="if($event.target.files.length) imageUrl = URL.createObjectURL($event.target.files[0])"
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
 
                             <div class="space-y-3">
@@ -104,7 +105,7 @@
                                 <p class="text-xs font-bold text-slate-500 tracking-wider">PREVIEW BUKTI</p>
 
                                 {{-- Tombol Ganti Gambar --}}
-                                <button type="button" wire:click="$set('paymentProof', null)"
+                                <button type="button" wire:click="$set('paymentProof', null)" @click="imageUrl = null"
                                     class="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
                                     <i data-lucide="refresh-cw" class="w-3 h-3"></i>
                                     Ganti Gambar
@@ -113,13 +114,13 @@
 
                             <div
                                 class="relative rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100">
-                                <img src="{{ $paymentProof->temporaryUrl() }}"
+                                <img :src="imageUrl"
                                     class="w-full h-56 object-contain mx-auto">
 
                                 {{-- Overlay Hapus saat Hover --}}
                                 <div
                                     class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button type="button" wire:click="$set('paymentProof', null)"
+                                    <button type="button" wire:click="$set('paymentProof', null)" @click="imageUrl = null"
                                         class="bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold border border-white/30 hover:bg-white/40 transition-all">
                                         Hapus & Pilih Ulang
                                     </button>

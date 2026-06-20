@@ -37,7 +37,7 @@
 
         <form wire:submit="updateProfile" class="space-y-10">
             {{-- Bagian Avatar --}}
-            <div
+            <div x-data="{ avatarUrl: null }"
                 class="flex flex-col md:flex-row items-center gap-8 p-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                 <div class="relative">
                     <div class="relative w-32 h-32 rounded-[2rem] overflow-hidden ring-4 ring-white shadow-xl bg-white">
@@ -49,21 +49,26 @@
                         </div>
 
                         {{-- Preview / Tampilan Avatar --}}
-                        @if ($avatar)
-                            <img src="{{ $avatar->temporaryUrl() }}" class="w-full h-full object-cover">
-                        @elseif ($user->getFirstMediaUrl('avatar'))
-                            <img src="{{ $user->getFirstMediaUrl('avatar') }}" class="w-full h-full object-cover">
-                        @else
-                            <div
-                                class="w-full h-full bg-jti-light flex items-center justify-center text-jti-primary text-4xl font-bold uppercase">
-                                {{ substr($user->name, 0, 1) }}
+                        <template x-if="avatarUrl">
+                            <img :src="avatarUrl" class="w-full h-full object-cover">
+                        </template>
+                        <template x-if="!avatarUrl">
+                            <div>
+                                @if ($user->getFirstMediaUrl('avatar'))
+                                    <img src="{{ $user->getFirstMediaUrl('avatar') }}" class="w-full h-full object-cover">
+                                @else
+                                    <div
+                                        class="w-full h-full bg-jti-light flex items-center justify-center text-jti-primary text-4xl font-bold uppercase">
+                                        {{ substr($user->name, 0, 1) }}
+                                    </div>
+                                @endif
                             </div>
-                        @endif
+                        </template>
                     </div>
                     <label
                         class="absolute z-50 -bottom-2 -right-2 p-2.5 bg-jti-yellow text-jti-primary rounded-xl shadow-lg cursor-pointer hover:scale-105 transition-transform">
                         <x-lucide-camera class="w-5 h-5" />
-                        <input type="file" wire:model="avatar" accept="image/*" class="hidden">
+                        <input type="file" wire:model="avatar" accept="image/*" class="hidden" @change="if($event.target.files.length) avatarUrl = URL.createObjectURL($event.target.files[0])">
                     </label>
                 </div>
 
@@ -74,7 +79,7 @@
                     @if ($user->getFirstMediaUrl('avatar'))
                         <div class="flex flex-col md:flex-row items-center md:items-start gap-2">
                             <button type="button" wire:click="deleteAvatar" wire:loading.attr="disabled"
-                                wire:target="deleteAvatar"
+                                wire:target="deleteAvatar" @click="avatarUrl = null"
                                 class="text-[11px] font-semibold text-rose-500 hover:text-rose-600 transition-colors flex items-center gap-1">
                                 <span wire:loading.remove wire:target="deleteAvatar">Hapus foto saat ini</span>
                                 <span wire:loading wire:target="deleteAvatar" class="flex items-center gap-1">
