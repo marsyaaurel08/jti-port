@@ -95,7 +95,7 @@ class OrdersHistoryInfolist
                                             ->weight(FontWeight::Bold)
                                             ->color('primary')
                                             ->icon('heroicon-m-play-circle')
-                                            ->url(fn($record) => $record->class_id ? "/classes/{$record->slug}" : "/courses/{$record->course->slug}")
+                                            ->url(fn($record) => $record->class_id ? "/classes/{$record->class->slug}" : "/courses/{$record->course->slug}")
                                             ->suffix(fn($record) => $record->class_id ? " (Kelas)" : " (Kursus)")
                                             ->openUrlInNewTab()
                                             ->columnSpanFull(2),
@@ -110,7 +110,7 @@ class OrdersHistoryInfolist
                                             ->formatStateUsing(fn() => 'Buka Materi')
                                             ->icon('heroicon-m-arrow-top-right-on-square')
                                             ->color('success')
-                                            ->url(fn($record) => $record->class_id ? "/classes/{$record->slug}" : "/courses/{$record->course->slug}"),
+                                            ->url(fn($record) => $record->class_id ? "/classes/{$record->class->slug}" : "/courses/{$record->course->slug}"),
                                     ]),
                             ]),
                     ]),
