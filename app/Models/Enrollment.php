@@ -82,11 +82,11 @@ class Enrollment extends Model
 
     public function course(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class)->withTrashed();
     }
     public function class(): BelongsTo
     {
-        return $this->belongsTo(CourseClass::class, 'class_id');
+        return $this->belongsTo(CourseClass::class, 'class_id')->withTrashed();
     }
     public function order(): BelongsTo
     {
