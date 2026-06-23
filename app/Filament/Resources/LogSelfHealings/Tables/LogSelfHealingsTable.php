@@ -45,6 +45,7 @@ class LogSelfHealingsTable
                     ->limit(50)
                     ->tooltip(fn ($record) => $record->error_message),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('result')
                     ->label('Hasil')
