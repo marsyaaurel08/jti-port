@@ -320,7 +320,37 @@ abstract class BaseProductCheckout extends Component
 
             // ==================== HANDLE FREE PAYMENT ====================
             if ($this->getTotalAmount() <= 0) {
-                $order->update(['status' => 'paid']);
+                $order->update([
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                ]);
+
+                // Daftarkan user ke enrollments dan buat course progress
+                foreach ($order->orderItems as $item) {
+                    $enrollment = \App\Models\Enrollment::create([
+                        'user_id' => $order->user_id,
+                        'course_id' => $item->course_id,
+                        'class_id' => $item->class_id,
+                        'order_id' => $order->id,
+                        'enrolled_at' => now(),
+                        'completed_lesson_count' => 0,
+                    ]);
+
+                    // Buat CourseProgress untuk semua lesson pada course
+                    $course = $item->course;
+                    if ($course) {
+                        foreach ($course->chapters as $chapter) {
+                            foreach ($chapter->lessons as $lesson) {
+                                \App\Models\CourseProgress::create([
+                                    'enrollment_id' => $enrollment->id,
+                                    'lesson_id' => $lesson->id,
+                                    'is_completed' => false,
+                                ]);
+                            }
+                        }
+                    }
+                }
+
                 DB::commit();
 
                 $this->clearCartItems();
