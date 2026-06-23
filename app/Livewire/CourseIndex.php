@@ -5,10 +5,12 @@ namespace App\Livewire;
 use App\Models\Category;
 use App\Models\Course;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+#[Layout('layouts.app')]
 class CourseIndex extends Component
 {
     use WithPagination;
@@ -84,7 +86,8 @@ class CourseIndex extends Component
 
     private function getCacheKey(): string
     {
-        return 'courses_' . md5(json_encode([
+        $version = Cache::get('courses_catalog_version', 1);
+        return 'courses_v' . $version . '_' . md5(json_encode([
             'categories' => $this->selectedCategories,
             'ratings' => $this->selectedRatings,
             'levels' => $this->selectedLevels,
