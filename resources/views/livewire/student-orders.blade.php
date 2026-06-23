@@ -1,4 +1,4 @@
-<div>
+<div @if(!$showProofUpload && !$showProofView && !$showFallbackPaymentModal && !$showMidtransPaymentModal && !$showBNIPaymentModal) wire:poll.5s @endif>
     <x-layouts.user :user="$this->user">
         {{-- SUCCESS TOAST (Premium melayang, otomatis hilang, bisa ditutup manual) --}}
         @if (session('success'))
@@ -50,43 +50,42 @@
 
         {{-- KONTEN UTAMA HALAMAN --}}
         @if ($orders->isEmpty())
-            {{-- Empty State --}}
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Pesanan Saya</h1>
-                <p class="text-gray-600 mt-2">Pantau status pembayaran dan riwayat transaksi Anda</p>
-            </div>
-
-            <div class="bg-white rounded-4xl border border-slate-100 p-16 text-center shadow-sm">
-                <div class="relative inline-flex mb-6">
-                    <div class="absolute inset-0 bg-jti-yellow/20 rounded-full blur-2xl"></div>
-                    <div
-                        class="relative w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
-                        <x-lucide-ghost class="w-10 h-10 text-gray-400" />
-                    </div>
+            <div wire:key="empty-orders">
+                {{-- Empty State --}}
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">Pesanan Saya</h1>
+                    <p class="text-gray-600 mt-2">Pantau status pembayaran dan riwayat transaksi Anda</p>
                 </div>
-                <h3 class="text-xl font-semibold text-slate-900 mb-2">Semua beres!</h3>
-                <p class="text-slate-500 max-w-xs mx-auto mb-8 text-sm leading-relaxed font-medium">
-                    Tidak ada tagihan yang menggantung. Saatnya menambah ilmu baru hari ini?
-                </p>
-                <a href="{{ route('courses.index') }}"
-                    class="inline-flex items-center gap-2 px-6 py-3 bg-jti-primary text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-jti-primary/20 transition-all active:scale-95 group">
-                    Cari Kursus
-                    <x-lucide-arrow-right class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </a>
+
+                <div class="bg-white rounded-4xl border border-slate-100 p-16 text-center shadow-sm">
+                    <div class="relative inline-flex mb-6">
+                        <div class="absolute inset-0 bg-jti-yellow/20 rounded-full blur-2xl"></div>
+                        <div class="relative w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400">
+                            <x-lucide-ghost class="w-10 h-10 text-gray-400" />
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 mb-2">Semua beres!</h3>
+                    <p class="text-slate-500 max-w-xs mx-auto mb-8 text-sm leading-relaxed font-medium">
+                        Tidak ada tagihan yang menggantung. Saatnya menambah ilmu baru hari ini?
+                    </p>
+                    <a href="{{ route('courses.index') }}"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-jti-primary text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-jti-primary/20 transition-all active:scale-95 group">
+                        Cari Kursus
+                        <x-lucide-arrow-right class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                </div>
             </div>
         @else
-            <div class="space-y-6">
+            <div class="space-y-6" wire:key="filled-orders">
                 {{-- Header --}}
                 <div class="px-2 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
                         <h2 class="text-2xl font-semibold text-jti-primary tracking-tight">Pesanan Anda</h2>
-                        <p class="text-sm text-slate-500 font-medium">Kelola pembayaran untuk item yang telah Anda pesan
-                        </p>
+                        <p class="text-sm text-slate-500 font-medium">Kelola pembayaran untuk item yang telah Anda pesan</p>
                     </div>
 
                     {{-- Status Badge --}}
-                    <div
-                        class="inline-flex items-center gap-2.5 bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="inline-flex items-center gap-2.5 bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
                         <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
                         <p class="text-xs font-bold text-slate-700">{{ $orders->count() }} Menunggu Pembayaran</p>
                     </div>
@@ -94,9 +93,10 @@
 
                 <div class="space-y-4">
                     @foreach ($orders as $order)
-                        <x-student.order-item :order="$order" />
+                        <x-student.order-item :order="$order" wire:key="order-{{ $order->id }}" />
                     @endforeach
                 </div>
+            </div>
         @endif
 
     </x-layouts.user>

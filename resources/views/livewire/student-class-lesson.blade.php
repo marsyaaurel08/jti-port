@@ -1,16 +1,38 @@
 <div class="flex flex-col min-h-screen">
     <!-- Session Flash Messages -->
     @if (session('success'))
-        <div class="fixed top-4 right-4 bg-green-50 border border-green-200 rounded-lg text-green-700 p-4 max-w-md z-50"
-            x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-            ✓ {{ session('success') }}
+        <div class="fixed top-4 right-4 bg-green-50 border border-green-200 rounded-lg text-green-700 p-4 max-w-md z-50 shadow-lg"
+            x-data="{ show: true }" 
+            x-show="show" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 -translate-y-4"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-4"
+            x-init="setTimeout(() => show = false, 3000)">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="font-medium text-sm">{{ session('success') }}</span>
+            </div>
         </div>
     @endif
 
     @if (session('error'))
-        <div class="fixed top-4 right-4 bg-red-50 border border-red-200 rounded-lg text-red-700 p-4 max-w-md z-50"
-            x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
-            ✗ {{ session('error') }}
+        <div class="fixed top-4 right-4 bg-red-50 border border-red-200 rounded-lg text-red-700 p-4 max-w-md z-50 shadow-lg"
+            x-data="{ show: true }" 
+            x-show="show" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 -translate-y-4"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-4"
+            x-init="setTimeout(() => show = false, 5000)">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span class="font-medium text-sm">{{ session('error') }}</span>
+            </div>
         </div>
     @endif
 
