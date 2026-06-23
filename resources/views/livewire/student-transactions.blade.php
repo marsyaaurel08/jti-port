@@ -76,10 +76,17 @@
                                         $firstItem = $transaction->orderItems->first();
                                         $typeLabel =
                                             $firstItem && $firstItem->class_id
-                                                ? 'Pembayaran course'
-                                                : 'Pembayaran kelas';
+                                                ? 'Pembayaran kelas'
+                                                : 'Pembayaran course';
+                                        
+                                        $productName = $firstItem ? ($firstItem->item_name ?? ($firstItem->class_id ? optional($firstItem->class)->title : optional($firstItem->course)->title)) : '';
                                     @endphp
-                                    <p class="text-xs text-slate-500 font-medium">{{ $typeLabel }}</p>
+                                    <p class="text-xs text-slate-500 font-medium">
+                                        {{ $typeLabel }}
+                                        @if($productName)
+                                            - <span class="text-slate-700">{{ Str::limit($productName, 35) }}</span>
+                                        @endif
+                                    </p>
                                 </div>
                             </div>
 
