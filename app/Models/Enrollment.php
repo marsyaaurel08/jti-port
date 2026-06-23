@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
 
+use App\Observers\EnrollmentObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+
+#[ObservedBy([EnrollmentObserver::class])]
 class Enrollment extends Model
 {
     use HasFactory, HasRoles, SoftDeletes;
