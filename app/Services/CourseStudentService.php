@@ -12,6 +12,8 @@ class CourseStudentService implements CourseStudentContract
         // Get user's enrollments with course, and progress data
         $enrollments = Enrollment::with(['course', 'progress'])
             ->where('user_id', $userId)
+            ->whereNull('class_id')
+            ->latest()
             ->get();
 
         // Transform enrollments to course data with progress
@@ -38,6 +40,7 @@ class CourseStudentService implements CourseStudentContract
         ])
             ->where('user_id', $userId)
             ->whereNull('class_id')
+            ->latest()
             ->get();
 
         // Transform enrollments to course data with progress

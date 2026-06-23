@@ -73,6 +73,7 @@ class ClassesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 TrashedFilter::make(),
             ])

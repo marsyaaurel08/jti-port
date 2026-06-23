@@ -9,18 +9,12 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasManyThrough};
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\{HasMedia, InteractsWithMedia};
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+#[ObservedBy([CourseObserver::class])]
 class Course extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia, LogsActivity;
-
-    /**
-     * Register the observer for the model.
-     */
-    protected static function booted(): void
-    {
-        static::observe(CourseObserver::class);
-    }
 
     protected $fillable = [
         'category_id',

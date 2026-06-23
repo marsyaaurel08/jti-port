@@ -18,6 +18,8 @@ use App\Livewire\StudentLesson;
 use App\Livewire\StudentOrders;
 use App\Livewire\StudentProfile;
 use App\Livewire\StudentTransactions;
+use App\Livewire\CourseIndex;
+use App\Livewire\ClassesIndex;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,13 +28,13 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // --- Kursus & Kelas (Katalog Publik) ---
 Route::prefix('courses')->name('courses.')->group(function () {
-    Route::get('/', [CourseController::class, 'index'])->name('index');
+    Route::get('/', CourseIndex::class)->name('index');
     // Use Livewire CourseShow component for course detail page
     Route::get('/{slug}', CourseShow::class)->name('show');
 });
 
 Route::prefix('classes')->name('classes.')->group(function () {
-    Route::get('/', [ClassesController::class, 'index'])->name('index');
+    Route::get('/', ClassesIndex::class)->name('index');
     Route::get('/{slug}', ClassShow::class)->name('show');
 });
 
