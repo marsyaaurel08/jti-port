@@ -15,6 +15,7 @@ class ClassStudentService implements ClassStudentContract
         $enrollments = Enrollment::with(['class', 'class.course', 'class.instructor'])
             ->where('user_id', $userId)
             ->whereNotNull('class_id')
+            ->latest()
             ->get();
 
         $classes = $enrollments->map(function ($enrollment) {
@@ -41,6 +42,7 @@ class ClassStudentService implements ClassStudentContract
         ])
             ->where('user_id', $userId)
             ->whereNotNull('class_id')
+            ->latest()
             ->get();
 
 
