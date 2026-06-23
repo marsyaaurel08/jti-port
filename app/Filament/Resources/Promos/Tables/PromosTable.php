@@ -66,6 +66,7 @@ class PromosTable
                     ->boolean()
                     ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 TernaryFilter::make('is_active')
                     ->label('Status Kupon')
