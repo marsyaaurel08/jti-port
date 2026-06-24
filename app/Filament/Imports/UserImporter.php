@@ -29,6 +29,7 @@ class UserImporter extends Importer
     {
         return User::firstOrNew(
             ['email' => $this->data['email']],
+            ['email_verified_at' => now()]
         );
     }
 
