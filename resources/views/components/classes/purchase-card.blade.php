@@ -91,6 +91,14 @@
                         </svg>
                         <span>Lanjutkan Belajar</span>
                     </a>
+                @elseif (!$class->is_active || !$class->end_date->isFuture())
+                    {{-- Kelas telah selesai / tidak aktif --}}
+                    <div class="w-full py-4 bg-red-500/10 border border-red-500/20 text-red-400 text-center font-semibold rounded-xl text-sm flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Pendaftaran Ditutup (Kelas Selesai)</span>
+                    </div>
                 @else
                     {{-- Tombol Checkout (Yellow Theme) --}}
                     <button type="button"
@@ -107,6 +115,7 @@
             </div>
             @if (
                 !$is_user_enrolled &&
+                    ($class->is_active && $class->end_date->isFuture()) &&
                     (!auth()->check() ||
                         !auth()->user()->hasAnyRole(['admin', 'super_admin', 'pengajar'])))
                 <button type="button"
