@@ -118,5 +118,8 @@ Route::get('/payment/check-status/{externalId}', [PaymentStatusController::class
 // routes/web.php (pakai middleware web agar bisa akses session login)
 Route::middleware('auth')->post('/api/tokens/create', function (Request $request) {
     $token = $request->user()->createToken('k6-load-tester');
-    return response()->json(['token' => $token->plainTextToken]);
+    return response()->json([
+        'token' => $token->plainTextToken,
+        'user_id' => $request->user()->id
+    ]);
 });
