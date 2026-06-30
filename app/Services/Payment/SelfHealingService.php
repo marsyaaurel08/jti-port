@@ -268,13 +268,21 @@ class SelfHealingService
             // Create CourseProgress records for all lessons in the course
             $course = $item->course;
             if ($course) {
-                $lessons = $course->chapters()->first()->lessons()->get();
-                foreach ($lessons as $lesson) {
-                    CourseProgress::create([
+                $chapter = $course->chapters()->first();
+                if ($chapter) {
+                    $lessonIds = $chapter->lessons()->pluck('id');
+                    $now = now();
+                    $progressData = $lessonIds->map(fn($id) => [
                         'enrollment_id' => $enrollment->id,
-                        'lesson_id' => $lesson->id,
+                        'lesson_id' => $id,
                         'is_completed' => false,
-                    ]);
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ])->toArray();
+
+                    if (!empty($progressData)) {
+                        CourseProgress::insert($progressData);
+                    }
                 }
             }
         }
