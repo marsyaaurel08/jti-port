@@ -235,24 +235,28 @@ class SelfHealingService
     private function markAsPaid(Order $order, array $statusResult): void
     {
         DB::transaction(function () use ($order, $statusResult) {
-            $order->refresh()->lockForUpdate();
+            // Re-fetch dengan lock row untuk mencegah race condition (webhook berjalan bersamaan)
+            $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->first();
 
             // Double-check setelah lock — hindari race condition dengan webhook
-            if ($order->status === 'paid') {
+            if (!$lockedOrder || $lockedOrder->status === 'paid') {
                 return;
             }
 
-            $order->update([
+            $lockedOrder->update([
                 'status' => 'paid',
                 'paid_at' => $statusResult['paid_at'] ?? now(),
             ]);
 
-            $this->processEnrollments($order);
+            $this->processEnrollments($lockedOrder);
         });
     }
 
     private function processEnrollments(Order $order): void
     {
+        // Eager load seluruh relasi yang dibutuhkan untuk mencegah N+1 query
+        $order->load(['orderItems.course.chapters.lessons']);
+        
         $orderItems = $order->orderItems;
 
         foreach ($orderItems as $item) {
