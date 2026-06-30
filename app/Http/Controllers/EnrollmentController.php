@@ -58,7 +58,7 @@ class EnrollmentController extends Controller
             $order = $enrollment->order;
             $processingTime = null;
             if ($order && $enrollment->enrolled_at && $order->created_at) {
-                $processingTime = $order->created_at->diffInSeconds($enrollment->enrolled_at);
+                $processingTime = $order->created_at->diffInMilliseconds($enrollment->enrolled_at) / 1000;
             }
 
             return response()->json([
