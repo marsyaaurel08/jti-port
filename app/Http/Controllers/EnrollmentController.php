@@ -57,8 +57,17 @@ class EnrollmentController extends Controller
         if ($enrollment) {
             $order = $enrollment->order;
             $processingTime = null;
-            if ($order && $enrollment->enrolled_at && $order->created_at) {
-                $processingTime = $order->created_at->diffInMilliseconds($enrollment->enrolled_at) / 1000;
+            $startTime = null;
+            $isWebhookFailed = false;
+
+            if ($order) {
+                // Gunakan waktu saat self-healing mulai memeriksa order ini (last_inquiry_at)
+                // Jika order tidak pernah dicek oleh self-healing, fallback ke waktu order dibuat
+                $startTime = $order->last_inquiry_at ?? $order->created_at;
+            }
+
+            if ($startTime && $enrollment->enrolled_at) {
+                $processingTime = $startTime->diffInMilliseconds($enrollment->enrolled_at) / 1000;
             }
 
             return response()->json([
@@ -70,6 +79,7 @@ class EnrollmentController extends Controller
                     'enrolled_at' => $enrollment->enrolled_at,
                     'expires_at' => $enrollment->expires_at,
                     'is_completed' => $enrollment->is_completed,
+                    'self_healing_started_at' => $order ? $order->last_inquiry_at : null,
                     'order_created_at' => $order ? $order->created_at : null,
                     'processing_time_seconds' => $processingTime,
                 ]
