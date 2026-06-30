@@ -8,6 +8,7 @@ use App\Models\Lesson;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Course;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -21,6 +22,65 @@ class EnrollmentController extends Controller
             ->paginate(6);
 
         return view('pages.user.enrolled', compact('enrolled'));
+    }
+
+    /**
+     * Cek status enrollment user untuk course atau class tertentu.
+     */
+    public function checkEnrollment(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'course_id' => 'nullable|exists:courses,id',
+            'class_id' => 'nullable|exists:classes,id',
+        ]);
+
+        if (!$request->course_id && !$request->class_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Harap sertakan course_id atau class_id.'
+            ], 400);
+        }
+
+        $query = Enrollment::where('user_id', $request->user_id);
+
+        if ($request->course_id) {
+            $query->where('course_id', $request->course_id);
+        }
+
+        if ($request->class_id) {
+            $query->where('class_id', $request->class_id);
+        }
+
+        $enrollment = $query->with(['course', 'class', 'order'])->first();
+
+        if ($enrollment) {
+            $order = $enrollment->order;
+            $processingTime = null;
+            if ($order && $enrollment->enrolled_at && $order->created_at) {
+                $processingTime = $order->created_at->diffInSeconds($enrollment->enrolled_at);
+            }
+
+            return response()->json([
+                'success' => true,
+                'is_enrolled' => true,
+                'status' => $enrollment->status,
+                'data' => [
+                    'enrollment_id' => $enrollment->id,
+                    'enrolled_at' => $enrollment->enrolled_at,
+                    'expires_at' => $enrollment->expires_at,
+                    'is_completed' => $enrollment->is_completed,
+                    'order_created_at' => $order ? $order->created_at : null,
+                    'processing_time_seconds' => $processingTime,
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'is_enrolled' => false,
+            'message' => 'User belum terdaftar di produk ini.'
+        ]);
     }
 
     /**

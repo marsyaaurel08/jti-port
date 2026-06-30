@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\Payment\PaymentController;
 use App\Http\Controllers\Payment\WebhookController;
 use App\Livewire\StudentClassCheckout;
@@ -36,3 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // Params di body: { force: boolean }
 // Jika force=true, maka akan memproses semua order yang masih pending tanpa cek waktu created_at
 Route::post('/self-healing', [WebhookController::class, 'selfHealing'])->name('self-healing');
+
+// Endpoint untuk cek enrollment user ke sebuah produk
+Route::get('/enrollment/check', [EnrollmentController::class, 'checkEnrollment'])->name('enrollment.check');
