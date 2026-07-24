@@ -125,8 +125,8 @@ class PaymentController extends Controller
                 'success' => true,
                 'message' => 'Order created successfully for load testing.',
                 'data' => [
-                    'order' => $order->fresh('items'),
-                    'class' => $class,
+                    'order_id' => $order->id,
+                    'invoice_number' => $order->invoice_number,
                 ],
             ], 201);
         } catch (\Exception $e) {
@@ -273,8 +273,8 @@ class PaymentController extends Controller
                 'success' => true,
                 'message' => 'Course order created successfully for load testing.',
                 'data' => [
-                    'order' => $order->fresh('items'),
-                    'course' => $course,
+                    'order_id' => $order->id,
+                    'invoice_number' => $order->invoice_number,
                 ],
             ], 201);
         } catch (\Exception $e) {
