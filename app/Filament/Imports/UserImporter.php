@@ -27,10 +27,14 @@ class UserImporter extends Importer
 
     public function resolveRecord(): ?User
     {
-        return User::firstOrNew(
-            ['email' => $this->data['email']],
-            ['email_verified_at' => now()]
-        );
+        return User::firstOrNew([
+            'email' => $this->data['email'],
+        ]);
+    }
+
+    protected function beforeCreate(): void
+    {
+        $this->record->email_verified_at = now();
     }
 
     public static function getCompletedNotificationBody(Import $import): string
