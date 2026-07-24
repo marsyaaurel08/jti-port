@@ -90,6 +90,43 @@ fi
 echo -e "${BLUE}🚀 Target Container: $NEW_NAME${NC}"
 
 # =====================================================================
+# 1.5. DATABASE BACKUP BEFORE DEPLOYMENT
+# =====================================================================
+
+DB_CONTAINER="${PROJECT_NAME}_mysql"
+DB_BACKUP_FILE="$BACKUP_DIR/db_backup_${TIMESTAMP}.sql.gz"
+
+if docker ps --format '{{.Names}}' | grep -q "^${DB_CONTAINER}$"; then
+    echo -e "${YELLOW}💾 Backing up database before deployment...${NC}"
+    mkdir -p "$BACKUP_DIR"
+
+    # Extract DB credentials from the running container's environment
+    DB_NAME=$(docker exec $DB_CONTAINER sh -c 'echo $MYSQL_DATABASE')
+    DB_USER=$(docker exec $DB_CONTAINER sh -c 'echo $MYSQL_USER')
+    DB_PASS=$(docker exec $DB_CONTAINER sh -c 'echo $MYSQL_PASSWORD')
+
+    # Fallback to root if MYSQL_USER is not set
+    if [ -z "$DB_USER" ]; then
+        DB_USER="root"
+        DB_PASS=$(docker exec $DB_CONTAINER sh -c 'echo $MYSQL_ROOT_PASSWORD')
+    fi
+
+    if docker exec $DB_CONTAINER mysqldump -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" 2>/dev/null | gzip > "$DB_BACKUP_FILE"; then
+        BACKUP_SIZE=$(du -h "$DB_BACKUP_FILE" | cut -f1)
+        echo -e "${GREEN}✓ Database backup created: $DB_BACKUP_FILE ($BACKUP_SIZE)${NC}"
+    else
+        echo -e "${RED}⚠️ Database backup failed! Continuing deployment...${NC}"
+        rm -f "$DB_BACKUP_FILE"
+    fi
+
+    # Cleanup: keep only backups from the last 7 days
+    find "$BACKUP_DIR" -name "db_backup_*.sql.gz" -mtime +7 -delete 2>/dev/null || true
+    echo -e "${GREEN}✓ Old backups cleaned (kept last 7 days)${NC}"
+else
+    echo -e "${YELLOW}⚠️ MySQL container not running, skipping backup.${NC}"
+fi
+
+# =====================================================================
 # 2. PULL & RUN NEW CONTAINER
 # =====================================================================
 
