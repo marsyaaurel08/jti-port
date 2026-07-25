@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Users\Tables;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
@@ -13,6 +16,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TrashedFilter;
 use STS\FilamentImpersonate\Actions\Impersonate as ImpersonateAction;
 
 class UsersTable
@@ -56,8 +60,10 @@ class UsersTable
                     ->multiple()
                     ->preload()
                     ->label('Filter by Role'),
+                TrashedFilter::make(),
             ], FiltersLayout::AboveContentCollapsible)
             ->recordActions([
+                RestoreAction::make(),
                 EditAction::make(),
                 // Action::make('impersonate')
                 //     ->label('Impersonate')
@@ -73,6 +79,8 @@ class UsersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
