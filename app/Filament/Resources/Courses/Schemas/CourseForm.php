@@ -146,6 +146,7 @@ class CourseForm
                                                 ->label('Preview Gratis')
                                                 ->options([0 => 'Tidak', 1 => 'Ya'])
                                                 ->default(0)
+                                                ->boolean()
                                                 ->required(),
                                             // Quiz Configuration
                                             Section::make('Konfigurasi Quiz')
