@@ -191,9 +191,18 @@ if [ "$IS_FIRST_DEPLOYMENT" = false ]; then
     echo -e "${GREEN}✓ $OLD_NAME removed${NC}"
 fi
 
-# Restart/Update worker
+# Restart/Update worker with the SAME image as the app
 echo -e "${YELLOW}⚙️ Starting/Updating queue worker...${NC}"
-docker compose up -d worker
+docker rm -f ${PROJECT_NAME}_worker 2>/dev/null || true
+docker run -d \
+  --name ${PROJECT_NAME}_worker \
+  --network $NETWORK_NAME \
+  --restart unless-stopped \
+  $ENV_OPTS \
+  -v app_storage:/var/www/html/storage \
+  $DOCKER_IMAGE \
+  php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
+echo -e "${GREEN}✓ Worker updated with image: $DOCKER_IMAGE${NC}"
 
 # =====================================================================
 # 6. SYNC PUBLIC ASSETS KE SHARED VOLUME
