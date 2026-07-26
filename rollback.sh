@@ -143,7 +143,24 @@ else
 fi
 
 # =====================================================================
-# 4. SAVE STATE & CLEANUP
+# 4. RESTART WORKER WITH ROLLBACK IMAGE
+# =====================================================================
+
+echo -e "${YELLOW}⚙️ Rolling back worker...${NC}"
+docker rm -f ${PROJECT_NAME}_worker 2>/dev/null || true
+docker run -d \
+  --name ${PROJECT_NAME}_worker \
+  --network $NETWORK_NAME \
+  --restart unless-stopped \
+  -e LARAVEL_ENV_ENCRYPTION_KEY="$LARAVEL_ENV_ENCRYPTION_KEY" \
+  -e APP_ENV="${APP_ENV:-production}" \
+  -v app_storage:/var/www/html/storage \
+  $IMAGE \
+  php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
+echo -e "${GREEN}✓ Worker rolled back with image: $IMAGE${NC}"
+
+# =====================================================================
+# 5. SAVE STATE & CLEANUP
 # =====================================================================
 
 echo "LAST_ACTIVE_CONTAINER=\"$ROLLBACK_TARGET\"" > "$STATE_FILE"
