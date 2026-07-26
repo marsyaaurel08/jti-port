@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\ClassResults\Schemas;
 
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -133,65 +133,10 @@ class ClassResultInfolist
                     ->collapsible(false)
                     ->columnSpanFull()
                     ->schema([
-                        RepeatableEntry::make('enrollments')
+                        ViewEntry::make('enrollments')
                             ->label(false)
                             ->columnSpanFull()
-                            ->schema([
-                                Grid::make(2)
-                                    ->columnSpanFull()
-                                    ->schema([
-                                        TextEntry::make('user.name')
-                                            ->label('👤 Nama Mahasiswa')
-                                            ->icon('heroicon-m-user')
-                                            ->weight('bold'),
-
-                                        TextEntry::make('progress_summary')
-                                            ->label('📈 Status Progres')
-                                            ->state(function ($record) {
-                                                $total = $record->course->total_lessons ?? 0;
-                                                $completed = $record->actual_completed_lesson_count ?? 0;
-
-                                                // Hitung persentase
-                                                $percent = $total > 0 ? ($completed / $total) * 100 : 0;
-
-                                                // Format: "X% (selesai n/m)"
-                                                return number_format($percent, 1) . "% ({$completed}/{$total} Lessons)";
-                                            })
-                                            ->badge()
-                                            ->color(function ($state) {
-                                                if (str_contains($state, '100.0%')) {
-                                                    return 'success';
-                                                } elseif (str_contains($state, '50')) {
-                                                    return 'warning';
-                                                }
-                                                return 'info';
-                                            })
-                                            ->icon('heroicon-m-academic-cap'),
-
-                                        TextEntry::make('user.email')
-                                            ->label('📧 Email')
-                                            ->icon('heroicon-m-envelope')
-                                            ->columnSpanFull(),
-
-                                        TextEntry::make('enrollment_info')
-                                            ->label('📅 Tanggal Pendaftaran')
-                                            ->state(function ($record) {
-                                                return $record->enrolled_at?->format('d M Y H:i') ?? '-';
-                                            })
-                                            ->icon('heroicon-m-calendar'),
-
-                                        TextEntry::make('completion_info')
-                                            ->label('✅ Penyelesaian')
-                                            ->state(function ($record) {
-                                                return $record->is_completed
-                                                    ? "Selesai pada " . $record->completed_at?->format('d M Y')
-                                                    : 'Belum Selesai';
-                                            })
-                                            ->badge()
-                                            ->color(fn($state) => str_contains($state, 'Belum Selesai') ?  'warning' : 'success')
-                                            ->icon(fn($state) => str_contains($state, 'Belum Selesai') ? 'heroicon-m-x-circle' : 'heroicon-m-check-circle'),
-                                    ])
-                            ]),
+                            ->view('filament.resources.class-results.student-progress-table'),
                     ]),
             ]);
     }
