@@ -59,8 +59,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - server: server-ihza
-            nginx_config: server_ihza
+          # - server: server-ihza
+          #   nginx_config: server_ihza
           # - server: server-jti
           #   nginx_config: server_jti
           - server: jagoan-hosting
