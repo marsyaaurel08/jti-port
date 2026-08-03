@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\HomeInstructors\Tables;
 
+use App\Models\HomeInstructor;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -80,17 +82,43 @@ class HomeInstructorsTable
                     ->fillForm(fn($record): array => $record->toArray())
                     // 2. Buat Form-nya
                     ->form([
-                        TextInput::make('name')->required()->maxLength(255),
-                        TextInput::make('role')->required()->maxLength(255),
-                        FileUpload::make('image')->image()->disk('public')->directory('instructors')->required(),
-                        Textarea::make('bio')->maxLength(65535)->columnSpanFull(),
-                        TextInput::make('linkedin')->url()->maxLength(255),
-                        TextInput::make('sort_order')->numeric()->default(0),
-                        Toggle::make('is_active')->label('Active Status'),
+                        TextInput::make('name')
+                            ->label('Nama')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('role')
+                            ->label('Role / Jabatan')
+                            ->required()
+                            ->maxLength(255),
+                        FileUpload::make('image')
+                            ->label('Foto')
+                            ->image()
+                            ->disk('public')
+                            ->directory('instructors')
+                            ->required(),
+                        Textarea::make('bio')
+                            ->label('Bio')
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+                        TextInput::make('linkedin')
+                            ->label('LinkedIn URL')
+                            ->url()
+                            ->maxLength(255),
+                        TextInput::make('sort_order')
+                            ->label('Urutan')
+                            ->numeric()
+                            ->default(0),
+                        Toggle::make('is_active')
+                            ->label('Status Aktif'),
                     ])
                     // 3. Simpan perubahannya
                     ->action(function ($record, array $data): void {
                         $record->update($data);
+
+                        Notification::make()
+                            ->title('Instruktur berhasil diperbarui')
+                            ->success()
+                            ->send();
                     }),
                 DeleteAction::make(), // Ditambahkan agar bisa hapus per baris
                 RestoreAction::make(), // Ditambahkan agar bisa restore per baris dari tong sampah
