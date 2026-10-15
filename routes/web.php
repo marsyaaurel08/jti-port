@@ -23,6 +23,7 @@ use App\Livewire\ClassesIndex;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
 // --- Public Routes ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
 

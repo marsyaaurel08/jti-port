@@ -22,8 +22,11 @@ class CourseClassSeeder extends Seeder
                 [
                     'name' => "Instructor {$i}",
                     'password' => bcrypt('password'),
+                    'role' => 'pengajar',
+                    'email_verified_at' => now(),
                 ]
             );
+            $instructors[$i]->syncRoles(['pengajar']);
         }
 
         // Get first 10 published courses

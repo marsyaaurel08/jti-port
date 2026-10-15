@@ -69,6 +69,7 @@
                 @php $isActive = request()->routeIs($menu['route']); @endphp
 
                 <a href="{{ route($menu['route']) }}"
+                    wire:navigate
                     class="group/item flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300
        {{ $isActive ? 'bg-jti-yellow/10 text-jti-primary' : 'text-slate-500 hover:bg-slate-50 hover:text-jti-primary' }}">
 

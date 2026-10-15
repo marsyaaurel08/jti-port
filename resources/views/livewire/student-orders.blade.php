@@ -1,4 +1,4 @@
-<div @if(!$showProofUpload && !$showProofView && !$showFallbackPaymentModal && !$showMidtransPaymentModal && !$showBNIPaymentModal) wire:poll.5s @endif>
+<div @if($orders->isNotEmpty() && !$showProofUpload && !$showProofView && !$showFallbackPaymentModal && !$showMidtransPaymentModal && !$showBNIPaymentModal) wire:poll.5s @endif>
     <x-layouts.user :user="$this->user">
         {{-- SUCCESS TOAST (Premium melayang, otomatis hilang, bisa ditutup manual) --}}
         @if (session('success'))

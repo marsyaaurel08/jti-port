@@ -100,15 +100,16 @@
                             $userMenus = [
                                 ['route' => 'student.my-courses', 'label' => 'Course Saya'],
                                 ['route' => 'student.my-classes', 'label' => 'Kelas Saya'],
-                                ['route' => 'student.cart', 'label' => 'Keranjang Saya', 'count' => true],
-                                ['route' => 'student.orders', 'label' => 'Pesanan Saya'],
-                                ['route' => 'student.transactions', 'label' => 'Riwayat Transaksi'],
-                                ['route' => 'student.profile', 'label' => 'Pengaturan Profil'],
+                                ['route' => 'student.cart', 'label' => 'Keranjang Saya', 'count' => true, 'navigate' => true],
+                                ['route' => 'student.orders', 'label' => 'Pesanan Saya', 'navigate' => true],
+                                ['route' => 'student.transactions', 'label' => 'Riwayat Transaksi', 'navigate' => true],
+                                ['route' => 'student.profile', 'label' => 'Pengaturan Profil', 'navigate' => true],
                             ];
                         @endphp
 
                         @foreach ($userMenus as $m)
                             <a href="{{ route($m['route']) }}"
+                               {{ !empty($m['navigate']) ? 'wire:navigate' : '' }}
                                class="group flex items-center justify-between px-5 py-[14px] rounded-3xl hover:bg-gray-50 active:bg-gray-100 transition-all">
                                 <span class="font-semibold text-gray-700 group-hover:text-jti-primary transition-colors">
                                     {{ $m['label'] }}

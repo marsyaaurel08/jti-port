@@ -72,9 +72,12 @@ class StudentOrders extends Component
     protected function getUnpaidOrders()
     {
         $userId = Auth::id();
-        $cacheKey = "user:{$userId}:unpaid_orders";
 
-        return Order::where('user_id', $userId)
+        return Order::with([
+            'orderItems.course',
+            'orderItems.class',
+        ])
+            ->where('user_id', $userId)
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();

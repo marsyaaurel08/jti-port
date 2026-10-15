@@ -55,7 +55,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Cache categories untuk navbar dengan durasi 24 jam - untuk semua user
         View::composer('*', function ($view) {
-            $categories = Cache::remember('categories', 86400, fn () => Category::all());
+            static $categories = null;
+            static $userData = null;
+
+            if ($categories === null) {
+                $categories = Cache::remember('categories', 86400, fn () => Category::all());
+            }
 
             if (! Auth::check()) {
                 $view->with([
@@ -68,13 +73,18 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $user = Auth::user();
-            $user = Cache::remember("user_{$user->id}", 3600, fn () => $user->fresh());
-            $isStaff = Cache::remember("user_staff_{$user->id}", 3600, fn () => $user->hasRole(['super_admin', 'admin', 'pengajar']));
+            if ($userData === null) {
+                $user = Auth::user();
+                if ($user) {
+                    $user->loadMissing('media');
+                }
+                $isStaff = Cache::remember("user_staff_{$user->id}", 3600, fn () => $user->hasRole(['super_admin', 'admin', 'pengajar']));
+                $userData = compact('user', 'isStaff');
+            }
 
             $view->with(array_merge(
-                compact('categories', 'user'),
-                ['isStaff' => $isStaff]
+                compact('categories'),
+                $userData
             ));
         });
     }

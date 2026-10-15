@@ -91,8 +91,8 @@ return new class extends Migration
          * 4. Hapus kolom lama
          */
         Schema::table('promo_products', function (Blueprint $table) {
-            $table->dropIndex('promo_products_class_id_foreign');
-            $table->dropIndex('promo_products_course_id_foreign');
+            // $table->dropIndex('promo_products_class_id_foreign');
+            // $table->dropIndex('promo_products_course_id_foreign');
 
             $table->dropColumn([
                 'course_id',

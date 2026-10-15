@@ -55,6 +55,10 @@ class Enrollment extends Model
 
     public function getActualCompletedLessonCountAttribute(): int
     {
+        if ($this->relationLoaded('progress')) {
+            return $this->progress->where('is_completed', true)->count();
+        }
+
         return $this->progress()->where('is_completed', true)->count();
     }
 

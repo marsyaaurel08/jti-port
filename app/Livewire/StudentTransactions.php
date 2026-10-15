@@ -28,7 +28,11 @@ class StudentTransactions extends Component
     #[Computed]
     public function transactions()
     {
-        return Order::where('user_id', Auth::id())
+        return Order::with([
+            'orderItems.course',
+            'orderItems.class',
+        ])
+            ->where('user_id', Auth::id())
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(10);
     }

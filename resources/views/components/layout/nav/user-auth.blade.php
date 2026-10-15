@@ -39,6 +39,7 @@
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Kelas
                     Saya</a>
                 <a href="{{ route('student.cart') }}"
+                    wire:navigate
                     class="flex items-center justify-between px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">
                     <span>Keranjang Saya</span>
                     <template x-if="cartCount > 0">
@@ -47,12 +48,15 @@
                     </template>
                 </a>
                 <a href="{{ route('student.orders') }}"
+                    wire:navigate
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Pesanan
                     Saya</a>
                 <a href="{{ route('student.transactions') }}"
+                    wire:navigate
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Riwayat
                     Transaksi</a>
                 <a href="{{ route('student.profile') }}"
+                    wire:navigate
                     class="block px-6 py-3 text-sm font-semibold text-gray-600 hover:bg-jti-light/30 hover:text-jti-orange transition-colors">Edit
                     Profil</a>
                 <form method="POST" action="{{ route('filament.user.auth.logout') }}">

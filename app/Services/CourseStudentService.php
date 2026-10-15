@@ -9,8 +9,18 @@ class CourseStudentService implements CourseStudentContract
 {
     public function getStudentCourses(int $userId, ?string $filter = null): \Illuminate\Support\Collection
     {
-        // Get user's enrollments with course, and progress data
-        $enrollments = Enrollment::with(['course', 'progress'])
+        // Get user's enrollments with course, chapters, lessons, and progress data
+        $enrollments = Enrollment::with([
+            'course' => function ($query) {
+                $query->with(['chapters' => function ($q) {
+                    $q->orderBy('sort_order')->with(['lessons' => function ($lq) {
+                        $lq->orderBy('sort_order');
+                    }]);
+                }]);
+            },
+            'lastAccessedLesson',
+            'progress',
+        ])
             ->where('user_id', $userId)
             ->whereNull('class_id')
             ->latest()
@@ -31,12 +41,17 @@ class CourseStudentService implements CourseStudentContract
 
     public function getStudentCoursesWithTrashed(int $userId, ?string $filter = null): \Illuminate\Support\Collection
     {
-        // Get user's enrollments with course (including trashed), and progress data
+        // Get user's enrollments with course (including trashed), chapters, lessons, and progress data
         $enrollments = Enrollment::with([
             'course' => function ($query) {
-                $query->withTrashed();
+                $query->withTrashed()->with(['chapters' => function ($q) {
+                    $q->orderBy('sort_order')->with(['lessons' => function ($lq) {
+                        $lq->orderBy('sort_order');
+                    }]);
+                }]);
             },
-            'progress'
+            'lastAccessedLesson',
+            'progress',
         ])
             ->where('user_id', $userId)
             ->whereNull('class_id')
@@ -76,19 +91,31 @@ class CourseStudentService implements CourseStudentContract
             ];
         }
 
-        // Get first lesson slug for navigation
+        // Get first lesson slug for navigation (use eager loaded collection if available)
         $firstLessonSlug = null;
-        $firstChapter = $course->chapters()->with('lessons')->orderBy('sort_order')->first();
-        if ($firstChapter && $firstChapter->lessons->isNotEmpty()) {
-            $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
-            $firstLessonSlug = $firstLesson->slug ?? null;
+        if ($course->relationLoaded('chapters')) {
+            $firstChapter = $course->chapters->sortBy('sort_order')->first();
+            if ($firstChapter && $firstChapter->relationLoaded('lessons') && $firstChapter->lessons->isNotEmpty()) {
+                $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
+                $firstLessonSlug = $firstLesson->slug ?? null;
+            }
+        } else {
+            $firstChapter = $course->chapters()->with('lessons')->orderBy('sort_order')->first();
+            if ($firstChapter && $firstChapter->lessons->isNotEmpty()) {
+                $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
+                $firstLessonSlug = $firstLesson->slug ?? null;
+            }
         }
 
         // Get last accessed lesson slug or fall back to first lesson
         $lastAccessedLessonSlug = null;
         if ($enrollment->last_accessed_lesson_id) {
-            $lastAccessedLesson = \App\Models\Lesson::find($enrollment->last_accessed_lesson_id);
-            $lastAccessedLessonSlug = $lastAccessedLesson->slug ?? $firstLessonSlug;
+            if ($enrollment->relationLoaded('lastAccessedLesson') && $enrollment->lastAccessedLesson) {
+                $lastAccessedLessonSlug = $enrollment->lastAccessedLesson->slug ?? $firstLessonSlug;
+            } else {
+                $lastAccessedLesson = \App\Models\Lesson::find($enrollment->last_accessed_lesson_id);
+                $lastAccessedLessonSlug = $lastAccessedLesson->slug ?? $firstLessonSlug;
+            }
         } else {
             $lastAccessedLessonSlug = $firstLessonSlug;
         }
@@ -128,19 +155,31 @@ class CourseStudentService implements CourseStudentContract
             ];
         }
 
-        // Get first lesson slug for navigation
+        // Get first lesson slug for navigation (use eager loaded collection if available)
         $firstLessonSlug = null;
-        $firstChapter = $course->chapters()->with('lessons')->orderBy('sort_order')->first();
-        if ($firstChapter && $firstChapter->lessons->isNotEmpty()) {
-            $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
-            $firstLessonSlug = $firstLesson->slug ?? null;
+        if ($course->relationLoaded('chapters')) {
+            $firstChapter = $course->chapters->sortBy('sort_order')->first();
+            if ($firstChapter && $firstChapter->relationLoaded('lessons') && $firstChapter->lessons->isNotEmpty()) {
+                $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
+                $firstLessonSlug = $firstLesson->slug ?? null;
+            }
+        } else {
+            $firstChapter = $course->chapters()->with('lessons')->orderBy('sort_order')->first();
+            if ($firstChapter && $firstChapter->lessons->isNotEmpty()) {
+                $firstLesson = $firstChapter->lessons->sortBy('sort_order')->first();
+                $firstLessonSlug = $firstLesson->slug ?? null;
+            }
         }
 
         // Get last accessed lesson slug or fall back to first lesson
         $lastAccessedLessonSlug = null;
         if ($enrollment->last_accessed_lesson_id) {
-            $lastAccessedLesson = \App\Models\Lesson::find($enrollment->last_accessed_lesson_id);
-            $lastAccessedLessonSlug = $lastAccessedLesson->slug ?? $firstLessonSlug;
+            if ($enrollment->relationLoaded('lastAccessedLesson') && $enrollment->lastAccessedLesson) {
+                $lastAccessedLessonSlug = $enrollment->lastAccessedLesson->slug ?? $firstLessonSlug;
+            } else {
+                $lastAccessedLesson = \App\Models\Lesson::find($enrollment->last_accessed_lesson_id);
+                $lastAccessedLessonSlug = $lastAccessedLesson->slug ?? $firstLessonSlug;
+            }
         } else {
             $lastAccessedLessonSlug = $firstLessonSlug;
         }

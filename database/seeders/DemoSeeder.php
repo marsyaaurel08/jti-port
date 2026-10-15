@@ -30,9 +30,11 @@ class DemoSeeder extends Seeder
                 [
                     'name' => "User {$i}",
                     'password' => bcrypt('password'),
+                    'role' => 'user',
                     'email_verified_at' => now(),
                 ]
             );
+            $users[$i]->syncRoles(['user']);
         }
 
         // Create 5 instructor users
@@ -43,8 +45,11 @@ class DemoSeeder extends Seeder
                 [
                     'name' => "Instructor {$i}",
                     'password' => bcrypt('password'),
+                    'role' => 'pengajar',
+                    'email_verified_at' => now(),
                 ]
             );
+            $instructors[$i]->syncRoles(['pengajar']);
         }
 
         // Create 1 category (or get existing)
@@ -69,6 +74,14 @@ class DemoSeeder extends Seeder
             'API Development',
             'Web Security Basics',
         ];
+
+        // If courses already exist, skip to prevent unique slug duplicate errors
+        if (Course::exists()) {
+            if ($this->command) {
+                $this->command->info('Courses already exist. Skipped duplicate course & class generation.');
+            }
+            return;
+        }
 
         // Create 11 courses with 2 chapters and 5 lessons each
         $allCourses = [];
@@ -194,8 +207,10 @@ class DemoSeeder extends Seeder
                 'name' => 'Instructor User',
                 'password' => bcrypt('password'),
                 'role' => 'pengajar',
+                'email_verified_at' => now(),
             ]
         );
+        $instructor->syncRoles(['pengajar']);
 
         $classCode = CourseClass::create([
             'course_id' => $allCourses[0]->id, // Use first course (Laravel Fundamentals)
